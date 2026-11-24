@@ -9,8 +9,8 @@ Run `npm install` and `npm run dev`. Build with `npm run build`; serve the build
 - The header contains only the Avaris logo and Contact button. The selected compact Montserrat Black headline is retained.
 - Desktop camera placement follows the reference: image height 64.5% of the viewport, bottom-aligned and centered at 47.7% of viewport width. Mobile scales the image by viewport width.
 - `src/HeroCamera.tsx` is the foreground replacement point for the final 3D model. Background and atmosphere are separate layers and can stay intact.
-- `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. Smoke uses a cached procedural sprite, a canvas capped at 1000 pixels wide and up to 30 updates per second. Background loops pause on hidden pages, and reduced-motion preferences freeze the ribbons and smoke.
-- Current desktop and 390 x 844 mobile checks cover composition, image loading, mobile overflow, Contact dialog, Escape key and browser error logs. Other hardware frame rates have not been benchmarked.
+- `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. Smoke uses a cached procedural sprite, a canvas capped at 1000 pixels wide and up to 30 updates per second. Moving the pointer clears soft trails in the procedural smoke; wheel scrolling disperses the smoke more broadly. Trails refill over 3.6 seconds, and wheel dispersal recovers after a short hold. Background loops pause on hidden pages. Reduced-motion preferences stop idle drift while preserving user-triggered clearing and fade-back.
+- Current desktop and 390 x 844 mobile checks cover composition, image loading, mobile overflow, Contact dialog, Escape key, pointer/wheel smoke clearing and browser error logs. Other hardware frame rates have not been benchmarked.
 
 ### New image assets
 

@@ -45,13 +45,14 @@ function createSmokeSprite() {
       const wisps = noise(nx * 5, ny * 4) * .55 + noise(nx * 13, ny * 10) * .3 + noise(nx * 27, ny * 20) * .15;
       const index = (y * sprite.width + x) * 4;
       pixels.data[index] = 147; pixels.data[index + 1] = 165; pixels.data[index + 2] = 186;
-      pixels.data[index + 3] = Math.pow(Math.max(0, wisps - .23), 1.35) * envelope * 120;
+      pixels.data[index + 3] = Math.pow(Math.max(0, wisps - .18), .95) * envelope * 225;
     }
   }
   context.putImageData(pixels, 0, 0);
   return sprite;
 }
 
+/** Live fog with feathered pointer clearing and wheel-driven dispersal. No image assets. */
 function Smoke({ reducedMotion }: { reducedMotion: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -59,44 +60,127 @@ function Smoke({ reducedMotion }: { reducedMotion: boolean }) {
     const context = element.getContext('2d', { alpha: true });
     if (!context) return;
     const sprite = createSmokeSprite();
+    type Clearing = { x: number; y: number; radius: number; life: number };
     let width = 0; let height = 0; let frame = 0; let last = 0; let elapsed = 0;
+    let clearings: Clearing[] = [];
+    let previousPointer: { x: number; y: number } | null = null;
+    let wheelDispersal = 0; let wheelHold = 0;
     const paint = () => {
+      context.globalAlpha = 1;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
-      for (let i = 0; i < 5; i++) {
-        const phase = elapsed * .028 + i * 1.73;
+      for (let i = 0; i < 6; i++) {
+        const phase = (reducedMotion ? 0 : elapsed) * .028 + i * 1.73;
         const cloudWidth = width * (.8 + i * .04);
         const cloudHeight = height * (.52 + i * .03);
         const x = width * (-.3 + i * .19 + Math.sin(phase) * .075);
         const y = height * (.06 + (i % 3) * .13 + Math.cos(phase * .71) * .045);
-        context.globalAlpha = .38 + Math.sin(phase + i) * .08;
+        context.globalAlpha = (.58 + Math.sin(phase + i) * .09) * (1 - wheelDispersal);
         context.drawImage(sprite, x, y, cloudWidth, cloudHeight);
       }
+      // Erase only this fog canvas. The camera, typography and ribbons are independent.
+      context.globalCompositeOperation = 'destination-out';
+      context.globalAlpha = 1;
+      for (const clearing of clearings) {
+        const x = clearing.x * width; const y = clearing.y * height;
+        const radius = clearing.radius * width;
+        const strength = .98 * Math.min(1, clearing.life / 1.7);
+        const feather = context.createRadialGradient(x, y, radius * .08, x, y, radius);
+        feather.addColorStop(0, `rgba(0,0,0,${strength})`);
+        feather.addColorStop(.35, `rgba(0,0,0,${strength * .94})`);
+        feather.addColorStop(.72, `rgba(0,0,0,${strength * .32})`);
+        feather.addColorStop(1, 'rgba(0,0,0,0)');
+        context.fillStyle = feather;
+        context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+      context.globalCompositeOperation = 'source-over';
     };
     const tick = (now: number) => {
-      frame = requestAnimationFrame(tick);
-      if (now - last < 1000 / 30) return;
-      elapsed += last ? Math.min((now - last) / 1000, .1) : 0;
+      frame = 0;
+      if (document.hidden) return;
+      if (now - last < 1000 / 30) { frame = requestAnimationFrame(tick); return; }
+      const delta = last ? Math.min((now - last) / 1000, .1) : 0;
+      elapsed += delta;
       last = now;
+      clearings = clearings.filter(clearing => { clearing.life -= delta; return clearing.life > 0; });
+      wheelHold = Math.max(0, wheelHold - delta);
+      if (wheelHold === 0) wheelDispersal = Math.max(0, wheelDispersal - delta * .28);
       paint();
+      if (!reducedMotion || clearings.length || wheelDispersal > 0) frame = requestAnimationFrame(tick);
+      else last = 0;
     };
     const stop = () => { cancelAnimationFrame(frame); frame = 0; last = 0; };
     const start = () => {
       stop();
-      if (document.hidden || reducedMotion) { paint(); return; }
+      if (document.hidden) return;
+      if (reducedMotion && !clearings.length && wheelDispersal === 0) { paint(); return; }
       frame = requestAnimationFrame(tick);
     };
+    const wake = () => {
+      if (!document.hidden && !frame) { last = 0; frame = requestAnimationFrame(tick); }
+    };
+    const addClearing = (x: number, y: number, radius: number) => {
+      clearings.push({ x, y, radius, life: 3.6 });
+      if (clearings.length > 72) clearings.splice(0, clearings.length - 72);
+    };
+    const pointer = (event: PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest('dialog')) return;
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      if (x < 0 || x > 1 || y < 0 || y > 1) { previousPointer = null; return; }
+      const radius = Math.min(155, Math.max(85, rect.width * .09)) / rect.width;
+      if (previousPointer) {
+        const dx = x - previousPointer.x; const dy = y - previousPointer.y;
+        const distance = Math.hypot(dx * rect.width, dy * rect.height);
+        if (distance < 8) return;
+        const steps = Math.min(12, Math.max(1, Math.ceil(distance / 26)));
+        for (let i = 1; i <= steps; i++) addClearing(previousPointer.x + dx * i / steps, previousPointer.y + dy * i / steps, radius);
+      } else addClearing(x, y, radius);
+      previousPointer = { x, y };
+      wake();
+    };
+    const wheel = (event: WheelEvent) => {
+      if (event.target instanceof Element && event.target.closest('dialog')) return;
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1;
+      const amount = Math.hypot(event.deltaX, event.deltaY) * unit;
+      if (!amount) return;
+      wheelDispersal = Math.min(1, wheelDispersal + Math.max(.2, amount / 140));
+      wheelHold = .65;
+      const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      addClearing(x, y, Math.min(220, rect.width * .17) / rect.width);
+      wake();
+    };
+    const leave = () => { previousPointer = null; };
     const resize = () => {
       const rect = element.getBoundingClientRect();
       const ratio = Math.min(1, 1000 / Math.max(rect.width, 1));
       width = element.width = Math.round(rect.width * ratio);
       height = element.height = Math.round(rect.height * ratio);
+      clearings = []; previousPointer = null;
       paint();
     };
     const observer = new ResizeObserver(resize); observer.observe(element);
     resize(); start();
     document.addEventListener('visibilitychange', start);
-    return () => { stop(); observer.disconnect(); document.removeEventListener('visibilitychange', start); };
+    window.addEventListener('pointermove', pointer, { passive: true });
+    window.addEventListener('pointerdown', pointer, { passive: true });
+    window.addEventListener('wheel', wheel, { passive: true });
+    window.addEventListener('blur', leave);
+    document.documentElement.addEventListener('pointerleave', leave);
+    return () => {
+      stop(); observer.disconnect();
+      document.removeEventListener('visibilitychange', start);
+      window.removeEventListener('pointermove', pointer);
+      window.removeEventListener('pointerdown', pointer);
+      window.removeEventListener('wheel', wheel);
+      window.removeEventListener('blur', leave);
+      document.documentElement.removeEventListener('pointerleave', leave);
+    };
   }, [reducedMotion]);
   return <canvas ref={canvas} className="studio-smoke" />;
 }
