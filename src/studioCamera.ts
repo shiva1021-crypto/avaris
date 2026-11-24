@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import rigUrl from '../models/avaris-camera-tripod.glb?url';
 
@@ -12,11 +10,10 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
   const scene = new THREE.Scene();
   const height = .385;
   const camera = new THREE.OrthographicCamera(-height/2, height/2, height/2, -height/2, .01, 4);
-  const target = new THREE.Vector3(-.032, 1.450, 0);
+  const target = new THREE.Vector3(-.032, .065, 0);
   camera.position.copy(target).add(new THREE.Vector3(-.78,.07,.65));
   camera.lookAt(target);
-  const transcoder = new KTX2Loader().setTranscoderPath('/basis/').detectSupport(renderer);
-  const loader = new GLTFLoader().setKTX2Loader(transcoder).setMeshoptDecoder(MeshoptDecoder);
+  const loader = new GLTFLoader();
   let environment: THREE.WebGLRenderTarget | undefined;
   let resize: ResizeObserver | undefined;
   let frame = 0;
@@ -40,7 +37,6 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     }
     for (const t of textures) t.dispose();
     environment?.dispose();
-    transcoder.dispose();
     renderer.dispose();
   }
   try {
@@ -58,7 +54,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     room.dispose();
     pmrem.dispose();
     scene.environment = environment.texture;
-    scene.environmentIntensity = .74;
+    scene.environmentIntensity = .49;
     function softbox(x: number, y: number, z: number, color: number, intensity: number) {
       const light = new THREE.DirectionalLight(color, intensity);
       light.position.set(x,y,z);

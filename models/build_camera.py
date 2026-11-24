@@ -28,10 +28,11 @@ def material(name, rgb, metal, rough):
     return m
 
 
-alloy = material("Graphite anodised alloy", (.041,.046,.054), .72,.34)
-panel = material("Satin panel", (.055,.059,.065), .48,.42)
-rubber = material("Grip elastomer", (.018,.019,.022), .03,.57)
-black = material("Optical baffles", (.009,.010,.012), .33,.41)
+alloy = material("Black anodised alloy", (.009,.010,.012), .78,.30)
+panel = material("Satin black panel", (.014,.015,.017), .62,.38)
+rubber = material("Grip elastomer", (.007,.0075,.008), .04,.59)
+black = material("Flocked optical baffles", (.0025,.0027,.003), .05,.68)
+black.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value=.13
 steel = material("Bead-blasted titanium", (.28,.30,.32), .88,.27)
 red = material("Crimson anodised witness rings", (.43,.012,.052), .66,.29)
 ink = material("Ivory enamel", (.67,.68,.64), .05,.42)
@@ -197,7 +198,7 @@ for i in range(96):
         draw.text((x+3,53),str([1.2,1.4,1.6,2,2.5,3,4,5,7,10,15,25][(i//4)%12]),font=font,fill=(210,207,196))
 marks=image_material("Engraved distance scale",im,alloy)
 # Fine powder-coat variation across the large operator-side access cover.
-grain=np.random.default_rng(31).normal(0,4,(512,512,1))+np.array([51,53,58])
+grain=np.random.default_rng(31).normal(0,2,(512,512,1))+np.array([26,27,29])
 coat=image_material("Fine textured graphite",Image.fromarray(grain.clip(0,255).astype("uint8")),panel)
 for cover in scene.objects:
     if cover.name.startswith("Service cover") and "gasket" not in cover.name:
@@ -249,13 +250,22 @@ section="Matte box"
 hood("Flared shade",[(-134,102,91,7),(-158,137,122,7),(-158,129,114,5),(-134,91,82,5)],black)
 hood("Front filter frame",[(-158,138,123,7),(-163,138,123,7),(-163,130,115,5),(-158,130,115,5)],alloy)
 hood("Rear filter tray",[(-134,106,95,6),(-130,106,95,6),(-130,91,82,5),(-134,91,82,5)],alloy)
+# Rear donut seals the square filter tray around the circular lens housing.
+rim=rounded_loop(100,91,6)
+seal_vertices=[(-133,y,zc+z) for y,z in rim]
+for y,z in rim:
+    radius=math.hypot(y,z)
+    seal_vertices.append((-133,40*y/radius,zc+40*z/radius))
+n=len(rim)
+mesh("Matte box light seal",seal_vertices,
+     [(i,n+i,n+(i+1)%n,(i+1)%n) for i in range(n)],black)
 for side in (-1,1):
     for z in (65,112):
         box("Tray lock",(-146,side*61,z),(9,5,13),alloy,1.4)
         fastener((-146,side*64,z))
     ring("Flag pivot",(-156,side*55,153),4.2,6,alloy,"Y")
     ring("Flag pivot index",(-156,side*58,153),2.5,1,red,"Y")
-flag=box("Adjustable top flag",(-179,0,163),(52,140,2),alloy,.9)
+flag=box("Adjustable top flag",(-179,0,163),(52,140,2),black,.9)
 flag.rotation_euler.y=.42
 for y in (-48,-20,20,48): ring("Flag hinge",(-155,y,153),3.1,13,black,"Y")
 
@@ -351,6 +361,71 @@ for name in sorted({o["assembly"] for o in objects}):
     bpy.context.object.name=name
     bpy.ops.object.select_all(action="DESELECT")
 bpy.ops.export_scene.gltf(filepath=str(OUT/"avaris-cinema.glb"),export_yup=True,export_texcoords=True)
+
+# Fixed fluid head and twin-tube legs. Z=0 is the underside of the camera shoe.
+section="Fixed studio tripod"
+cast=material("Black cast magnesium",(.012,.013,.014),.57,.37)
+tube=material("Black satin leg tubing",(.013,.014,.016),.83,.29)
+box("Sliding head saddle",(0,0,-2.5),(91,45,5),alloy,2)
+box("Tilt cradle",(0,0,-8),(63,43,10),cast,4)
+ring("Transverse tilt drum",(0,0,-21),21,51,cast,"Y")
+for side in (-1,1):
+    ring("Tilt bearing shoulder",(0,side*25,-21),19,4,alloy,"Y")
+    ring("Drag dial outer lip",(0,side*28,-21),14.7,4,cast,"Y")
+    ring("Drag dial inset",(0,side*30,-21),11.7,1.4,panel,"Y")
+    ring("Drag dial face",(0,side*31,-21),9.7,1.3,alloy,"Y")
+    for x in (-15,15): fastener((x,side*23,-9),"Y",1.2)
+lathe("Tapered fluid-head body",(0,0,0),[
+    (-52,18),(-50,21),(-44,23),(-36,25),(-30,27),(-24,27),
+    (-22,24),(-22,1),(-52,1)],cast,"Z")
+ring("Pan drum",(0,0,-55),27,8,alloy,"Z")
+ring("Pan bearing trim",(0,0,-59),28,2.1,red,"Z")
+ring("Pan lock collar",(0,0,-64),27.5,8.5,cast,"Z",steps=192,teeth=48)
+ring("Pan skirt",(0,0,-70),28,4,rubber,"Z")
+lathe("Tripod spider",(0,0,0),[(-87,21),(-85,25),(-77,27),(-73,25),
+    (-72,22),(-72,1),(-87,1)],cast,"Z")
+
+def shaft(name,start,end,radius,mat):
+    delta=end-start
+    part=ring(name,(start+end)*.5,radius,delta.length,mat,steps=32)
+    part.rotation_mode="QUATERNION"
+    part.rotation_quaternion=delta.to_track_quat("X","Z")
+    return part
+
+for index in range(3):
+    a=math.radians(4+120*index)
+    radial=Vector((math.cos(a),math.sin(a),0))
+    across=Vector((-math.sin(a),math.cos(a),0))
+    down=Vector((0,0,-1))
+    pivot=radial*27+down*84
+    direction=(radial*.39+down).normalized()
+    shaft("Leg hinge barrel",pivot-across*12,pivot+across*12,7.3,cast)
+    for sign in (-1,1):
+        tip=pivot+across*(sign*13)
+        shaft("Hinge axle cap",tip,tip+across*sign*1.8,5,alloy)
+        shaft("Recessed hinge pin",tip+across*sign*1.8,tip+across*sign*2.3,2.3,black)
+        upper=pivot+across*(sign*6.6)
+        shaft("Twin upper leg tube",upper,upper+direction*376,5.6,tube)
+    for distance in (22,343,375):
+        clamp=box("Twin-tube bridge",pivot+direction*distance,(13,26,13),cast,3)
+        clamp.rotation_euler.z=a
+    shaft("Telescoping lower leg",pivot+direction*367,pivot+direction*890,6.5,tube)
+    shaft("Rubber foot",pivot+direction*883,pivot+direction*902,9,rubber)
+
+stand_parts=[o for o in scene.objects if o.get("assembly")==section]
+stand_root=bpy.data.objects.new("Fixed tripod",None)
+scene.collection.objects.link(stand_root)
+stand_root.scale=(.001,)*3
+for part in stand_parts:
+    part.parent=stand_root
+    part.select_set(True)
+bpy.context.view_layer.objects.active=stand_parts[0]
+bpy.ops.object.convert(target="MESH")
+bpy.ops.object.join()
+stand=bpy.context.object
+stand.name="Fluid head and twin-tube legs"
+bpy.ops.export_scene.gltf(filepath=str(OUT/"avaris-camera-tripod.glb"),export_yup=True)
+stand.hide_render=True
 
 # Studio proof from the exported geometry, with broad strip reflections.
 def aim(o,at): o.rotation_euler=(Vector(at)-o.location).to_track_quat("-Z","Y").to_euler()
