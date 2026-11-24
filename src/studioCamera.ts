@@ -25,12 +25,17 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
-  const height = .385;
-  const camera = new THREE.OrthographicCamera(-height/2, height/2, height/2, -height/2, .01, 4);
-  const target = new THREE.Vector3(-.032, .065, 0);
-  camera.position.copy(target).add(new THREE.Vector3(-.64,.045,.80));
-  camera.lookAt(target);
+  // A low, long-lens view reveals the underside of the flag and monitor.
+  // The optical axis passes through the mounting shoe, the reference landmark.
+  const distance = 2.27;
+  const framedHeight = .400;
+  const fov = THREE.MathUtils.radToDeg(2 * Math.atan(framedHeight / (2 * distance)));
+  const camera = new THREE.PerspectiveCamera(fov, 1, .05, 5);
+  camera.position.set(-.667,-.070,.742).normalize().multiplyScalar(distance);
+  camera.lookAt(0,0,0);
   const loader = new GLTFLoader();
   let environment: THREE.WebGLRenderTarget | undefined;
   let resize: ResizeObserver | undefined;
@@ -66,22 +71,35 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     signal.addEventListener('abort', dispose, { once: true });
     const head = rig.scene.children.find(node => node.children.some(child => child.name === 'Chassis'));
     if (!head) throw new Error('Camera mount missing');
+    rig.scene.traverse(part => {
+      if (part instanceof THREE.Mesh) {
+        part.castShadow = true;
+        part.receiveShadow = true;
+      }
+    });
     const room = new RoomEnvironment();
     reflectionPanel(room, new THREE.Vector3(-2,3.4,1.3), 6, 2.6, 16);
-    reflectionPanel(room, new THREE.Vector3(2.4,.85,3), 4.6, 2.4, 8);
-    reflectionPanel(room, new THREE.Vector3(-3,1,.1), 2.8, 2, 6);
+    reflectionPanel(room, new THREE.Vector3(2.4,1.65,3), 3.8, 1.6, 5);
+    reflectionPanel(room, new THREE.Vector3(-3,1,.1), 2.8, 2, 4);
     const pmrem = new THREE.PMREMGenerator(renderer);
     environment = pmrem.fromScene(room, .035);
     room.dispose();
     pmrem.dispose();
     scene.environment = environment.texture;
-    scene.environmentIntensity = .88;
+    scene.environmentIntensity = .77;
     function softbox(x: number, y: number, z: number, color: number, intensity: number) {
       const light = new THREE.DirectionalLight(color, intensity);
       light.position.set(x,y,z);
       scene.add(light);
+      return light;
     }
-    softbox(-3,5,2,0xe7edff,3.2);
+    const key = softbox(-3,5,2,0xe7edff,3.2);
+    key.castShadow = true;
+    Object.assign(key.shadow.camera, { left: -.31, right: .31, top: .31, bottom: -.31, near: 5.5, far: 7 });
+    key.shadow.camera.updateProjectionMatrix();
+    key.shadow.mapSize.set(1024,1024);
+    key.shadow.normalBias = .00035;
+    key.shadow.bias = -.00008;
     softbox(2,3,-4,0xafbad0,2.7);
     softbox(-2,1,-3,0xb64a68,.75);
     function draw() { frame = 0; renderer.render(scene,camera); }
@@ -90,9 +108,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       if (!w || !h) return;
       renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
       renderer.setSize(w,h,false);
-      camera.left=-height*w/h/2;
-      camera.right=-camera.left;
-      camera.updateProjectionMatrix();
+      camera.setViewOffset(w,h,-.075*h,-.10*h,w,h);
       draw();
     }
     fit();

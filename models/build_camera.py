@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from PIL import Image, ImageDraw, ImageFont
 
 OUT = Path(__file__).resolve().parent
@@ -33,7 +33,7 @@ panel = material("Satin black panel", (.014,.015,.017), .62,.38)
 rubber = material("Grip elastomer", (.007,.0075,.008), .04,.59)
 black = material("Flocked optical baffles", (.0025,.0027,.003), .05,.68)
 black.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value=.13
-steel = material("Bead-blasted titanium", (.28,.30,.32), .88,.27)
+steel = material("Gunmetal support hardware", (.095,.102,.113), .92,.23)
 red = material("Crimson anodised witness rings", (.43,.012,.052), .66,.29)
 ink = material("Ivory enamel", (.67,.68,.64), .05,.42)
 screen = material("Smoked monitor glass", (.011,.016,.021), .34,.16)
@@ -172,7 +172,7 @@ box("Power pack release",(101,-35.7,90),(8,2.7,5),red,1)
 
 section="Cine lens"
 zc=89
-lathe("Stepped prime barrel",(-20,0,zc),[(-115,43),(-107,45),(-82,45),(-75,43),(-54,42),(-43,38),(-21,35),(-18,32),(2,32),(2,21),(-115,21)],alloy)
+lathe("Stepped prime barrel",(-20,0,zc),[(-115,43),(-107,45),(-82,45),(-75,43),(-54,42),(-43,38),(-21,35),(-18,32),(2,32),(2,21),(-84,21),(-84,37),(-115,37)],alloy)
 for x,r,w in [(-124,45,2.2),(-72,42.4,1.1),(-45,36.3,.8)]:
     ring("Anodised lens index",(x,0,zc),r,w,red,bore=r-2)
 for x,r,w in [(-111,45,14),(-80,42.3,8)]:
@@ -224,21 +224,21 @@ for p in o.data.polygons:
 v,u=np.mgrid[-1:1:512j,-1:1:512j]
 rr=np.hypot(v,u)
 pix=np.zeros((512,512,3))+[13,14,18]
-for cx,cy,color in [(.39,-.39,[210,59,104]),(-.36,.43,[5,65,56])]:
+for cx,cy,color in [(.43,-.43,[150,51,83]),(-.38,.42,[4,25,21])]:
     rad=np.hypot(u-cx,v-cy)
-    light=np.exp(-rad**2/.16)*(.75+.25*(.5+.5*np.cos(21*rr+.6))**3)
+    light=np.exp(-rad**2/.10)*(.78+.22*(.5+.5*np.cos(21*rr+.6))**3)
     pix+=light[:,:,None]*color
 pix*=np.clip(.50+rr*2,.5,1)[:,:,None]
 glass=image_material("Rose and teal optical coating",Image.fromarray(pix.clip(0,255).astype("uint8")),optic)
 glass_node=glass.node_tree.nodes["Principled BSDF"]
 glass.node_tree.links.new(glass.node_tree.nodes["Image Texture"].outputs["Color"],glass_node.inputs["Emission Color"])
-glass_node.inputs["Emission Strength"].default_value=.22
-verts=[(-144,0,zc)]; faces=[]
+glass_node.inputs["Emission Strength"].default_value=.05
+verts=[(-120,0,zc)]; faces=[]
 for i in range(1,15):
-    r=36*i/14
+    r=29*i/14
     for j in range(96):
         a=2*pi*j/96
-        verts.append((-144+4*(r/36)**2,r*math.cos(a),zc+r*math.sin(a)))
+        verts.append((-120+2.8*(r/29)**2,r*math.cos(a),zc+r*math.sin(a)))
         k=1+(i-1)*96+j; l=1+(i-1)*96+(j+1)%96
         faces.append((0,l,k) if i==1 else (k-96,l-96,l,k))
 o=mesh("Convex optical element",verts,faces,glass); uv=o.data.uv_layers.new()
@@ -246,7 +246,10 @@ for p in o.data.polygons:
     p.use_smooth=True
     for idx in p.loop_indices:
         co=o.data.vertices[o.data.loops[idx].vertex_index].co
-        uv.data[idx].uv=(.5+co.y/72,.5+(co.z-zc)/72)
+        uv.data[idx].uv=(.5+co.y/58,.5+(co.z-zc)/58)
+lathe("Recessed optical well",(-139,0,zc),[(0,39),(25,36),(25,27),(19,28),(0,36)],black)
+for i in range(5):
+    ring("Recessed optical ridge",(-138+i*4,0,zc),37-i*1.65,1.2,alloy,bore=35.5-i*1.65)
 for i in range(5):
     ring("Internal light trap",(-142-i*.9,0,zc),37.5+i*1.05,1.3,black,bore=35.6+i*1.04)
 
@@ -264,7 +267,7 @@ for x,half_w,half_h,r in [(-137,51,46,0),(-132,51,46,0),
         a=2*pi*i/n
         cy,sz=math.cos(a),math.sin(a)
         distance=r or min(half_w/max(abs(cy),1e-8),half_h/max(abs(sz),1e-8))
-        verts.append((x,distance*cy,zc+distance*sz))
+        verts.append((x,distance*cy*(.95/1.34 if r else 1),zc+distance*sz*(.95/.85 if r else 1)))
 for row in range(4):
     for i in range(n):
         j=(i+1)%n; nxt=(row+1)%4
@@ -279,7 +282,11 @@ for side in (-1,1):
         fastener((-146,side*64,z))
     ring("Flag pivot",(-156,side*55,153),4.2,6,alloy,"Y")
     ring("Flag pivot index",(-156,side*58,153),2.5,1,red,"Y")
-flag=box("Adjustable top flag",(-179,0,163),(52,140,2),black,.9)
+flag_finish=material("Satin flag enamel",(.004,.005,.007),.24,.48)
+flag_finish.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value=.18
+flag=box("Adjustable top flag",(-179,0,163),(52,140,2),flag_finish,.9)
+flag.data.materials.append(steel)
+flag.modifiers["Machined radius"].material=1
 flag.rotation_euler.y=.42
 for y in (-48,-20,20,48): ring("Flag hinge",(-155,y,153),3.1,13,black,"Y")
 
@@ -341,7 +348,7 @@ ring("Swivel hinge",(-21,0,175),6.3,18,alloy,"Y")
 fastener((-21,-9.4,175),"Y",3.5)
 box("Monitor shoe",(-21,0,184),(10,12,12),alloy,1.4)
 origin=Vector((-23,0,219))
-angle=-1.07
+angle=-1.54
 def monitor(name,local,size,mat,r):
     x,y,z=local
     p=origin+Vector((x*math.cos(angle)-y*math.sin(angle),x*math.sin(angle)+y*math.cos(angle),z))
@@ -349,18 +356,41 @@ def monitor(name,local,size,mat,r):
     return o
 monitor("Field monitor enclosure",(0,0,0),(102,11,62),alloy,4.4)
 monitor("Bonded bezel",(0,-5.7,0),(99,2.8,59),black,1.35)
-monitor("Optical screen",(0,-7.2,0),(94,.9,53),screen,.43)
+sx,sy=np.meshgrid(np.linspace(0,1,256),np.linspace(0,1,144))
+sheen=np.exp(-((sx+.15)**2/.72+(sy+.17)**2/.64))
+screen_map=np.array([15,17,22])+sheen[:,:,None]*np.array([43,44,47])
+display=image_material("Smoked display backing",Image.fromarray(screen_map.astype("uint8")),screen)
+face=monitor("Optical screen",(0,-7.2,0),(94,.9,53),display,.43)
+for poly in face.data.polygons:
+    for idx in poly.loop_indices:
+        v=face.data.vertices[face.data.loops[idx].vertex_index].co
+        face.data.uv_layers.active.data[idx].uv=(.5+v.x/94,.5+v.z/53)
 for z,m in [(10,steel),(-8,red)]:
     monitor("I/O bezel",(51,0,z),(1.4,6,13),m,.65)
     monitor("Recessed port",(51.8,0,z),(.4,3.8,9),black,.2)
 for x in range(-36,39,6): monitor("Rear cooling flute",(x,5.7,-15),(3,1,13),black,.5)
-cable("Monitor lead",[(1,-43,202),(9,-43,198),(30,-31,191),(44,-14,168),(44,5,145),(47,12,138)],1.55)
+cable("Monitor lead",[(-23,-49,199),(-22,-52,192),(-17,-49,177),(3,-31,164),(21,-13,147),(34,12,138)],1.55)
 
 # Save editable components, then batch static surfaces by assembly for delivery.
 objects=list(scene.objects)
 root=bpy.data.objects.new("Avaris | tripod mount",None); scene.collection.objects.link(root)
-root.scale=(.001,)*3
-for o in objects: o.parent=root
+# Fit the broad front filter tray and compact body to the hero silhouette.
+# Optical elements retain a circular cross-section inside the wider housing.
+root.scale=(.001,.00134,.00085)
+bpy.context.view_layer.update()
+optical_centre=Vector((0,0,zc))
+optical_fit=(Matrix.Translation(optical_centre)
+             @ Matrix.Diagonal((1,.95/1.34,.95/.85,1))
+             @ Matrix.Translation(-optical_centre))
+for o in objects:
+    if o["assembly"]=="Cine lens" or o.name=="Optics retaining bezel":
+        o.matrix_world=optical_fit @ o.matrix_world
+    if o["assembly"]=="Monitor and swivel":
+        o.location.x+=13
+    if o.name.startswith(("Focus rail bracket","Focus swing arm","Focus pinion","Follow focus handwheel")):
+        o.location.y=-o.location.y
+    o.location.x+=20
+    o.parent=root
 scene.unit_settings.system="METRIC"
 scene.render.fps=24
 bpy.context.preferences.filepaths.save_version=0
@@ -407,7 +437,7 @@ def shaft(name,start,end,radius,mat):
     return part
 
 for index in range(3):
-    a=math.radians(4+120*index)
+    a=math.radians(-13+120*index)
     radial=Vector((math.cos(a),math.sin(a),0))
     across=Vector((-math.sin(a),math.cos(a),0))
     down=Vector((0,0,-1))
@@ -429,7 +459,7 @@ for index in range(3):
 stand_parts=[o for o in scene.objects if o.get("assembly")==section]
 stand_root=bpy.data.objects.new("Fixed tripod",None)
 scene.collection.objects.link(stand_root)
-stand_root.scale=(.001,)*3
+stand_root.scale=(.00134,.00134,.001)
 for part in stand_parts:
     part.parent=stand_root
     part.select_set(True)
