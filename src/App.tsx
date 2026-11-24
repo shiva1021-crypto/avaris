@@ -38,8 +38,7 @@ export default function App() {
     </div>
     <a className="lens-cta" href="/services/" aria-label="Explore our services">
       <span className="lens-dial" aria-hidden="true" />
-      <span className="lens-glass" aria-hidden="true"><span className="lens-aperture" /></span>
-      <span className="lens-label">Explore<span>services</span></span>
+      <span className="lens-arrow" aria-hidden="true">↗</span>
     </a>
     {!loaded && <div className="loading-label" role="status">{failed ? 'The studio could not load.' : 'Bringing the studio into focus'}{!failed && <span className="loading-line" />}{failed && <button onClick={() => location.reload()}>Try again</button>}</div>}
     </>}

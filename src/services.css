@@ -1,13 +1,15 @@
-/* The approved hero remains intact; the lens control is its only new element. */
-.lens-cta { position: absolute; z-index: 3; left: 8%; top: 69.5%; display: grid; place-items: center; width: 116px; height: 116px; border-radius: 50%; border: 1px solid #707a8655; background: #0c1016dd; box-shadow: inset 0 0 0 5px #0c0f14, inset 0 0 0 6px #53687855, 0 8px 28px #0005; transition: border-color .35s, box-shadow .35s; }
-.lens-dial { position: absolute; inset: 7px; border-radius: inherit; background: repeating-conic-gradient(from 0deg, #a6b3c177 0deg 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 62%, #000 63% 70%, transparent 71%); transition: transform .7s cubic-bezier(.22,.61,.36,1); }
-.lens-glass { position: absolute; inset: 17px; border-radius: 50%; border: 1px solid #74253e; background: radial-gradient(ellipse at 28% 20%, #53687840, transparent 55%), radial-gradient(ellipse at 75% 90%, #7b1d362c, #0a0e16 64%); box-shadow: inset 0 0 0 3px #0c1119, inset 0 0 18px #000b; overflow: hidden; }
-.lens-aperture { position: absolute; inset: 8px; border: 10px solid #8c96a211; clip-path: polygon(25% 7%, 75% 7%, 100% 50%, 75% 93%, 25% 93%, 0 50%); transition: transform .7s; transform: rotate(-15deg); }
-.lens-label { position: relative; font-size: 15px; font-weight: 500; line-height: 1.25; text-align: center; color: #e5e4e2; }
-.lens-label span { display: block; }
-.lens-cta:hover, .lens-cta:focus-visible { border-color: #b24a67; box-shadow: inset 0 0 0 5px #0c0f14, inset 0 0 0 6px #7b1d36aa, 0 0 32px #8d29432b; }
-.lens-cta:hover .lens-dial, .lens-cta:focus-visible .lens-dial { transform: rotate(24deg); }
-.lens-cta:hover .lens-aperture, .lens-cta:focus-visible .lens-aperture { transform: rotate(8deg); }
+/* The hero CTA is intentionally label-free and echoing the studio's circular set details. */
+.lens-cta { position: absolute; z-index: 3; left: 8%; top: 69.5%; display: grid; place-items: center; width: 82px; height: 82px; border: 1px solid #9ca7b17a; border-radius: 50%; background: #10151bd1; box-shadow: 0 14px 38px #0007, inset 0 0 0 7px #090d1244; backdrop-filter: blur(8px); transition: width .45s cubic-bezier(.22,.61,.36,1), height .45s cubic-bezier(.22,.61,.36,1), border-color .35s, background .35s, box-shadow .35s, transform .45s cubic-bezier(.22,.61,.36,1); }
+.lens-dial { position: absolute; inset: 8px; border: 1px solid #7f8b9655; border-radius: 50%; transition: transform .7s cubic-bezier(.22,.61,.36,1), border-color .35s; }
+.lens-dial::before, .lens-dial::after { content: ''; position: absolute; border-radius: 50%; }
+.lens-dial::before { inset: 5px; border: 1px solid #a0395544; border-top-color: #c05270; animation: cta-orbit 7s linear infinite; }
+.lens-dial::after { width: 5px; height: 5px; left: 50%; top: -3px; background: #c75c78; box-shadow: 0 0 10px #c75c7888; transform: translateX(-50%); }
+.lens-arrow { position: relative; z-index: 1; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #f1eff0; font-size: 21px; line-height: 1; transition: transform .45s cubic-bezier(.22,.61,.36,1), background .35s, color .35s; }
+.lens-cta:hover, .lens-cta:focus-visible { width: 92px; height: 92px; border-color: #c35a73a8; background: #151920e6; box-shadow: 0 18px 42px #0009, 0 0 28px #8d294329, inset 0 0 0 7px #090d1266; transform: translateY(-4px); }
+.lens-cta:hover .lens-dial, .lens-cta:focus-visible .lens-dial { transform: rotate(34deg); border-color: #9ca7b18a; }
+.lens-cta:hover .lens-dial::before, .lens-cta:focus-visible .lens-dial::before { animation-duration: 2.8s; }
+.lens-cta:hover .lens-arrow, .lens-cta:focus-visible .lens-arrow { transform: translate(3px, -3px); background: #982d4b; color: #fff; }
+@keyframes cta-orbit { to { transform: rotate(360deg); } }
 
 html:has(.services-page) { scroll-behavior: smooth; }
 .services-page { position: relative; min-height: 100svh; isolation: isolate; overflow-x: clip; }
@@ -69,12 +71,10 @@ html:has(.services-page) { scroll-behavior: smooth; }
   .service-toggle { grid-column: 2; grid-row: 1 / 3; }
   .services-closing { grid-template-columns: 1fr 40%; gap: 6%; }
 }
-@media (min-width: 601px) and (max-width: 900px) { .lens-cta { left: 5%; width: 100px; height: 100px; } .lens-label { font-size: 14px; } .lens-glass { inset: 14px; } }
+@media (min-width: 601px) and (max-width: 900px) { .lens-cta { left: 5%; width: 76px; height: 76px; } .lens-cta:hover, .lens-cta:focus-visible { width: 84px; height: 84px; } }
 @media (max-width: 600px) {
-  .lens-cta { left: 50%; top: 31%; transform: translateX(-50%); width: 96px; height: 96px; }
-  .lens-label { font-size: 14px; }
-  .lens-glass { inset: 13px; }
-  .lens-dial { inset: 5px; }
+  .lens-cta { left: calc(50% - 38px); top: 58%; width: 76px; height: 76px; }
+  .lens-cta:hover, .lens-cta:focus-visible { width: 82px; height: 82px; transform: translateY(-3px); }
   .services-content { padding: 0 24px; }
   .services-hero { padding-top: 112px; padding-bottom: 45px; }
   .services-breadcrumb { margin-bottom: 38px; }
