@@ -1,4 +1,12 @@
-# Avaris cinematic homepage
+# Avaris cinematic agency website
+
+## Pages and theme
+
+- `/` preserves the approved camera hero and adds a lens-inspired **Explore services** control.
+- `/services/` is a separate production entry with seven expandable service groups, the same live atmosphere and the existing Contact dialog.
+- `THEME.md` records the agreed colors, typography, motion, lens-control placement and scope before implementation.
+- `src/App.tsx` shares the page shell; `src/ServicesPage.tsx` holds the services content. `services/index.html` and the Vite multi-page configuration make direct navigation and refresh work.
+- Browser checks covered desktop and 320–390 px mobile layouts, lens navigation, keyboard expansion, direct page refresh, returning home and the conversation dialog. Contact details remain a clearly labeled prototype.
 
 ## Current version: 2D camera and live atmosphere
 
@@ -9,7 +17,7 @@ Run `npm install` and `npm run dev`. Build with `npm run build`; serve the build
 - The header contains only the Avaris logo and Contact button. The selected compact Montserrat Black headline is retained.
 - Desktop camera placement follows the reference: image height 64.5% of the viewport, bottom-aligned and centered at 47.7% of viewport width. Mobile scales the image by viewport width.
 - `src/HeroCamera.tsx` is the foreground replacement point for the final 3D model. Background and atmosphere are separate layers and can stay intact.
-- `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. `src/LiveSmokeRenderer.ts` evolves layered, domain-warped shader noise continuously: crosswind, lift and changing eddies remain active while the pointer is idle. The visible Canvas layer is capped at 1000 pixels wide; a moving/deforming procedural Canvas fallback covers devices without a usable shader context. `src/InteractiveSmoke.tsx` drives `src/FluidWake.ts`, a small velocity/dye solver with advection, pressure projection and vorticity confinement. The starting wake is about 12â€“16 CSS pixels wide, follows pointer velocity, curls and dissipates. Entering or resting the pointer creates no disk. The fluid grid is capped at 240 cells per axis, with a faster frame loop only while the wake is active. Wheel scrolling retains broad dispersal without a local circular brush. Background loops pause on hidden pages. Reduced-motion preferences stop idle drift while preserving user-triggered clearing and fade-back.
+- `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. `src/LiveSmokeRenderer.ts` evolves layered, domain-warped shader noise continuously: crosswind, lift and changing eddies remain active while the pointer is idle. The visible Canvas layer is capped at 1000 pixels wide; a moving/deforming procedural Canvas fallback covers devices without a usable shader context. `src/InteractiveSmoke.tsx` drives `src/FluidWake.ts`, a small velocity/dye solver with advection, pressure projection and vorticity confinement. The starting wake is about 12-16 CSS pixels wide, follows pointer velocity, curls and dissipates. Entering or resting the pointer creates no disk. The fluid grid is capped at 240 cells per axis, with a faster frame loop only while the wake is active. Wheel scrolling retains broad dispersal without a local circular brush. Background loops pause on hidden pages. Reduced-motion preferences stop idle drift while preserving user-triggered clearing and fade-back.
 - Current desktop and 390 x 844 mobile checks cover composition, image loading, mobile overflow, Contact dialog, Escape key, pointer/wheel smoke flow, shader rendering, advancing idle animation time and browser error logs. Isolated numerical checks verified cursor-scale injection width, finite values, dissipation and reduced-motion settling. Other hardware frame rates have not been benchmarked.
 
 ### New image assets

@@ -11,6 +11,11 @@ const RIGHT = [
   'M 770 686 C 1120 649 1440 583 1700 270',
   'M 770 680 C 1120 662 1440 565 1700 255',
 ];
+const FULL_RIGHT = [
+  'M -80 798 C 650 790 1330 730 1700 255',
+  'M -80 801 C 660 782 1330 742 1700 270',
+  'M -80 798 C 650 790 1330 730 1700 255',
+];
 
 function MovingPath({ frames, duration, reducedMotion, ...props }: {
   frames: string[]; duration: string; reducedMotion: boolean;
@@ -20,7 +25,9 @@ function MovingPath({ frames, duration, reducedMotion, ...props }: {
   </path>;
 }
 
-export default function StudioAtmosphere({ reducedMotion }: { reducedMotion: boolean }) {
+export default function StudioAtmosphere({ reducedMotion, fullBackdrop = false }: { reducedMotion: boolean; fullBackdrop?: boolean }) {
+  const right = fullBackdrop ? FULL_RIGHT : RIGHT;
+  const rightStart = fullBackdrop ? -80 : 770;
   const svg = useRef<SVGSVGElement>(null);
   useEffect(() => {
     const visibility = () => {
@@ -46,11 +53,11 @@ export default function StudioAtmosphere({ reducedMotion }: { reducedMotion: boo
         <filter id="fabric-edge" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation=".7" /></filter>
       </defs>
       <MovingPath frames={LEFT.map(d => d + ' L 850 814 L -30 814 Z')} duration="19s" reducedMotion={reducedMotion} fill="url(#fabric-left)" />
-      <MovingPath frames={RIGHT.map(d => d + ' L 1700 810 L 770 810 Z')} duration="16s" reducedMotion={reducedMotion} fill="url(#fabric-right)" />
+      <MovingPath frames={right.map(d => d + ` L 1700 810 L ${rightStart} 810 Z`)} duration="16s" reducedMotion={reducedMotion} fill="url(#fabric-right)" />
       <MovingPath frames={LEFT} duration="19s" reducedMotion={reducedMotion} fill="none" stroke="#9e294a" strokeWidth="24" opacity=".18" filter="url(#fabric-glow)" />
-      <MovingPath frames={RIGHT} duration="16s" reducedMotion={reducedMotion} fill="none" stroke="url(#edge-right)" strokeWidth="52" opacity=".55" filter="url(#fabric-glow)" />
+      <MovingPath frames={right} duration="16s" reducedMotion={reducedMotion} fill="none" stroke="url(#edge-right)" strokeWidth="52" opacity=".55" filter="url(#fabric-glow)" />
       <MovingPath frames={LEFT} duration="19s" reducedMotion={reducedMotion} fill="none" stroke="#a63653" strokeWidth="2" opacity=".65" filter="url(#fabric-edge)" />
-      <MovingPath frames={RIGHT} duration="16s" reducedMotion={reducedMotion} fill="none" stroke="url(#edge-right)" strokeWidth="2" filter="url(#fabric-edge)" />
+      <MovingPath frames={right} duration="16s" reducedMotion={reducedMotion} fill="none" stroke="url(#edge-right)" strokeWidth="2" filter="url(#fabric-edge)" />
     </svg>
     <Smoke reducedMotion={reducedMotion} />
   </div>;
