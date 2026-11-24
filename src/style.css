@@ -21,7 +21,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .headline { position: absolute; z-index: 2; top: 23.4%; left: 0; right: 0; margin: 0; text-align: center; font-family: 'Montserrat', 'DM Sans', Arial, sans-serif; font-size: clamp(42px, 5.1vw, 100px); font-weight: 900; font-style: normal; text-transform: uppercase; line-height: 1; letter-spacing: -.065em; color: #e4e7ec; text-shadow: 0 2px 18px rgb(0 0 0 / 12%); pointer-events: none; }
 .headline .headline-accent { color: #7b1d36; }
 .camera-stage { position: absolute; inset: 0; z-index: 1; opacity: 0; transition: opacity 1.25s ease; pointer-events: none; }
-.camera-cutout { position: absolute; left: 47.7%; bottom: 0; height: 64.5%; width: auto; max-width: none; transform: translateX(-50%); user-select: none; }
+.camera-frame { position: absolute; left: 47.7%; bottom: 0; height: 64.5%; aspect-ratio: 1; width: auto; max-width: none; transform: translateX(-50%); user-select: none; }
 .is-ready .camera-stage { opacity: 1; }
 .loading-label { position: absolute; top: 62%; left: 50%; transform: translateX(-50%); text-align: center; font-size: 14px; letter-spacing: .08em; color: #aab0b7; white-space: nowrap; }
 .loading-line { display: block; width: 120px; height: 1px; margin: 18px auto; overflow: hidden; background: #7f2941; animation: breathe 1.8s ease-in-out infinite; }
@@ -44,7 +44,17 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   .contact-button { margin-left: auto; min-height: 36px; padding: 6px 14px; border-width: 1px; font-size: 14px; gap: 8px; }
   .contact-button span { font-size: 18px; }
   .headline { top: 22%; font-size: clamp(25px, 7.8vw, 46px); letter-spacing: -.065em; white-space: nowrap; }
-  .camera-cutout { height: auto; width: 86%; left: 50%; }
+  .camera-frame { height: auto; width: 86%; left: 50%; }
   .chapter-dialog { padding: 54px 28px 30px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.camera-poster, .camera-render { position: absolute; inset: 0; width: 100%; height: 100%; }
+.camera-render { left: -17%; width: 134%; opacity: 0; }
+.is-interactive .camera-render { opacity: 1; }
+.is-interactive .camera-poster { visibility: hidden; }
+.camera-drag { position: absolute; inset: 0 2% 31%; pointer-events: auto; cursor: grab; touch-action: pan-y; }
+.camera-drag:active { cursor: grabbing; }
+.camera-drag:focus-visible { outline: 1px solid #b97b90; outline-offset: 3px; border-radius: 12px; }
+.rotation-hint { position: absolute; right: 2%; bottom: 6%; font-size: 13px; color: #e5e4e2; text-shadow: 0 1px 4px #08090b; }
+.keyboard-hint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
