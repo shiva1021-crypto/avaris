@@ -44,7 +44,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   .contact-button { margin-left: auto; min-height: 36px; padding: 6px 14px; border-width: 1px; font-size: 14px; gap: 8px; }
   .contact-button span { font-size: 18px; }
   .headline { top: 22%; font-size: clamp(25px, 7.8vw, 46px); letter-spacing: -.065em; white-space: nowrap; }
-  .camera-cutout { height: auto; width: 108%; left: 50%; }
+  .camera-cutout { height: auto; width: 86%; left: 50%; }
   .chapter-dialog { padding: 54px 28px 30px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
