@@ -1,0 +1,147 @@
+{
+  "D:\\Digital Marketing web\\avaris\\.openai\\hosting.json": {
+    "mtime": 1795526139.4925883,
+    "ast_hash": "942272666da43482483efa419bd69943",
+    "semantic_hash": "942272666da43482483efa419bd69943"
+  },
+  "D:\\Digital Marketing web\\avaris\\package.json": {
+    "mtime": 1795526139.6596289,
+    "ast_hash": "e9de7bdbd0c6d3d29c8590cbf5ba585e",
+    "semantic_hash": "e9de7bdbd0c6d3d29c8590cbf5ba585e"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\basis\\basis_transcoder.js": {
+    "mtime": 1795526167.2696848,
+    "ast_hash": "3acfda59c08cbb3875d1a4a5de3efa5a",
+    "semantic_hash": "3acfda59c08cbb3875d1a4a5de3efa5a"
+  },
+  "D:\\Digital Marketing web\\avaris\\scripts\\asset-provenance.json": {
+    "mtime": 1795532394.5343902,
+    "ast_hash": "ec280a1c7d76e2f27f551a88e96bb806",
+    "semantic_hash": "ec280a1c7d76e2f27f551a88e96bb806"
+  },
+  "D:\\Digital Marketing web\\avaris\\scripts\\prepare-assets.py": {
+    "mtime": 1795526178.7906537,
+    "ast_hash": "14c7376fdb14867ba90f66a5992ea028",
+    "semantic_hash": "14c7376fdb14867ba90f66a5992ea028"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\App.tsx": {
+    "mtime": 1795537997.7569678,
+    "ast_hash": "8404b9adb59dda9acdfac844f6312a94",
+    "semantic_hash": "8404b9adb59dda9acdfac844f6312a94"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\FluidWake.ts": {
+    "mtime": 1795533883.215086,
+    "ast_hash": "4a52c5541f32e30203c85afa2989c2f4",
+    "semantic_hash": "4a52c5541f32e30203c85afa2989c2f4"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\HeroCamera.tsx": {
+    "mtime": 1795532154.1007342,
+    "ast_hash": "7d73d850f5b0924985076b6e1e551c2e",
+    "semantic_hash": "7d73d850f5b0924985076b6e1e551c2e"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\InteractiveSmoke.tsx": {
+    "mtime": 1795534358.7273192,
+    "ast_hash": "47153c930dffa968ed51c58003e1918f",
+    "semantic_hash": "47153c930dffa968ed51c58003e1918f"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\LiveSmokeRenderer.ts": {
+    "mtime": 1795534283.2468114,
+    "ast_hash": "51fec8fe1ed24f3da7492a1183cc1733",
+    "semantic_hash": "51fec8fe1ed24f3da7492a1183cc1733"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\Scene.tsx": {
+    "mtime": 1795528393.8625188,
+    "ast_hash": "e107b26b1b66a53b82810fe61e80975f",
+    "semantic_hash": "e107b26b1b66a53b82810fe61e80975f"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\ServicesPage.tsx": {
+    "mtime": 1795537139.6730342,
+    "ast_hash": "718ccfe3f34f5afa52cc68bbb7f8b9ee",
+    "semantic_hash": "718ccfe3f34f5afa52cc68bbb7f8b9ee"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\SmokeTexture.ts": {
+    "mtime": 1795533963.465971,
+    "ast_hash": "f23774f2538f8f4b6fb99825fe54e5f4",
+    "semantic_hash": "f23774f2538f8f4b6fb99825fe54e5f4"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\StudioAtmosphere.tsx": {
+    "mtime": 1795537139.6553771,
+    "ast_hash": "d41320d55954905cb635462d79ae64ef",
+    "semantic_hash": "d41320d55954905cb635462d79ae64ef"
+  },
+  "D:\\Digital Marketing web\\avaris\\src\\main.tsx": {
+    "mtime": 1795537386.3338084,
+    "ast_hash": "09ffbe740abd89de34c4be1bc07095ca",
+    "semantic_hash": "09ffbe740abd89de34c4be1bc07095ca"
+  },
+  "D:\\Digital Marketing web\\avaris\\tsconfig.json": {
+    "mtime": 1795526139.6596289,
+    "ast_hash": "1946b7cda2bc1fe5eccd7177a97e99e9",
+    "semantic_hash": "1946b7cda2bc1fe5eccd7177a97e99e9"
+  },
+  "D:\\Digital Marketing web\\avaris\\vite.config.ts": {
+    "mtime": 1795536852.968168,
+    "ast_hash": "60a153b0a4848683ae1c3e65d2c4f9e7",
+    "semantic_hash": "60a153b0a4848683ae1c3e65d2c4f9e7"
+  },
+  "D:\\Digital Marketing web\\avaris\\README.md": {
+    "mtime": 1795537386.3447728,
+    "ast_hash": "e77e59be5987d0c2b6f8f9ed7db8f49d",
+    "semantic_hash": "e77e59be5987d0c2b6f8f9ed7db8f49d"
+  },
+  "D:\\Digital Marketing web\\avaris\\THEME.md": {
+    "mtime": 1795536731.290138,
+    "ast_hash": "1204d75635dc67bc819de7df41633095",
+    "semantic_hash": "1204d75635dc67bc819de7df41633095"
+  },
+  "D:\\Digital Marketing web\\avaris\\index.html": {
+    "mtime": 1795532108.9413905,
+    "ast_hash": "31af749cc7db4f1a91d575404f60ae01",
+    "semantic_hash": "31af749cc7db4f1a91d575404f60ae01"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\fonts\\montserrat-OFL.txt": {
+    "mtime": 1795527066.732084,
+    "ast_hash": "2fdec60339ef243dcaca42a0c7bce717",
+    "semantic_hash": "2fdec60339ef243dcaca42a0c7bce717"
+  },
+  "D:\\Digital Marketing web\\avaris\\services\\index.html": {
+    "mtime": 1795536852.9629624,
+    "ast_hash": "f98d1f097462d41b9779a6d7fce6e4b1",
+    "semantic_hash": "f98d1f097462d41b9779a6d7fce6e4b1"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\camera-reference-cutout.png": {
+    "mtime": 1795531919.5612788,
+    "ast_hash": "d27d7d720542662f9399452f927dc098",
+    "semantic_hash": "d27d7d720542662f9399452f927dc098"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\camera-reference-cutout.webp": {
+    "mtime": 1795532084.2492447,
+    "ast_hash": "370825ae0240d7ec4836718be9b766ff",
+    "semantic_hash": "370825ae0240d7ec4836718be9b766ff"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\studio-background.png": {
+    "mtime": 1795526056.8138185,
+    "ast_hash": "07b28d5b961bd59a53d462799e5650e3",
+    "semantic_hash": "07b28d5b961bd59a53d462799e5650e3"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\studio-background.webp": {
+    "mtime": 1795526187.5038257,
+    "ast_hash": "24b4e3102384668f18a598fa9fbadb5c",
+    "semantic_hash": "24b4e3102384668f18a598fa9fbadb5c"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\studio-empty.png": {
+    "mtime": 1795531868.657859,
+    "ast_hash": "cb218d259384700ca0575f18ca0a901f",
+    "semantic_hash": "cb218d259384700ca0575f18ca0a901f"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\assets\\studio-empty.webp": {
+    "mtime": 1795532084.6584947,
+    "ast_hash": "d9d02279fb8bd94a6950744d73a8747d",
+    "semantic_hash": "d9d02279fb8bd94a6950744d73a8747d"
+  },
+  "D:\\Digital Marketing web\\avaris\\public\\favicon.svg": {
+    "mtime": 1795526139.6716697,
+    "ast_hash": "085bfb85607e015589f9dece60a0f325",
+    "semantic_hash": "085bfb85607e015589f9dece60a0f325"
+  }
+}
