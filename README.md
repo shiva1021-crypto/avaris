@@ -1,5 +1,28 @@
 # Avaris cinematic homepage
 
+## Current version: 2D camera and live atmosphere
+
+The current React / TypeScript / Vite homepage uses a reference-derived transparent camera cutout, a clean studio plate, live burgundy SVG ribbons and procedural Canvas 2D smoke. The earlier 3D scene remains in `src/Scene.tsx` for future use, but is not imported or downloaded by the active homepage.
+
+Run `npm install` and `npm run dev`. Build with `npm run build`; serve the build with `npm run preview`.
+
+- The header contains only the Avaris logo and Contact button. The selected compact Montserrat Black headline is retained.
+- Desktop camera placement follows the reference: image height 64.5% of the viewport, bottom-aligned and centered at 47.7% of viewport width. Mobile scales the image by viewport width.
+- `src/HeroCamera.tsx` is the foreground replacement point for the final 3D model. Background and atmosphere are separate layers and can stay intact.
+- `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. Smoke uses a cached procedural sprite, a canvas capped at 1000 pixels wide and up to 30 updates per second. Background loops pause on hidden pages, and reduced-motion preferences freeze the ribbons and smoke.
+- Current desktop and 390 x 844 mobile checks cover composition, image loading, mobile overflow, Contact dialog, Escape key and browser error logs. Other hardware frame rates have not been benchmarked.
+
+### New image assets
+
+The built-in image generation tool produced `public/assets/camera-reference-cutout.png` and `public/assets/studio-empty.png`; corresponding WebPs are used by the page (about 270 KB combined). The generative camera extraction follows the reference closely, but is not a pixel-identical manual mask. The previous background containing frozen ribbons is retained as a design reference.
+
+Exact prompts, source references, outputs and tool mode are recorded in `scripts/asset-provenance.json`.
+
+## Earlier 3D prototype (archived implementation notes)
+
+These notes describe the preserved prototype, not the active 2D rendering path.
+
+
 Single-page React / TypeScript / Vite prototype. The scene uses the supplied cinema-camera and tripod GLBs with Three.js, React Three Fiber and Drei. Additional matte box, monitor, handle, rails, cage, fluid head and tripod reinforcement are real procedural 3D geometry.
 
 ## Run

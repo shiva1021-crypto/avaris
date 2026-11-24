@@ -1,0 +1,17 @@
+{
+  "mode": "Built-in image_gen tool",
+  "camera": {
+    "reference": "C:/Users/ACTIVE/Downloads/Avaris Cinematic Camera Hero.png",
+    "output": "public/assets/camera-reference-cutout.png",
+    "delivery": "public/assets/camera-reference-cutout.webp",
+    "transparent": true,
+    "prompt": "Use case: background-extraction. Edit target: attached Avaris hero reference. Extract ONLY the exact professional cinema camera rig and its tripod from the reference as a clean transparent-background cutout. Preserve the camera's identity and details: large square matte box and raised top flap, lens with subtle crimson reflection, black camera body at three-quarter view facing front-left, mounted upper monitor, top handle, rails, follow-focus hardware, fluid head and lower tripod legs cropped by the original bottom edge. Preserve the EXACT pose, perspective, original dark cinematic lighting, material colors, proportions and all mechanical detail. Do not redesign, replace or relight the camera. Remove EVERYTHING else: all background, ribbons, floor, haze, text, logo, navbar. True alpha transparency, no black background, no checkerboard rendered into pixels, no cast shadow. Frame the cutout tightly with a small transparent margin; monitor top and matte box tips fully included; retain original crop of tripod legs at bottom. Output a roughly square transparent asset. This is for compositing over the original background; edge fidelity and source-image likeness are paramount."
+  },
+  "studio": {
+    "reference": "public/assets/studio-background.png",
+    "output": "public/assets/studio-empty.png",
+    "delivery": "public/assets/studio-empty.webp",
+    "transparent": false,
+    "prompt": "Use case: precise-object-edit. Edit target: supplied empty studio background. Remove ONLY both burgundy/red fabric wave ribbons and their reddish glows. Reconstruct the empty studio behind those ribbons seamlessly. Preserve EXACTLY all other lighting, camera viewpoint, dimensions, composition, smooth cool slate studio haze, near-black onyx environment, upper-left soft white spotlight and dark polished floor including its restrained silver reflections and horizon at 84% height. The entire scene should be an empty smooth dark product studio plate, no visible waves or fabric, no red or burgundy illumination, no equipment, no camera, no text, no logo. Keep the original 16:9 framing. This background will be combined with live animated fabric ribbons and smoke in code."
+  }
+}
