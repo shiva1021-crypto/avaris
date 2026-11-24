@@ -49,10 +49,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
-.camera-poster, .camera-render { position: absolute; inset: 0; width: 100%; height: 100%; }
-.camera-render { left: -17%; width: 134%; opacity: 0; }
-.is-interactive .camera-render { opacity: 1; }
-.is-interactive .camera-poster { visibility: hidden; }
+.camera-render { position: absolute; inset: 0; left: -17%; width: 134%; height: 100%; }
 .camera-drag { position: absolute; inset: 0 2% 31%; pointer-events: auto; cursor: grab; touch-action: pan-y; }
 .camera-drag:active { cursor: grabbing; }
 .camera-drag:focus-visible { outline: 1px solid #b97b90; outline-offset: 3px; border-radius: 12px; }

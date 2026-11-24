@@ -10,9 +10,9 @@ export default function HeroCamera({ onReady, onError }: { onReady: () => void; 
 
   useEffect(() => {
     const lifetime = new AbortController();
-    const showPoster = () => setActive(false);
+    const fail = () => { setActive(false); onError(); };
     const surface = canvas.current!;
-    surface.addEventListener('webglcontextlost', showPoster);
+    surface.addEventListener('webglcontextlost', fail);
     async function load() {
       const { mountStudioCamera } = await import('./studioCamera');
       if (lifetime.signal.aborted) return;
@@ -22,10 +22,10 @@ export default function HeroCamera({ onReady, onError }: { onReady: () => void; 
       onReady();
       setActive(true);
     }
-    load().catch(showPoster);
+    load().catch(fail);
     return () => {
       lifetime.abort();
-      surface.removeEventListener('webglcontextlost', showPoster);
+      surface.removeEventListener('webglcontextlost', fail);
       turn.current = () => {};
     };
   }, [onReady]);
@@ -37,9 +37,7 @@ export default function HeroCamera({ onReady, onError }: { onReady: () => void; 
   }
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
-    <img className="camera-poster" src="/assets/camera-reference-cutout.webp" width="1254" height="1254"
-      alt="Avaris cinema camera on its tripod" draggable={false} fetchPriority="high" onLoad={onReady} onError={onError} />
-    <canvas className="camera-render" ref={canvas} aria-hidden="true" />
+    <canvas className="camera-render" ref={canvas} role="img" aria-label="Avaris cinema camera on its tripod" />
     {active && <>
       <div className="camera-drag" role="slider" tabIndex={0} aria-label="Rotate cinema camera"
         aria-valuemin={0} aria-valuemax={359} aria-valuenow={heading} aria-valuetext={`${heading} degrees`}
