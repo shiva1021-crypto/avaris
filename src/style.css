@@ -15,9 +15,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .contact-button { display: flex; align-items: center; gap: 14px; border: 2px solid #9b2946; border-radius: 100px; background: rgb(8 9 12 / 16%); padding: 10px 29px; min-height: 49px; font-size: clamp(16px, 1.15vw, 20px); font-weight: 500; transition: background .3s, border-color .3s; }
 .contact-button:hover { background: #74203955; border-color: #cf4266; }
 .contact-button span { font-size: 23px; line-height: 1; }
-.headline { position: absolute; z-index: 1; top: 26%; left: 0; right: 0; margin: 0; text-align: center; font-family: 'Montserrat', 'DM Sans', Arial, sans-serif; font-size: clamp(56px, 8.55vw, 180px); font-weight: 900; font-style: normal; text-transform: uppercase; line-height: .95; letter-spacing: -.065em; white-space: nowrap; color: #e4e7ec; text-shadow: 0 2px 18px rgb(0 0 0 / 12%); pointer-events: none; }
+.headline { position: absolute; z-index: 2; top: 23.4%; left: 0; right: 0; margin: 0; text-align: center; font-family: 'Montserrat', 'DM Sans', Arial, sans-serif; font-size: clamp(42px, 5.1vw, 100px); font-weight: 900; font-style: normal; text-transform: uppercase; line-height: 1; letter-spacing: -.065em; color: #e4e7ec; text-shadow: 0 2px 18px rgb(0 0 0 / 12%); pointer-events: none; }
 .headline .headline-accent { color: #7b1d36; }
-.camera-stage { position: absolute; inset: 0; z-index: 2; opacity: 0; transition: opacity 1.25s ease; touch-action: pan-y; }
+.camera-stage { position: absolute; inset: 0; opacity: 0; transition: opacity 1.25s ease; touch-action: pan-y; }
 .is-ready .camera-stage { opacity: 1; }
 .loading-label { position: absolute; top: 62%; left: 50%; transform: translateX(-50%); text-align: center; font-size: 14px; letter-spacing: .08em; color: #aab0b7; white-space: nowrap; }
 .loading-line { display: block; width: 120px; height: 1px; margin: 18px auto; overflow: hidden; background: #7f2941; animation: breathe 1.8s ease-in-out infinite; }
@@ -30,8 +30,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .chapter-dialog p { font-size: 16px; line-height: 1.65; color: #a9b0b9; }
 .back-button { border: 1px solid #913149; border-radius: 50px; padding: 12px 20px; margin-top: 20px; background: transparent; }
 @keyframes breathe { 50% { opacity: .3; transform: scaleX(.5); } }
-@media (min-aspect-ratio: 2/1) { .homepage { min-height: 600px; } .headline { top: 26%; font-size: 8.55vw; } }
-@media (max-width: 900px) { .site-header { left: 5%; right: 5%; top: 3%; } .brand { gap: 12px; } .contact-button { padding: 8px 18px; min-height: 44px; } .headline { top: 26%; font-size: 8.55vw; } }
+@media (min-aspect-ratio: 2/1) { .homepage { min-height: 600px; } .headline { top: 20%; font-size: 4.4vw; } }
+@media (max-width: 900px) { .site-header { left: 5%; right: 5%; top: 3%; } .brand { gap: 12px; } .contact-button { padding: 8px 18px; min-height: 44px; } .headline { top: 24%; font-size: 6.5vw; } }
 @media (max-width: 600px) {
   .homepage { min-height: 560px; }
   .site-header { top: 24px; height: 40px; left: 24px; right: 24px; gap: 16px; }
@@ -39,8 +39,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   .brand-mark { width: 28px; height: 26px; }
   .contact-button { margin-left: auto; min-height: 36px; padding: 6px 14px; border-width: 1px; font-size: 14px; gap: 8px; }
   .contact-button span { font-size: 18px; }
-  .headline { top: 16%; font-size: clamp(54px, 19vw, 110px); line-height: .91; letter-spacing: -.065em; white-space: normal; }
-  .headline span { display: block; }
+  .headline { top: 22%; font-size: clamp(25px, 7.8vw, 46px); letter-spacing: -.065em; white-space: nowrap; }
   .studio-background { background-position: 55% center; }
   .chapter-dialog { padding: 54px 28px 30px; }
 }

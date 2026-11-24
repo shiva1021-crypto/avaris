@@ -20,12 +20,12 @@ Build with `npm run build`. Serve the output with `npm run preview`.
 - The tripod uses Meshopt and local KTX2/Basis decoders. Its embedded attribution identifies CC0 1.0 / tevy.dev. The supplied camera metadata identifies fab-model-conversion; original asset licensing remains with its source.
 - Fonts and all runtime assets are served locally. No account, backend, CMS or contact form is included.
 - The minimal header contains only the Avaris logo and Contact button. Contact opens a clearly labeled prototype dialog until real contact details are supplied.
-- Oversized Montserrat Black typography sits behind the larger, raised 3D rig. Mobile stacks the three words vertically.
-- Studio softboxes, cool fill and edge lights bring out the graphite materials. Beveled accessories, coated lens glass and internal optical rings add detail.
+- Montserrat Black typography uses the earlier compact size on a single line. The camera and tripod use their earlier scale and lower position, with generous space around the headline.
+- The earlier restrained studio lighting and dark materials are restored.
 
 ## Motion and performance
 
-The scene renders on demand and continues requesting frames only while its damped rotation is settling. Cursor rotation is capped at about 5.4 degrees horizontally and 2.9 degrees vertically. Reduced-motion preferences disable cursor motion and entrance animation. Pixel ratio ranges from 1.25 to 1.75 for controlled supersampling. Rig size responds to the 3D viewport width, with a maximum scale of 1.36.
+The scene renders on demand and continues requesting frames only while its damped rotation is settling. Cursor rotation is capped at about 5.4 degrees horizontally and 2.9 degrees vertically. Reduced-motion preferences disable cursor motion and entrance animation. Pixel ratio is capped at 1.6. Desktop, tablet and mobile use rig scales of 1, 0.86 and 0.58 respectively.
 
 ## Validation
 
