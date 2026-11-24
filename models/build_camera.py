@@ -164,6 +164,10 @@ ring("Record switch",(-7,-41.3,64),4.1,1.6,red,"Y")
 box("Battery latch",(96,0,89),(9,64,71),black,3)
 box("Rear power pack",(114,0,89),(32,71,78),alloy,5)
 box("Battery cap",(128,0,89),(5,67,71),panel,2)
+for y in (-26,26):
+    for z in (60,118): fastener((130.6,y,z),"X")
+for z in (74,83,92):
+    box("Battery grip recess",(130.65,0,z),(.6,32,1.8),black,.28)
 box("Power pack release",(101,-35.7,90),(8,2.7,5),red,1)
 
 section="Cine lens"
@@ -198,7 +202,7 @@ for i in range(96):
         draw.text((x+3,53),str([1.2,1.4,1.6,2,2.5,3,4,5,7,10,15,25][(i//4)%12]),font=font,fill=(210,207,196))
 marks=image_material("Engraved distance scale",im,alloy)
 # Fine powder-coat variation across the large operator-side access cover.
-grain=np.random.default_rng(31).normal(0,2,(512,512,1))+np.array([26,27,29])
+grain=np.random.default_rng(31).normal(0,2,(512,512,1))+np.array([37,39,43])
 coat=image_material("Fine textured graphite",Image.fromarray(grain.clip(0,255).astype("uint8")),panel)
 for cover in scene.objects:
     if cover.name.startswith("Service cover") and "gasket" not in cover.name:
@@ -220,9 +224,9 @@ for p in o.data.polygons:
 v,u=np.mgrid[-1:1:512j,-1:1:512j]
 rr=np.hypot(v,u)
 pix=np.zeros((512,512,3))+[13,14,18]
-for cx,cy,color in [(.32,-.37,[214,70,112]),(-.34,.40,[6,90,77])]:
+for cx,cy,color in [(.39,-.39,[210,59,104]),(-.36,.43,[5,65,56])]:
     rad=np.hypot(u-cx,v-cy)
-    light=np.exp(-rad**2/.17)*(.54+.46*(.5+.5*np.cos(35*rr+.6))**3)
+    light=np.exp(-rad**2/.16)*(.75+.25*(.5+.5*np.cos(21*rr+.6))**3)
     pix+=light[:,:,None]*color
 pix*=np.clip(.50+rr*2,.5,1)[:,:,None]
 glass=image_material("Rose and teal optical coating",Image.fromarray(pix.clip(0,255).astype("uint8")),optic)
@@ -250,15 +254,25 @@ section="Matte box"
 hood("Flared shade",[(-134,102,91,7),(-158,137,122,7),(-158,129,114,5),(-134,91,82,5)],black)
 hood("Front filter frame",[(-158,138,123,7),(-163,138,123,7),(-163,130,115,5),(-158,130,115,5)],alloy)
 hood("Rear filter tray",[(-134,106,95,6),(-130,106,95,6),(-130,91,82,5),(-134,91,82,5)],alloy)
-# Rear donut seals the square filter tray around the circular lens housing.
-rim=rounded_loop(100,91,6)
-seal_vertices=[(-133,y,zc+z) for y,z in rim]
-for y,z in rim:
-    radius=math.hypot(y,z)
-    seal_vertices.append((-133,40*y/radius,zc+40*z/radius))
-n=len(rim)
-mesh("Matte box light seal",seal_vertices,
-     [(i,n+i,n+(i+1)%n,(i+1)%n) for i in range(n)],black)
+# Continuous rebate from the filter tray to the optical rim. Both ends lap
+# adjoining parts so the studio cannot show between them at oblique angles.
+n=128
+verts=[]; faces=[]
+for x,half_w,half_h,r in [(-137,51,46,0),(-132,51,46,0),
+                          (-132,0,0,34.8),(-139,0,0,34.8)]:
+    for i in range(n):
+        a=2*pi*i/n
+        cy,sz=math.cos(a),math.sin(a)
+        distance=r or min(half_w/max(abs(cy),1e-8),half_h/max(abs(sz),1e-8))
+        verts.append((x,distance*cy,zc+distance*sz))
+for row in range(4):
+    for i in range(n):
+        j=(i+1)%n; nxt=(row+1)%4
+        faces.append((row*n+i,row*n+j,nxt*n+j,nxt*n+i))
+mesh("Solid light-tight lens adapter",verts,faces,black)
+hood("Stepped filter-retainer lip",[(-142,111,100,5),(-144,111,100,5),
+     (-144,105,94,4),(-142,105,94,4)],alloy)
+ring("Optics retaining bezel",(-140,0,zc),42,2.8,alloy,bore=36.1,steps=128)
 for side in (-1,1):
     for z in (65,112):
         box("Tray lock",(-146,side*61,z),(9,5,13),alloy,1.4)
@@ -282,7 +296,7 @@ for x in range(-12,84,8): ring("Cage threaded insert",(x,-30,43),2.6,1.6,black,"
 box("Focus rail bracket",(-79,-32,32),(15,32,16),alloy,2)
 box("Focus swing arm",(-78,-43,48),(9,8,35),panel,2)
 ring("Focus pinion",(-78,-44,65),13,8,alloy,"X",2,160,40)
-for y,r,w,m in [(-47,20,7,alloy),(-52,19,3,red),(-55,17,6,rubber),(-59,14,2,panel)]:
+for y,r,w,m in [(-47,24,7,alloy),(-52,22.5,3,red),(-55,21,6,rubber),(-59,17,2,panel)]:
     ring("Follow focus handwheel",(-74,y,36),r,w,m,"Y",1.1,128,32 if m==rubber else 0)
 box("Carriage release",(-27,-29,6),(9,5,6),red,1)
 

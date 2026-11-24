@@ -58,3 +58,4 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .camera-drag:focus-visible { outline: 1px solid #b97b90; outline-offset: 3px; border-radius: 12px; }
 .rotation-hint { position: absolute; right: 2%; bottom: 6%; font-size: 13px; color: #e5e4e2; text-shadow: 0 1px 4px #08090b; }
 .keyboard-hint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (min-width: 901px) { .camera-frame.is-interactive { height: 68%; } }
