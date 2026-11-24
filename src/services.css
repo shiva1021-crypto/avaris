@@ -71,9 +71,9 @@ html:has(.services-page) { scroll-behavior: smooth; }
   .service-toggle { grid-column: 2; grid-row: 1 / 3; }
   .services-closing { grid-template-columns: 1fr 40%; gap: 6%; }
 }
-@media (min-width: 601px) and (max-width: 900px) { .lens-cta { left: 5%; width: 76px; height: 76px; } .lens-cta:hover, .lens-cta:focus-visible { width: 84px; height: 84px; } }
+@media (min-width: 601px) and (max-width: 900px) { .lens-cta { left: 5%; top: auto; bottom: 42px; width: 76px; height: 76px; } .lens-cta:hover, .lens-cta:focus-visible { width: 84px; height: 84px; } }
 @media (max-width: 600px) {
-  .lens-cta { left: calc(50% - 38px); top: 58%; width: 76px; height: 76px; }
+  .lens-cta { left: 24px; top: auto; bottom: 24px; width: 68px; height: 68px; }
   .lens-cta:hover, .lens-cta:focus-visible { width: 82px; height: 82px; transform: translateY(-3px); }
   .services-content { padding: 0 24px; }
   .services-hero { padding-top: 112px; padding-bottom: 45px; }
