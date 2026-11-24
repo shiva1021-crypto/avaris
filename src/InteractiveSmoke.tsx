@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { FluidWake } from './FluidWake';
 import { createSmokeSprite } from './SmokeTexture';
+import { LiveSmokeRenderer } from './LiveSmokeRenderer';
 
 export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -9,6 +10,8 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const context = element.getContext('2d', { alpha: true });
     if (!context) return;
     const sprite = createSmokeSprite();
+    const liveSmoke = LiveSmokeRenderer.create();
+    element.dataset.smokeRenderer = liveSmoke ? 'procedural-airflow' : 'canvas-airflow';
     const mask = document.createElement('canvas');
     const maskContext = mask.getContext('2d')!;
     let fluid: FluidWake | null = null;
@@ -16,19 +19,30 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     let width = 0; let height = 0; let frame = 0; let last = 0; let elapsed = 0;
     let previousPointer: { x: number; y: number; time: number } | null = null;
     let wheelDispersal = 0; let wheelHold = 0;
+    let reportedSecond = -1;
 
     const paint = () => {
+      if (Math.floor(elapsed) !== reportedSecond) {
+        reportedSecond = Math.floor(elapsed);
+        element.dataset.smokeTime = (reducedMotion ? 0 : elapsed).toFixed(2);
+      }
       context.globalAlpha = 1;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
-      for (let i = 0; i < 6; i++) {
-        const phase = (reducedMotion ? 0 : elapsed) * .028 + i * 1.73;
-        const cloudWidth = width * (.8 + i * .04);
-        const cloudHeight = height * (.52 + i * .03);
-        const x = width * (-.3 + i * .19 + Math.sin(phase) * .075);
-        const y = height * (.06 + (i % 3) * .13 + Math.cos(phase * .71) * .045);
-        context.globalAlpha = (.58 + Math.sin(phase + i) * .09) * (1 - wheelDispersal);
-        context.drawImage(sprite, x, y, cloudWidth, cloudHeight);
+      if (liveSmoke?.render(reducedMotion ? 0 : elapsed)) {
+        context.globalAlpha = 1 - wheelDispersal;
+        context.drawImage(liveSmoke.canvas, 0, 0, width, height);
+      } else {
+        // Animated Canvas fallback for devices without a usable shader context.
+        for (let i = 0; i < 6; i++) {
+          const phase = (reducedMotion ? 0 : elapsed) * .13 + i * 1.73;
+          const cloudWidth = width * (.8 + i * .04 + Math.sin(phase * .7) * .08);
+          const cloudHeight = height * (.52 + i * .03 + Math.cos(phase * .6) * .06);
+          const x = width * (-.3 + i * .19 + Math.sin(phase) * .09);
+          const y = height * (.06 + (i % 3) * .13 + Math.cos(phase * .71) * .06);
+          context.globalAlpha = (.58 + Math.sin(phase + i) * .09) * (1 - wheelDispersal);
+          context.drawImage(sprite, x, y, cloudWidth, cloudHeight);
+        }
       }
       if (fluid?.active && maskPixels) {
         fluid.writeMask(maskPixels.data);
@@ -57,6 +71,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const stop = () => { cancelAnimationFrame(frame); frame = 0; last = 0; };
     const start = () => {
       stop();
+      element.dataset.smokeState = document.hidden ? 'paused' : reducedMotion ? 'reduced-motion' : 'running';
       if (document.hidden) return;
       if (reducedMotion && !fluid?.active && wheelDispersal === 0) { paint(); return; }
       frame = requestAnimationFrame(tick);
@@ -102,6 +117,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       const ratio = Math.min(1, 1000 / Math.max(rect.width, 1));
       width = element.width = Math.max(1, Math.round(rect.width * ratio));
       height = element.height = Math.max(1, Math.round(rect.height * ratio));
+      liveSmoke?.resize(width, height);
       const columns = Math.min(240, Math.max(48, Math.ceil(rect.width / 5)));
       const rows = Math.min(240, Math.max(40, Math.round(columns * rect.height / Math.max(1, rect.width))));
       fluid = new FluidWake(columns, rows);
@@ -119,7 +135,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     window.addEventListener('blur', leave);
     document.documentElement.addEventListener('pointerleave', leave);
     return () => {
-      stop(); observer.disconnect();
+      stop(); observer.disconnect(); liveSmoke?.dispose();
       document.removeEventListener('visibilitychange', start);
       window.removeEventListener('pointermove', pointer);
       window.removeEventListener('pointerdown', pointer);
