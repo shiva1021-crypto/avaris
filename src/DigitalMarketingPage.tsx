@@ -1,11 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 import './digital-marketing.css';
 
 type SceneStatus = 'loading' | 'ready' | 'error';
 
 export default function DigitalMarketingPage() {
   const host = useRef<HTMLDivElement>(null);
+  const arrival = useRef<HTMLDivElement>(null);
+  const [arriving, setArriving] = useState(() => {
+    try { return sessionStorage.getItem('avaris-lens-transition') === '1'; }
+    catch { return false; }
+  });
   const [status, setStatus] = useState<SceneStatus>('loading');
+
+  useEffect(() => {
+    if (!arriving || !arrival.current) return;
+    try { sessionStorage.removeItem('avaris-lens-transition'); } catch { /* Storage may be unavailable. */ }
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fade = gsap.to(arrival.current, {
+      opacity: 0,
+      duration: reduced ? 0 : 0.62,
+      ease: 'power2.out',
+      onComplete: () => setArriving(false),
+    });
+    const clearArrival = () => setArriving(false);
+    window.addEventListener('pageshow', clearArrival);
+    return () => {
+      fade.kill();
+      window.removeEventListener('pageshow', clearArrival);
+    };
+  }, [arriving]);
 
   useEffect(() => {
     const sceneHost = host.current;
@@ -86,5 +110,6 @@ export default function DigitalMarketingPage() {
     </div>
 
     <p className="digital-sr-only" role="status" aria-live="polite">{statusText}</p>
+    {arriving && <div ref={arrival} className="lens-blackout lens-arrival" aria-hidden="true" />}
   </main>;
 }

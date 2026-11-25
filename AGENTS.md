@@ -1,9 +1,9 @@
 # AGENTS.md — MYBI Digital (`avaris`) shared project direction
 
 This file is the single source of truth for Codex, Antigravity and OpenCode when continuing this project.
-It records the agreed direction from the user and the inspection findings for **Milestone 1**.
-Implementation details are ready; **final approval to begin implementation is still required**. No source
-file may be changed until that approval is given.
+It records the agreed direction from the user, inspection findings, completed work, and the corrected
+page architecture migrating the immersive digital marketing experience into the existing **Business Marketing**
+route (`/services/`).
 
 ---
 
@@ -12,9 +12,12 @@ file may be changed until that approval is given.
 1. **Do not create a new project.** Continue this repository only.
 2. **Do not redesign or damage the completed homepage.** `/` keeps its approved camera hero, headline,
    chapter navigation, lens transition, intro rope and mobile layout exactly as they are.
-3. New immersive work is **additive** — a separate route, not a replacement for the homepage.
-4. **No edits to `src/`, HTML entries, `vite.config.ts`, `package.json`, `THEME.md` or `README.md` until
-   final approval.** `AGENTS.md` is documentation and is the only file touched in Milestone 1.
+3. **No seventh destination page.** The six existing homepage-connected pages (`src/pages.ts`) remain the
+   complete set of destination routes: `/services/` (Business Marketing), `/brand-films/`,
+   `/weddings-events/`, `/work/`, `/about/`, `/contact/`. The earlier `/digital-marketing/` standalone route
+   has been superseded and removed.
+4. **Preserve completed work and reuse existing assets.** Do not regenerate the character GLB, land mask,
+   or stand-in screen textures unnecessarily.
 5. Approved brand palette — Onyx `#0A0A0A`, Blue Slate `#536878`, Alabaster `#E5E4E2`,
    Burgundy `#7B1D36`, Accent `#9B2946`.
 6. Technology constraints: **Three.js + GSAP + GLSL shaders + appropriate post-processing**, retaining
@@ -26,9 +29,9 @@ file may be changed until that approval is given.
     particles, rotating burgundy orbital rings, eight photographic screens, dark reflective studio floor,
     atmospheric smoke, subtle particles, cinematic lighting, large `DIGITAL MARKETING` typography,
     minimal MYBI Digital header and Contact control.
-11. **Approved concept image:** `C:\Users\ACTIVE\Downloads\Digital Marketing Command Center.png`
-    (1672×941) — confirmed by the user. Copy it into `design-archive/` as a reference; do not render it
-    as a texture (see §5).
+11. **Approved concept image:** `design-archive/Digital Marketing Command Center.png`
+    (1672×941, copied from `C:\Users\ACTIVE\Downloads\Digital Marketing Command Center.png`) — confirmed by
+    the user as reference only; do not render it as a texture (see §5).
 
 ---
 
@@ -101,32 +104,42 @@ file may be changed until that approval is given.
 
 ---
 
-## 3. New page — agreed architecture
+## 3. Business Marketing page — corrected architecture
 
 ### 3.1 Route and shell
-- New path: **`/digital-marketing/`** (confirmed) with `digital-marketing/index.html` mirroring the
-  existing HTML entries (title, description, favicon, `#root`, `/src/main.tsx`).
-- Add that input to `vite.config.ts` `rollupOptions.input`.
-- Extend `src/App.tsx` with a branch **before** the `currentPage` logic that renders a new
-  `DigitalMarketingPage` only for that pathname. Do **not** add it to `src/pages.ts` — that array feeds
-  the homepage desktop nav, chapter nav and menu, and changing it would alter the finished homepage.
-- **Discoverability: direct URL only.** No homepage link, desktop-nav entry or menu link is added in this
-  milestone.
+- **Actual Business Marketing route:** **`/services/`** (`services/index.html`, defined as `pages[0]` in
+  `src/pages.ts`: `{ path: '/services/', title: 'Business Marketing', angle: 24 }`).
+- **Homepage connection:** Connected via the homepage desktop navigation (`Business Marketing`), the
+  default chapter navigation frame (`01 / 06 Business Marketing`, which triggers `HeroCamera`'s lens
+  transition and sets `sessionStorage['avaris-lens-transition'] = '1'`), the mobile site menu `<dialog>`,
+  and `<link vite-ignore rel="prefetch" href="/services/" as="document" />` in the HTML entries.
+- **`src/App.tsx` routing:** Normalizes `window.location.pathname` (`replace(/\/index\.html$/, '/').replace(/\/?$/, '/')`)
+  and branches to lazy-loaded `DigitalMarketingPage` when `normalizedPath === '/services/'` (`/services`,
+  `/services/`, `/services/index.html`). `src/pages.ts` is kept unchanged so homepage navigation,
+  chapter angles, and the remaining five routes (`/brand-films/`, `/weddings-events/`, `/work/`,
+  `/about/`, `/contact/`) stay untouched.
+- **Redundant route removed:** `/digital-marketing/` (`digital-marketing/index.html` and the
+  `digitalMarketing` Vite input) has been removed.
+- **Lens transition arrival:** `DigitalMarketingPage` consumes `sessionStorage['avaris-lens-transition']`
+  and fades `.lens-blackout.lens-arrival` out on mount so the homepage camera lens transition flows
+  directly into the `/services/` scene.
 
 ### 3.2 Component boundaries
 ```
-src/DigitalMarketingPage.tsx      React host: DOM typography, canvas host, loading/error state,
-                                  reduced-motion + visibility handling, reuse of shared header/dialog.
+services/index.html               Existing Business Marketing Vite entry (`Business Marketing — MYBI Digital`).
+src/DigitalMarketingPage.tsx      React host: DOM typography, canvas host, lens-arrival fade, loading/error
+                                  state, reduced-motion + visibility handling, brand home & Contact links.
 src/digitalScene.ts               Imperative Three.js renderer (mirrors studioCamera.ts pattern),
                                   dynamically imported so Three.js never enters the initial bundle.
-src/digitalScene/                 Optional split modules once the scene grows:
+src/digitalScene/                 Modular scene units:
+  config.ts                       Scene camera, globe, ring, character, floor, lighting & DPR config.
   globe.ts                        Icosahedron geometry + holographic GLSL shader + land mask sampling.
   character.ts                    GLB load, AnimationMixer, back-facing placement.
-  screens.ts                      Eight independent 3D planes + frames + per-object float.
-  floor.ts                        Reflective floor material / planar reflector.
-  atmosphere.ts                   In-scene smoke + particle fields.
-  shaders.ts                      Shared GLSL chunks and post-processing pass.
-digital-marketing/index.html      New Vite multi-page entry.
+  screens.ts                      (Pending) Eight independent 3D planes + frames + per-object float.
+  floor.ts                        Reflective floor material / planar reflector + stage rings.
+  lighting.ts                     PMREM room environment + key/rim/burgundy/fill lights + backdrop glow.
+  atmosphere.ts                   (Pending) In-scene smoke + particle fields.
+  shaders.ts                      Shared GLSL chunks and (pending) post-processing pass.
 ```
 DOM typography, header and Contact stay in HTML/CSS for accessibility and SEO. The canvas is decorative
 with `role="img"` and a descriptive label; the eight screens are decorative in the DOM layer.
@@ -267,10 +280,10 @@ with `role="img"` and a descriptive label; the eight screens are decorative in t
 
 ## 7. Decisions resolved by the user
 
-1. **Concept image:** `Digital Marketing Command Center.png` — confirmed.
-2. **Screen imagery:** reuse existing project imagery as stand-ins; swap in real photographs later.
-3. **Route:** `/digital-marketing/`, direct URL only — no homepage or menu links.
-4. **Globe:** accurate coastlines from a generated land mask.
+1. **Concept image:** `design-archive/Digital Marketing Command Center.png` — confirmed.
+2. **Screen imagery:** reuse existing project imagery as stand-ins (`public/assets/digital-marketing/screens/`); swap in real photographs later.
+3. **Route:** **`/services/`** (the existing **Business Marketing** page in `src/pages.ts`), reached via homepage navigation and camera lens transition. The earlier standalone `/digital-marketing/` route instruction was superseded and removed.
+4. **Globe:** accurate coastlines from a generated land mask (`public/assets/digital-marketing/globe/earth-land-mask-1024x512.png`).
 5. **Floor:** low-res planar reflection on desktop, shader fallback on mobile.
 
 Assumptions (revisit if the user objects):
@@ -295,18 +308,26 @@ Assumptions (revisit if the user objects):
 
 ## 9. Status
 
-- **Milestone 1: inspection complete; decisions recorded.**
-- **Phase A: complete.** Assets are prepared, validated and recorded. No source files were modified;
-  no route, navigation, HTML entry, Vite config, homepage animation or CSS was changed.
-- **Phase B: complete.** The isolated `/digital-marketing/` route and static shell are in place.
-  The original homepage remains visually and behaviourally unchanged; no navigation or menu link was added.
-- **Phase C: complete.** The core real-time Three.js environment is implemented behind a dynamic import.
-  The homepage, navigation, camera, global styling and existing atmosphere modules remain untouched.
-- **Phase C visual correction: complete.** The rejected first render was corrected in place against the
-  approved concept image. Browser verification is recorded below. Phase D is still awaiting approval.
-- The original `Breathing Idle.fbx` remains untracked and unmodified. The optimised GLB is
-  `public/assets/digital-marketing/character/mybi-idle-character.glb` (3.72 MB).
-- Do not proceed to Phase D until the user explicitly approves it.
+- **Milestone 1: complete.**
+- **Phase A (Assets): complete.** Prepared, validated, and recorded in `public/assets/digital-marketing/asset-manifest.json` and `scripts/asset-provenance.json`.
+  - Character GLB: `public/assets/digital-marketing/character/mybi-idle-character.glb` (3.72 MB, original `Armature|mixamo.com|Layer0` idle animation preserved). Original `Breathing Idle.fbx` remains in repo root.
+  - Earth land mask: `public/assets/digital-marketing/globe/earth-land-mask-1024x512.png` (1024×512 Natural Earth 1:110m public domain).
+  - Eight stand-in screen textures: `public/assets/digital-marketing/screens/screen-01-camera-side.webp` through `screen-08-mybi-titanium.webp`.
+- **Phase B & C (Shell + Core 3D + Visual Correction): complete (initial baseline).**
+- **Route Migration (`/digital-marketing/` → `/services/`): complete.**
+  - Git checkpoint tagged at `checkpoint/pre-route-migration` (commit `624017b`).
+  - Migrated `DigitalMarketingPage` into `/services/` (`services/index.html`, `pages[0]` Business Marketing).
+  - Wired `DigitalMarketingPage` to consume the existing homepage camera lens transition (`avaris-lens-transition`).
+  - Removed redundant `digital-marketing/index.html`, the `digitalMarketing` entry in `vite.config.ts`, and the `/digital-marketing` branch in `src/App.tsx`.
+  - Remaining five pages (`/brand-films/`, `/weddings-events/`, `/work/`, `/about/`, `/contact/`) and the homepage (`/`) remain untouched.
+- **Outstanding visual & feature items (next after migration review):**
+  - Larger, more prominent holographic Earth with fine illuminated geographic particles.
+  - Controlled dark human silhouette with crisp silver/alabaster rim lighting.
+  - Eight independent floating photographic screens at varied depths and angles with natural photographic colors.
+  - Seamless black studio atmosphere with realistic in-scene atmospheric smoke.
+  - Restrained bloom and cinematic post-processing (`EffectComposer` / `UnrealBloomPass` / vignette-grain).
+  - Smooth cursor-responsive perspective and premium scroll-driven choreography (`https://steven.com/creator-tech` motion reference).
+  - Mobile & performance verification pass.
 
 ### Phase A deliverables
 

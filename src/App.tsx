@@ -6,10 +6,10 @@ import StudioAtmosphere from './StudioAtmosphere';
 import { pages } from './pages';
 
 const DigitalMarketingPage = lazy(() => import('./DigitalMarketingPage'));
-const digitalMarketingPath = window.location.pathname.replace(/\/+$/, '') || '/';
-const isDigitalMarketing = digitalMarketingPath === '/digital-marketing' || digitalMarketingPath === '/digital-marketing/index.html';
+const normalizedPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\/?$/, '/');
+const isBusinessMarketing = normalizedPath === '/services/';
 
-const currentPage = pages.find(page => page.path === window.location.pathname.replace(/\/?$/, '/'));
+const currentPage = pages.find(page => page.path === normalizedPath);
 const isServicesPage = Boolean(currentPage);
 
 function StudioApp() {
@@ -103,9 +103,12 @@ function StudioApp() {
 }
 
 export default function App() {
-  if (isDigitalMarketing) {
-    return <Suspense fallback={
-      <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
+  if (isBusinessMarketing) {
+    let lensArriving = false;
+    try { lensArriving = sessionStorage.getItem('avaris-lens-transition') === '1'; } catch { /* Storage may be unavailable. */ }
+    return <Suspense fallback={lensArriving
+      ? <div className="lens-blackout lens-arrival" aria-hidden="true" />
+      : <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
     }><DigitalMarketingPage /></Suspense>;
   }
   return <StudioApp />;
