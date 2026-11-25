@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import rigUrl from '../models/avaris-camera-tripod.glb?url';
 import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
@@ -75,6 +76,40 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     signal.addEventListener('abort', dispose, { once: true });
     const head = rig.scene.children.find(node => node.children.some(child => child.name === 'Chassis'));
     if (!head) throw new Error('Camera mount missing');
+    if (mobile) {
+      // Batch opaque parts sharing a material, separately for the moving head
+      // and fixed support. Geometry, normals and UVs are preserved.
+      rig.scene.updateMatrixWorld(true);
+      const retired = new Set<THREE.BufferGeometry>();
+      for (const assembly of rig.scene.children) {
+        const groups = new Map<THREE.Material, THREE.Mesh[]>();
+        assembly.traverse(part => {
+          if (!(part instanceof THREE.Mesh) || Array.isArray(part.material) ||
+              part.material.transparent || part instanceof THREE.SkinnedMesh) return;
+          const meshes = groups.get(part.material) ?? [];
+          meshes.push(part);
+          groups.set(part.material, meshes);
+        });
+        const inverse = assembly.matrixWorld.clone().invert();
+        for (const [material, meshes] of groups) {
+          if (meshes.length < 2 || meshes.includes(assembly as THREE.Mesh)) continue;
+          const transformed = meshes.map(mesh => mesh.geometry.clone().applyMatrix4(
+            new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld)));
+          const geometry = mergeGeometries(transformed, false);
+          transformed.forEach(item => item.dispose());
+          if (!geometry) continue;
+          meshes.forEach(mesh => {
+            retired.add(mesh.geometry);
+            mesh.removeFromParent();
+          });
+          assembly.add(new THREE.Mesh(geometry, material));
+        }
+      }
+      rig.scene.traverse(part => {
+        if (part instanceof THREE.Mesh) retired.delete(part.geometry);
+      });
+      retired.forEach(geometry => geometry.dispose());
+    }
     rig.scene.traverse(part => {
       if (part instanceof THREE.Mesh) {
         part.castShadow = true;
@@ -110,6 +145,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     const start = camera.position.clone();
     const forward = camera.getWorldDirection(new THREE.Vector3());
     const lens = new THREE.Vector3();
+    const opticalCenter = new THREE.Vector3();
     const holder = canvas.parentElement!;
     const hero = holder.closest('main')!;
     let w = 0, h = 0;
@@ -139,7 +175,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
         THREE.MathUtils.lerp(offsetY + (renderingCloseup ? 0 : cropTop),(referenceHeight-h)/2,push),w,h);
       renderer.render(scene,camera);
       if (mobile && push === 0) {
-        const opticalCenter = lens.clone().project(camera);
+        opticalCenter.copy(lens).project(camera);
         canvas.style.transformOrigin = ((opticalCenter.x + 1) * w / 2) + 'px ' +
           ((1 - opticalCenter.y) * h / 2) + 'px';
       }

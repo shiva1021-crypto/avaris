@@ -41,9 +41,10 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
   }, [onReady]);
 
   useEffect(() => {
-    if (!active || minimalMotion) return;
+    if (!active) return;
     const motion = gsap.matchMedia();
     motion.add('(prefers-reduced-motion: no-preference)', () => {
+      if (minimalMotion) window.dispatchEvent(new CustomEvent('avaris-transition', { detail: true }));
       const pose = { degrees: angle.current };
       const neutral = pose.degrees;
       const pan = gsap.timeline({
@@ -63,7 +64,11 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
         .to(pose, { degrees: neutral, duration: 3.4 });
       idlePan.current = pan;
       pan.play();
-      return () => { idlePan.current = null; pan.kill(); };
+      return () => {
+        idlePan.current = null;
+        pan.kill();
+        if (minimalMotion) window.dispatchEvent(new CustomEvent('avaris-transition', { detail: false }));
+      };
     });
     return () => motion.revert();
   }, [active, minimalMotion]);
