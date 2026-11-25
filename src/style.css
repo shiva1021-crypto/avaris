@@ -321,7 +321,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .chapter-link:is(:hover, :focus-visible) { --focus-mark: #ffd0e0; }
 .chapter-neighbor { font-size: 11px; opacity: .78; }
 @media (min-width: 900px) and (pointer: fine) {
-  .chapter-nav { bottom: clamp(30px, 7svh, 76px); }
+  .chapter-nav { bottom: clamp(30px, 7svh, 76px); left: 7.2%; transform: none; }
 }
 @media (max-width: 767px), (pointer: coarse) {
   .chapter-nav { grid-template-columns: 44px minmax(0, 220px) 44px; justify-content: center; width: calc(100% - 24px); gap: 4px; }
