@@ -55,7 +55,6 @@ export default function StudioRope({ onReturn }: { onReturn: () => void }) {
       d += ' L ' + end.x + ' ' + end.y;
       path.current?.setAttribute('d', d);
       handle.current?.setAttribute('transform', 'translate(' + end.x + ' ' + end.y + ')');
-      if (grip.current) grip.current.style.transform = 'translate(' + (end.x - 24) + 'px,' + (end.y - 24) + 'px)';
     };
     const tick = (now: number) => {
       frame = 0;
