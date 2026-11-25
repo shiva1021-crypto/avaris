@@ -102,19 +102,48 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     key.shadow.bias = -.00008;
     softbox(2,3,-4,0xafbad0,2.7);
     softbox(-2,1,-3,0xb64a68,.75);
-    function draw() { frame = 0; renderer.render(scene,camera); }
+    let push = 0;
+    const start = camera.position.clone();
+    const forward = camera.getWorldDirection(new THREE.Vector3());
+    const lens = new THREE.Vector3();
+    const holder = canvas.parentElement!;
+    const hero = holder.closest('main')!;
+    let referenceWidth = 1, referenceHeight = 1, offsetX = 0, offsetY = 0;
+    const draw = () => {
+      frame = 0;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
+      head.localToWorld(lens.set(-100,89,0));
+      lens.addScaledVector(forward,.004);
+      camera.position.lerpVectors(start,lens,push);
+      camera.near = .001;
+      camera.setViewOffset(referenceWidth,referenceHeight,
+        THREE.MathUtils.lerp(offsetX,(referenceWidth-w)/2,push),
+        THREE.MathUtils.lerp(offsetY,(referenceHeight-h)/2,push),w,h);
+      renderer.render(scene,camera);
+    };
     function fit() {
+      const bounds = holder.getBoundingClientRect();
+      const viewport = hero.getBoundingClientRect();
+      referenceWidth = bounds.width * 1.34;
+      referenceHeight = bounds.height;
+      const left = viewport.left - bounds.left, top = viewport.top - bounds.top;
+      Object.assign(canvas.style, { left: left+'px', top: top+'px', width: viewport.width+'px', height: viewport.height+'px' });
+      offsetX = left + bounds.width*.17 - .075*referenceHeight;
+      offsetY = top - .10*referenceHeight;
       const w=canvas.clientWidth, h=canvas.clientHeight;
       if (!w || !h) return;
       renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
       renderer.setSize(w,h,false);
-      camera.setViewOffset(w,h,-.075*h,-.10*h,w,h);
+      cancelAnimationFrame(frame);
       draw();
     }
     fit();
     resize = new ResizeObserver(fit);
-    resize.observe(canvas);
-    return (degrees: number) => {
+    resize.observe(hero);
+    resize.observe(holder);
+    return (degrees: number, lensPush = 0) => {
+      push = lensPush;
       head.rotation.y = THREE.MathUtils.degToRad(degrees);
       if (!frame) frame = requestAnimationFrame(draw);
     };

@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
+import gsap from 'gsap';
+import { createPortal } from 'react-dom';
 
-export default function HeroCamera({ onReady, onError }: { onReady: () => void; onError: () => void }) {
+export default function HeroCamera({ onReady, onError, transition }: {
+  onReady: () => void; onError: () => void; transition: RefObject<((url: string) => void) | null>;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const turn = useRef<(degrees: number) => void>(() => {});
+  const turn = useRef<(degrees: number, push?: number) => void>(() => {});
+  const running = useRef(false);
+  const flash = useRef<HTMLDivElement>(null);
+  const blackout = useRef<HTMLDivElement>(null);
   const angle = useRef(0);
   const drag = useRef<{ id: number; x: number; start: number } | null>(null);
   const [active, setActive] = useState(false);
@@ -30,13 +37,57 @@ export default function HeroCamera({ onReady, onError }: { onReady: () => void; 
     };
   }, [onReady]);
 
+  useEffect(() => {
+    const overlay = blackout.current!;
+    const chrome = document.querySelectorAll('.site-header, .headline, .lens-cta, .rotation-hint');
+    let timeline: gsap.core.Timeline | undefined;
+    const reset = () => {
+      timeline?.kill();
+      running.current = false;
+      gsap.set([flash.current, overlay], { opacity: 0 });
+      gsap.set(chrome, { clearProps: 'opacity' });
+      turn.current(angle.current);
+    };
+    transition.current = url => {
+      if (running.current) return;
+      running.current = true;
+      const state = { degrees: angle.current, push: 0 };
+      const straight = 48;
+      const destination = state.degrees + gsap.utils.wrap(-180, 180, straight - state.degrees);
+      const draw = () => turn.current(state.degrees, state.push);
+      timeline = gsap.timeline({ onComplete: () => {
+        try { sessionStorage.setItem('avaris-lens-transition', '1'); } catch { /* Storage may be unavailable. */ }
+        location.assign(url);
+      } });
+      timeline.to(state, { degrees: destination, duration: .95, ease: 'power3.inOut', onUpdate: draw })
+        .to(flash.current, { opacity: .85, duration: .055 })
+        .to(flash.current, { opacity: 0, duration: .23, ease: 'power2.out' })
+        .addLabel('enterLens', '<.10')
+        .to(document.querySelectorAll('.site-header, .headline, .lens-cta, .rotation-hint'), { opacity: 0, duration: .32 }, 'enterLens')
+        .to(state, { push: 1, duration: 1.5, ease: 'power2.inOut', onUpdate: draw }, 'enterLens')
+        .to(overlay, { opacity: 1, duration: .4, ease: 'power2.out' }, '-=.62')
+        .to(overlay, { opacity: 1, duration: .22 });
+    };
+    window.addEventListener('pageshow', reset);
+    return () => {
+      window.removeEventListener('pageshow', reset);
+      timeline?.kill();
+      transition.current = null;
+    };
+  }, [transition]);
+
   function rotate(degrees: number) {
+    if (running.current) return;
     angle.current = degrees;
     setHeading((Math.round(degrees) % 360 + 360) % 360);
     turn.current(degrees);
   }
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
+    {createPortal(<>
+      <div ref={flash} className="shutter-flash" aria-hidden="true" />
+      <div ref={blackout} className="lens-blackout" aria-hidden="true" />
+    </>, document.body)}
     <canvas className="camera-render" ref={canvas} role="img" aria-label="Avaris cinema camera on its tripod" />
     {active && <>
       <div className="camera-drag" role="slider" tabIndex={0} aria-label="Rotate cinema camera"

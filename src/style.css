@@ -63,3 +63,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   }
   .rotation-hint { top: min(61svh, 91%); bottom: auto; }
 }
+
+.shutter-flash, .lens-blackout { position: fixed; inset: 0; opacity: 0; pointer-events: none; z-index: 100; }
+.shutter-flash { background: #fff; }
+.lens-blackout { background: #000; }
+.lens-arrival { opacity: 1; }

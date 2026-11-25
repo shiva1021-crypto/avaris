@@ -7,6 +7,12 @@ import ServicesPage from './ServicesPage';
 const isServicesPage = window.location.pathname.startsWith('/services');
 
 export default function App() {
+  const lensTransition = useRef<((url: string) => void) | null>(null);
+  const arrival = useRef<HTMLDivElement>(null);
+  const [arriving] = useState(() => {
+    try { return isServicesPage && sessionStorage.getItem('avaris-lens-transition') === '1'; }
+    catch { return false; }
+  });
   const shell = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -18,6 +24,10 @@ export default function App() {
     const change = () => setReducedMotion(media.matches);
     media.addEventListener('change', change);
     const context = gsap.context(() => {
+      if (arrival.current) {
+        sessionStorage.removeItem('avaris-lens-transition');
+        gsap.to(arrival.current, { opacity: 0, duration: media.matches ? 0 : .62, ease: 'power2.out' });
+      }
       if (media.matches) return;
       gsap.from('.site-header', { opacity: 0, y: -12, duration: 1.1, ease: 'power2.out' });
       if (isServicesPage) gsap.from('.services-opening', { opacity: 0, y: 18, duration: 1.2, delay: .15, ease: 'power3.out' });
@@ -34,14 +44,20 @@ export default function App() {
     {isServicesPage ? <ServicesPage onContact={() => dialog.current?.showModal()} /> : <>
     <h1 className="headline"><span>Shoot.</span>{' '}<span>Scale.</span>{' '}<span className="headline-accent">Shine.</span></h1>
     <div className="camera-stage">
-      <HeroCamera onReady={ready} onError={() => setFailed(true)} />
+      <HeroCamera onReady={ready} onError={() => setFailed(true)} transition={lensTransition} />
     </div>
-    <a className="lens-cta" href="/services/" aria-label="Explore our services">
+    <a className="lens-cta" href="/services/" aria-label="Explore our services" onClick={event => {
+      if (!loaded || reducedMotion || !lensTransition.current || event.metaKey || event.ctrlKey ||
+          event.shiftKey || event.altKey || event.button !== 0) return;
+      event.preventDefault();
+      lensTransition.current(event.currentTarget.href);
+    }}>
       <span className="lens-dial" aria-hidden="true" />
       <span className="lens-arrow" aria-hidden="true">↗</span>
     </a>
     {!loaded && <div className="loading-label" role="status">{failed ? 'The studio could not load.' : 'Bringing the studio into focus'}{!failed && <span className="loading-line" />}{failed && <button onClick={() => location.reload()}>Try again</button>}</div>}
     </>}
+    {arriving && <div ref={arrival} className="lens-blackout lens-arrival" aria-hidden="true" />}
     <dialog ref={dialog} className="chapter-dialog" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <button className="close-dialog" aria-label="Close dialog" onClick={() => dialog.current?.close()}>×</button>
       <span className="dialog-label">Avaris / Contact</span>
