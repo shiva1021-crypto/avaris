@@ -119,7 +119,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const resize = () => {
       const rect = element.getBoundingClientRect();
       const ratio = mobile
-        ? Math.min(1, Math.sqrt(250_000 / Math.max(rect.width * rect.height, 1)))
+        ? Math.min(1, Math.sqrt(125_000 / Math.max(rect.width * rect.height, 1)))
         : Math.min(1, 1000 / Math.max(rect.width, 1));
       width = element.width = Math.max(1, Math.round(rect.width * ratio));
       height = element.height = Math.max(1, Math.round(rect.height * ratio));

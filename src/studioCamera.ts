@@ -24,7 +24,7 @@ function reflectionPanel(room: THREE.Scene, position: THREE.Vector3, width: numb
 
 export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: AbortSignal) {
   const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !mobile });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = !mobile;
@@ -122,7 +122,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       h = viewportHeight - inset;
       canvas.style.top = canvasTop + inset + 'px';
       canvas.style.height = h + 'px';
-      const ratio = mobile ? Math.min(1.25, Math.sqrt(500_000 / (w * viewportHeight))) : 1.75;
+      const ratio = mobile ? Math.min(1.25, Math.sqrt(300_000 / (w * viewportHeight))) : 1.75;
       renderer.setPixelRatio(Math.min(devicePixelRatio, ratio));
       renderer.setSize(w, h, false);
     };
