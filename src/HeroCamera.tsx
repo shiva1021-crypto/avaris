@@ -11,6 +11,7 @@ export default function HeroCamera({ onReady, onError, transition }: {
   const flash = useRef<HTMLDivElement>(null);
   const blackout = useRef<HTMLDivElement>(null);
   const angle = useRef(0);
+  const idlePan = useRef<gsap.core.Timeline | null>(null);
   const drag = useRef<{ id: number; x: number; start: number } | null>(null);
   const [active, setActive] = useState(false);
   const [heading, setHeading] = useState(0);
@@ -38,6 +39,38 @@ export default function HeroCamera({ onReady, onError, transition }: {
   }, [onReady]);
 
   useEffect(() => {
+    if (!active) return;
+    const motion = gsap.matchMedia();
+    motion.add('(prefers-reduced-motion: no-preference)', () => {
+      const pose = { degrees: angle.current };
+      const neutral = pose.degrees;
+      let lastDraw = -Infinity;
+      const pan = gsap.timeline({
+        paused: true,
+        repeat: -1,
+        repeatDelay: 1.4,
+        delay: 1.6,
+        defaults: { ease: 'sine.inOut' },
+        onUpdate: () => {
+          if (running.current || document.hidden || canvas.current?.closest('[inert]') || document.querySelector('dialog[open]')) return;
+          const now = performance.now();
+          if (now - lastDraw < 31) return;
+          lastDraw = now;
+          angle.current = pose.degrees;
+          turn.current(pose.degrees);
+        },
+      });
+      pan.to(pose, { degrees: neutral + 9, duration: 2.6 })
+        .to(pose, { degrees: neutral - 7, duration: 4.6 })
+        .to(pose, { degrees: neutral, duration: 2.6 });
+      idlePan.current = pan;
+      pan.play();
+      return () => { idlePan.current = null; pan.kill(); };
+    });
+    return () => motion.revert();
+  }, [active]);
+
+  useEffect(() => {
     const overlay = blackout.current!;
     let timeline: gsap.core.Timeline | undefined;
     const reset = () => {
@@ -50,6 +83,7 @@ export default function HeroCamera({ onReady, onError, transition }: {
     };
     transition.current = url => {
       if (running.current) return;
+      idlePan.current?.pause();
       running.current = true;
       window.dispatchEvent(new CustomEvent('avaris-transition', { detail: true }));
       const state = { degrees: angle.current, push: 0 };
@@ -94,8 +128,13 @@ export default function HeroCamera({ onReady, onError, transition }: {
       <div className="camera-drag" role="slider" tabIndex={0} aria-label="Rotate cinema camera"
         aria-valuemin={0} aria-valuemax={359} aria-valuenow={heading} aria-valuetext={`${heading} degrees`}
         aria-describedby="rotation-hint"
+        onFocus={() => {
+          idlePan.current?.pause();
+          setHeading((Math.round(angle.current) % 360 + 360) % 360);
+        }}
         onPointerDown={e => {
           if (!e.isPrimary || e.button !== 0) return;
+          idlePan.current?.pause();
           drag.current = { id: e.pointerId, x: e.clientX, start: angle.current };
           e.currentTarget.setPointerCapture(e.pointerId);
         }}
