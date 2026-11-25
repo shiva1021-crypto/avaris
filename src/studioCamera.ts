@@ -22,10 +22,13 @@ function reflectionPanel(room: THREE.Scene, position: THREE.Vector3, width: numb
 }
 
 export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: AbortSignal) {
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !mobile });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !mobile;
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
   // A low, long-lens view reveals the underside of the flag and monitor.
@@ -133,7 +136,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       offsetY = top - .10*referenceHeight;
       const w=canvas.clientWidth, h=canvas.clientHeight;
       if (!w || !h) return;
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1 : 1.75));
       renderer.setSize(w,h,false);
       cancelAnimationFrame(frame);
       draw();
@@ -144,7 +147,9 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     resize.observe(holder);
     return (degrees: number, lensPush = 0) => {
       push = lensPush;
-      head.rotation.y = THREE.MathUtils.degToRad(degrees);
+      const yaw = THREE.MathUtils.degToRad(degrees);
+      if (yaw !== head.rotation.y) renderer.shadowMap.needsUpdate = true;
+      head.rotation.y = yaw;
       if (!frame) frame = requestAnimationFrame(draw);
     };
   } catch (error) { dispose(); throw error; }

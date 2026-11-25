@@ -39,18 +39,19 @@ export default function HeroCamera({ onReady, onError, transition }: {
 
   useEffect(() => {
     const overlay = blackout.current!;
-    const chrome = document.querySelectorAll('.site-header, .headline, .lens-cta, .rotation-hint');
     let timeline: gsap.core.Timeline | undefined;
     const reset = () => {
       timeline?.kill();
       running.current = false;
       gsap.set([flash.current, overlay], { opacity: 0 });
-      gsap.set(chrome, { clearProps: 'opacity' });
+      gsap.set(document.querySelectorAll('.site-header, .headline, .lens-cta, .rotation-hint'), { clearProps: 'opacity' });
+      window.dispatchEvent(new CustomEvent('avaris-transition', { detail: false }));
       turn.current(angle.current);
     };
     transition.current = url => {
       if (running.current) return;
       running.current = true;
+      window.dispatchEvent(new CustomEvent('avaris-transition', { detail: true }));
       const state = { degrees: angle.current, push: 0 };
       const straight = 48;
       const destination = state.degrees + gsap.utils.wrap(-180, 180, straight - state.degrees);

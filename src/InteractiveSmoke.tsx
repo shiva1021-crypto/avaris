@@ -9,8 +9,10 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const element = canvas.current!;
     const context = element.getContext('2d', { alpha: true });
     if (!context) return;
-    const sprite = createSmokeSprite();
-    const liveSmoke = LiveSmokeRenderer.create();
+    const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
+    const liveSmoke = mobile ? null : LiveSmokeRenderer.create();
+    let sprite: HTMLCanvasElement | undefined;
+    let suspended = false;
     element.dataset.smokeRenderer = liveSmoke ? 'procedural-airflow' : 'canvas-airflow';
     const mask = document.createElement('canvas');
     const maskContext = mask.getContext('2d')!;
@@ -33,6 +35,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
         context.globalAlpha = 1 - wheelDispersal;
         context.drawImage(liveSmoke.canvas, 0, 0, width, height);
       } else {
+        sprite ??= createSmokeSprite();
         // Animated Canvas fallback for devices without a usable shader context.
         for (let i = 0; i < 6; i++) {
           const phase = (reducedMotion ? 0 : elapsed) * .13 + i * 1.73;
@@ -56,8 +59,8 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     };
     const tick = (now: number) => {
       frame = 0;
-      if (document.hidden) return;
-      const interval = fluid?.active ? 1000 / 60 - 1 : 1000 / 30 - 1;
+      if (document.hidden || suspended) return;
+      const interval = 1000 / (mobile ? 24 : fluid?.active ? 60 : 30) - 1;
       if (now - last < interval) { frame = requestAnimationFrame(tick); return; }
       const delta = last ? Math.min((now - last) / 1000, .05) : 0;
       elapsed += delta; last = now;
@@ -72,14 +75,15 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const start = () => {
       stop();
       element.dataset.smokeState = document.hidden ? 'paused' : reducedMotion ? 'reduced-motion' : 'running';
-      if (document.hidden) return;
+      if (document.hidden || suspended) return;
       if (reducedMotion && !fluid?.active && wheelDispersal === 0) { paint(); return; }
       frame = requestAnimationFrame(tick);
     };
     const wake = () => {
-      if (!document.hidden && !frame) { last = 0; frame = requestAnimationFrame(tick); }
+      if (!document.hidden && !suspended && !frame) { last = 0; frame = requestAnimationFrame(tick); }
     };
     const pointer = (event: PointerEvent) => {
+      if (suspended || (event.target instanceof Element && event.target.closest('.camera-drag'))) return;
       if (event.target instanceof Element && event.target.closest('dialog')) return;
       const rect = element.getBoundingClientRect();
       if (!rect.width || !rect.height || !fluid) return;
@@ -114,7 +118,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const leave = () => { previousPointer = null; };
     const resize = () => {
       const rect = element.getBoundingClientRect();
-      const ratio = Math.min(1, 1000 / Math.max(rect.width, 1));
+      const ratio = mobile ? Math.min(.55, 480 / Math.max(rect.width,rect.height,1)) : Math.min(1, 1000 / Math.max(rect.width, 1));
       width = element.width = Math.max(1, Math.round(rect.width * ratio));
       height = element.height = Math.max(1, Math.round(rect.height * ratio));
       liveSmoke?.resize(width, height);
@@ -128,6 +132,11 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     };
     const observer = new ResizeObserver(resize); observer.observe(element);
     resize(); start();
+    const transition = (event: Event) => {
+      suspended = (event as CustomEvent<boolean>).detail;
+      start();
+    };
+    window.addEventListener('avaris-transition', transition);
     document.addEventListener('visibilitychange', start);
     window.addEventListener('pointermove', pointer, { passive: true });
     window.addEventListener('pointerdown', pointer, { passive: true });
@@ -136,6 +145,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     document.documentElement.addEventListener('pointerleave', leave);
     return () => {
       stop(); observer.disconnect(); liveSmoke?.dispose();
+      window.removeEventListener('avaris-transition', transition);
       document.removeEventListener('visibilitychange', start);
       window.removeEventListener('pointermove', pointer);
       window.removeEventListener('pointerdown', pointer);

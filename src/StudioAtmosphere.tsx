@@ -30,12 +30,21 @@ export default function StudioAtmosphere({ reducedMotion, fullBackdrop = false }
   const rightStart = fullBackdrop ? -80 : 770;
   const svg = useRef<SVGSVGElement>(null);
   useEffect(() => {
+    let suspended = false;
     const visibility = () => {
-      if (document.hidden || reducedMotion) svg.current?.pauseAnimations();
+      if (document.hidden || reducedMotion || suspended) svg.current?.pauseAnimations();
       else svg.current?.unpauseAnimations();
     };
     visibility(); document.addEventListener('visibilitychange', visibility);
-    return () => document.removeEventListener('visibilitychange', visibility);
+    const transition = (event: Event) => {
+      suspended = (event as CustomEvent<boolean>).detail;
+      visibility();
+    };
+    window.addEventListener('avaris-transition', transition);
+    return () => {
+      document.removeEventListener('visibilitychange', visibility);
+      window.removeEventListener('avaris-transition', transition);
+    };
   }, [reducedMotion]);
   return <div className="studio-atmosphere" aria-hidden="true">
     <svg ref={svg} className="studio-curtains" viewBox="0 0 1672 941" preserveAspectRatio="none">
