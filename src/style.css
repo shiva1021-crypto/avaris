@@ -15,9 +15,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .site-header { position: absolute; top: 2.45%; left: 7.2%; right: 5.5%; height: 52px; display: flex; align-items: center; justify-content: space-between; z-index: 4; }
 .brand { display: inline-flex; align-items: center; gap: 20px; font-size: clamp(27px, 2.4vw, 42px); font-weight: 700; letter-spacing: -1.7px; line-height: 1; }
 .brand-mark { display: block; width: clamp(34px, 3.3vw, 56px); height: auto; flex: none; }
-.contact-button { display: flex; align-items: center; gap: 14px; border: 2px solid #9b2946; border-radius: 100px; background: rgb(8 9 12 / 16%); padding: 10px 29px; min-height: 49px; font-size: clamp(16px, 1.15vw, 20px); font-weight: 500; transition: background .3s, border-color .3s; }
-.contact-button:hover { background: #74203955; border-color: #cf4266; }
-.contact-button span { font-size: 23px; line-height: 1; }
 .headline {
   position: absolute;
   z-index: 0;
@@ -70,14 +67,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .back-button { border: 1px solid #913149; border-radius: 50px; padding: 12px 20px; margin-top: 20px; background: transparent; }
 @keyframes breathe { 50% { opacity: .3; transform: scaleX(.5); } }
 @media (min-aspect-ratio: 2/1) { .homepage { min-height: 600px; } }
-@media (max-width: 900px) { .site-header { left: 5%; right: 5%; top: 3%; } .brand { gap: 12px; } .contact-button { padding: 8px 18px; min-height: 44px; } }
+@media (max-width: 900px) { .site-header { left: 5%; right: 5%; top: 3%; } .brand { gap: 12px; } }
 @media (max-width: 600px) {
   .homepage { min-height: 560px; }
   .site-header { top: 24px; height: 40px; left: 24px; right: 24px; gap: 16px; }
   .brand { font-size: clamp(21px, 7.4vw, 29px); gap: 8px; letter-spacing: -1.2px; }
   .brand-mark { width: 34px; }
-  .contact-button { margin-left: auto; min-height: 36px; padding: 6px 14px; border-width: 1px; font-size: 14px; gap: 8px; }
-  .contact-button span { font-size: 18px; }
   .headline {
     top: clamp(105px, 19%, 160px);
     font-size: 13.7vw;
@@ -108,17 +103,27 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .lens-blackout { background: #000; }
 .lens-arrival { opacity: 1; }
 .studio-intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; }
-.intro-field { position: absolute; inset: 0; background: #090b10; }
-.intro-lockup { position: relative; display: flex; align-items: center; gap: .32em; font: 700 clamp(2.4rem, 6vw, 6rem)/1 'DM Sans', sans-serif; letter-spacing: -.065em; color: #eef0f4; }
+.intro-field { position: absolute; inset: 0; background: #090b10;
+  --reveal: 0px;
+  mask-image: radial-gradient(circle at var(--reveal-x, 50%) var(--reveal-y, 60%),
+    transparent max(0px, calc(var(--reveal) - 56px)), #000 var(--reveal));
+}
+.intro-lockup { position: relative; display: flex; align-items: center; gap: .32em; font: 650 clamp(2.15rem, 7vw, 7rem)/1.04 'Host Grotesk', 'DM Sans', sans-serif; letter-spacing: -.065em; color: #eef0f4; }
 .intro-mark { display: block; width: 1.04em; height: auto; flex: none; }
 .intro-skip { position: absolute; right: max(24px,env(safe-area-inset-right)); bottom: max(20px,env(safe-area-inset-bottom)); padding: 12px; border: 0; background: transparent; color: #bdc0c7; font: inherit; cursor: pointer; }
 
 .homepage .brand-mark { width: clamp(58px, 5.2vw, 82px); }
-.homepage .contact-button {
-  gap: 8px;
+
+.intro-name-clip { display: block; overflow: hidden; padding-bottom: .18em; }
+.intro-name { display: block; }
+.contact-button {
+  margin-inline-start: auto;
   min-height: 44px;
-  padding: 5px 14px;
-  border-width: 1px;
-  font-size: 14px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  font: 600 clamp(15px, 1.2vw, 19px)/1 'Host Grotesk', 'DM Sans', sans-serif;
+  letter-spacing: -.02em;
+  text-underline-offset: .3em;
 }
-.homepage .contact-button span { font-size: 17px; }
+.contact-button:hover { text-decoration: underline; }

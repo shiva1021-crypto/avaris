@@ -43,7 +43,7 @@ export default function App() {
     {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1><StudioAtmosphere reducedMotion={reducedMotion} /></>}
     <header className="site-header">
       <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-logo.png" alt="" />{isServicesPage && <span>MYBI Digital</span>}</a>
-      <button className="contact-button" onClick={() => dialog.current?.showModal()}>Contact <span aria-hidden="true">↗</span></button>
+      <button className="contact-button" onClick={() => dialog.current?.showModal()}>Contact</button>
     </header>
     {isServicesPage ? <ServicesPage onContact={() => dialog.current?.showModal()} /> : <>
     <div className="camera-stage">

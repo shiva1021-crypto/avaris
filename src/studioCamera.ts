@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import rigUrl from '../models/avaris-camera-tripod.glb?url';
+import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
 
 // Feathered reflection panels are baked once into the lighting environment.
 // Their gradients remain visible on black glass and brushed metal as the rig turns.
@@ -66,7 +67,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     renderer.dispose();
   }
   try {
-    const response = await fetch(rigUrl, { signal });
+    const response = await fetch(mobile ? mobileRigUrl : rigUrl, { signal });
     if (!response.ok) throw new Error('Camera model unavailable');
     const rig = await loader.parseAsync(await response.arrayBuffer(), '');
     scene.add(rig.scene);
@@ -111,10 +112,10 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     const lens = new THREE.Vector3();
     const holder = canvas.parentElement!;
     const hero = holder.closest('main')!;
+    let w = 0, h = 0;
     let referenceWidth = 1, referenceHeight = 1, offsetX = 0, offsetY = 0;
     const draw = () => {
       frame = 0;
-      const w = canvas.clientWidth, h = canvas.clientHeight;
       if (!w || !h) return;
       head.localToWorld(lens.set(-100,89,0));
       lens.addScaledVector(forward,.004);
@@ -135,7 +136,8 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       const narrowLayout = viewport.width <= 600;
       offsetX = left + bounds.width * .17 - (narrowLayout ? .018 : .075) * referenceHeight;
       offsetY = top - .10*referenceHeight;
-      const w=canvas.clientWidth, h=canvas.clientHeight;
+      w = Math.round(viewport.width);
+      h = Math.round(viewport.height);
       if (!w || !h) return;
       // Smooth thin highlights on high-density phones while bounding the
       // number of pixels rendered during rotation and the lens transition.
