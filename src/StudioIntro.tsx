@@ -55,7 +55,7 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
   useLayoutEffect(() => { if (ready) release.current(); }, [ready]);
   return <div ref={root} className="studio-intro" aria-label="MYBI Digital introduction">
     <div className="intro-field" />
-    <div className="intro-lockup" aria-hidden="true"><img className="intro-mark" src="/mybi-logo.png" alt="" /><span className="intro-name-clip"><span className="intro-name">MYBI Digital</span></span></div>
+    <div className="intro-lockup" aria-hidden="true"><img className="intro-mark" src="/mybi-titanium.png" alt="" /><span className="intro-name-clip"><span className="intro-name">MYBI Digital</span></span></div>
     <button className="intro-skip" onClick={finish}>Skip intro</button>
   </div>;
 }

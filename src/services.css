@@ -97,3 +97,32 @@ html:has(.services-page) { scroll-behavior: smooth; }
   .services-signoff { font-size: 13px; gap: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { html:has(.services-page) { scroll-behavior: auto; } }
+
+.services-opening.page-copy {
+  position: relative;
+  display: block;
+  width: min(1050px, 86%);
+  padding: clamp(135px, 25svh, 220px) 0 110px;
+  margin: 0 auto;
+}
+.page-copy h1 {
+  margin: 0 0 .35em;
+  font: 650 clamp(3rem, 9vw, 8rem)/.95 'Host Grotesk', sans-serif;
+  letter-spacing: -.065em;
+  overflow-wrap: anywhere;
+}
+.page-copy p { max-width: 38rem; line-height: 1.55; color: #c9ccd2; }
+.page-copy a { display: inline-block; margin-top: 1.15em; color: #f2a9bc; }
+
+@media (min-width: 1024px) and (pointer: fine) {
+  .services-opening.page-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    column-gap: clamp(40px, 7vw, 110px);
+    row-gap: 14px;
+    align-items: start;
+    padding-top: 31svh;
+  }
+  .page-copy h1 { grid-row: span 3; font-size: clamp(4rem, 7.4vw, 8rem); margin: 0; }
+  .page-copy p, .page-copy a { grid-column: 2; margin: 0; }
+}

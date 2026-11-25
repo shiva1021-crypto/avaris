@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import gsap from 'gsap';
 import { createPortal } from 'react-dom';
 
-export default function HeroCamera({ onReady, onError, transition }: {
+export default function HeroCamera({ onReady, onError, transition, chapterAngle, minimalMotion }: {
+  minimalMotion: boolean;
+  chapterAngle: number | null;
   onReady: () => void; onError: () => void; transition: RefObject<((url: string) => void) | null>;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -11,6 +13,8 @@ export default function HeroCamera({ onReady, onError, transition }: {
   const flash = useRef<HTMLDivElement>(null);
   const blackout = useRef<HTMLDivElement>(null);
   const angle = useRef(0);
+  const hasSelectedChapter = useRef(false);
+  const chapterTurn = useRef<gsap.core.Tween | null>(null);
   const idlePan = useRef<gsap.core.Timeline | null>(null);
   const [active, setActive] = useState(false);
 
@@ -37,7 +41,7 @@ export default function HeroCamera({ onReady, onError, transition }: {
   }, [onReady]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || minimalMotion) return;
     const motion = gsap.matchMedia();
     motion.add('(prefers-reduced-motion: no-preference)', () => {
       const pose = { degrees: angle.current };
@@ -62,7 +66,24 @@ export default function HeroCamera({ onReady, onError, transition }: {
       return () => { idlePan.current = null; pan.kill(); };
     });
     return () => motion.revert();
-  }, [active]);
+  }, [active, minimalMotion]);
+
+  useEffect(() => {
+    if (!active || chapterAngle === null || running.current) return;
+    hasSelectedChapter.current = true;
+    idlePan.current?.pause();
+    const pose = { degrees: angle.current };
+    chapterTurn.current = gsap.to(pose, {
+      degrees: chapterAngle,
+      duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : minimalMotion ? 1.05 : 1.35,
+      ease: 'power3.inOut',
+      onUpdate: () => {
+        angle.current = pose.degrees;
+        turn.current(pose.degrees);
+      },
+    });
+    return () => { chapterTurn.current?.kill(); };
+  }, [active, chapterAngle, minimalMotion]);
 
   useEffect(() => {
     const overlay = blackout.current!;
@@ -71,14 +92,15 @@ export default function HeroCamera({ onReady, onError, transition }: {
       timeline?.kill();
       running.current = false;
       gsap.set([flash.current, overlay], { opacity: 0 });
-      gsap.set(document.querySelectorAll('.site-header, .headline, .lens-cta'), { clearProps: 'opacity' });
+      gsap.set(document.querySelectorAll('.site-header, .headline, .chapter-nav'), { clearProps: 'opacity' });
       window.dispatchEvent(new CustomEvent('avaris-transition', { detail: false }));
       turn.current(angle.current);
-      idlePan.current?.resume();
+      if (!hasSelectedChapter.current) idlePan.current?.resume();
     };
     transition.current = url => {
       if (running.current) return;
       idlePan.current?.pause();
+      chapterTurn.current?.kill();
       running.current = true;
       window.dispatchEvent(new CustomEvent('avaris-transition', { detail: true }));
       const state = { degrees: angle.current, push: 0 };
@@ -93,7 +115,7 @@ export default function HeroCamera({ onReady, onError, transition }: {
         .to(flash.current, { opacity: .85, duration: .055 })
         .to(flash.current, { opacity: 0, duration: .23, ease: 'power2.out' })
         .addLabel('enterLens', '<.10')
-        .to(document.querySelectorAll('.site-header, .headline, .lens-cta'), { opacity: 0, duration: .32 }, 'enterLens')
+        .to(document.querySelectorAll('.site-header, .headline, .chapter-nav'), { opacity: 0, duration: .32 }, 'enterLens')
         .to(state, { push: 1, duration: 1.5, ease: 'power2.inOut', onUpdate: draw }, 'enterLens')
         .to(overlay, { opacity: 1, duration: .4, ease: 'power2.out' }, '-=.62')
         .to(overlay, { opacity: 1, duration: .22 });
