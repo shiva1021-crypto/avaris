@@ -127,24 +127,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 }
 .studio-intro.is-lit .intro-light-beam { opacity: 1; }
 .intro-light-pool { display: none; }
-.studio-pullcord {
-  --pullcord-top: max(0px, calc(43svh - 176px));
-  --pullcord-right: calc(50% - 32px);
-  --pullcord-z: 2;
-  --pullcord-ink: #a1a5ae;
-}
-.studio-pullcord::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 31px;
-  width: 2px;
-  height: max(0px, calc(43svh - 176px));
-  background: repeating-linear-gradient(110deg, #858b94 0 2px, #30343e 2px 4px);
-}
-.studio-pullcord stop:first-child { stop-color: #b96d87; }
-.studio-pullcord stop:last-child { stop-color: #471e30; }
-.studio-pullcord .pullcord-knob:focus-visible { outline-color: #df91ab; }
+ .rope-simulation { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.rope-grip { position: absolute; left: 0; top: 0; width: 48px; height: 60px; border: 0; background: transparent; touch-action: none; cursor: grab; }
+.rope-grip:active { cursor: grabbing; }
+.rope-tilt { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); min-height: 44px; padding: 8px 18px; background: transparent; border: 1px solid #98506b66; border-radius: 30px; font-size: 12px; }
 .intro-instruction {
   position: absolute;
   left: 20px;

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { PullCord } from 'pullcord';
-import 'pullcord/pullcord.css';
+import StudioRope from './StudioRope';
 
 const seenKey = 'mybi-studio-light-v3';
 
@@ -19,9 +18,6 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
   const [pulled, setPulled] = useState(false);
 
   useEffect(() => {
-    const button = root.current?.querySelector<HTMLButtonElement>('.pullcord-knob');
-    button?.setAttribute('aria-describedby', 'intro-instruction');
-    button?.focus({ preventScroll: true });
     const timer = window.setTimeout(() => setWaitExpired(true), 12000);
     return () => clearTimeout(timer);
   }, []);
@@ -55,19 +51,12 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
       <div className="intro-light-pool" />
 
     </div>
-    <PullCord
-      className="studio-pullcord"
-      noEntrance
-      pulled={pulled}
-      onPull={activate}
-      ariaLabel="Pull the cord to turn on the studio lights"
-      config={{ gravity: 1050, damping: .96, iterations: 16, stretchMax: 48, stretchToggle: 25, maxVelocity: 18 }}
-    />
+    <StudioRope onReturn={activate} />
 
     <div className="intro-instruction" id="intro-instruction">
       <p className="intro-studio-name">MYBI Digital</p>
       <h1>Bring the studio to life.</h1>
-      <p role="status">{pulled ? ready || waitExpired ? 'Lights on.' : 'Getting the studio ready…' : 'Pull the cord to turn on the lights.'}</p>
+      <p role="status">{pulled ? ready || waitExpired ? 'Lights on.' : 'Getting the studio ready…' : 'Pull down, then release to turn on the lights.'}</p>
       {!pulled && <span>Or tap the handle to enter.</span>}
     </div>
   </div>;
