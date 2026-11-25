@@ -75,12 +75,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   .brand-mark { width: 34px; }
   .headline {
     top: clamp(105px, 19%, 160px);
-    font-size: 13.7vw;
+    font-size: clamp(48px, 15.5vw, 76px);
     line-height: 1.23;
   }
-  .headline span { scale: 1 1.13; }
+  .headline span { scale: .9 1.13; }
   .camera-frame {
-    bottom: 18%;
+    bottom: 14%;
     left: 50%;
     width: min(94%, 60svh);
     height: auto;

@@ -122,7 +122,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       h = viewportHeight - inset;
       canvas.style.top = canvasTop + inset + 'px';
       canvas.style.height = h + 'px';
-      const ratio = mobile ? Math.min(1.25, Math.sqrt(500_000 / (w * viewportHeight))) : 1.75;
+      const ratio = mobile ? Math.min(1.5, Math.sqrt(750_000 / (w * viewportHeight))) : 1.75;
       renderer.setPixelRatio(Math.min(devicePixelRatio, ratio));
       renderer.setSize(w, h, false);
     };
