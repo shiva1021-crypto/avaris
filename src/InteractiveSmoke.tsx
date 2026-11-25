@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { FluidWake } from './FluidWake';
 import { createSmokeSprite } from './SmokeTexture';
 import { LiveSmokeRenderer } from './LiveSmokeRenderer';
 
@@ -14,13 +13,11 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     let sprite: HTMLCanvasElement | undefined;
     let suspended = false;
     element.dataset.smokeRenderer = liveSmoke ? 'procedural-airflow' : 'canvas-airflow';
-    const mask = document.createElement('canvas');
-    const maskContext = mask.getContext('2d')!;
-    let fluid: FluidWake | null = null;
-    let maskPixels: ImageData | null = null;
     let width = 0; let height = 0; let frame = 0; let last = 0; let elapsed = 0;
-    let previousPointer: { x: number; y: number; time: number } | null = null;
+    let previousPointer: { x: number; y: number } | null = null;
     let wheelDispersal = 0; let wheelHold = 0;
+    let scrollFlow = 0;
+    const cursor = { x: .5, y: .5, dx: 0, dy: 0 };
     let reportedSecond = -1;
 
     const paint = () => {
@@ -31,7 +28,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       context.globalAlpha = 1;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
-      if (liveSmoke?.render(reducedMotion ? 0 : elapsed)) {
+      if (liveSmoke?.render(reducedMotion ? 0 : elapsed, cursor, scrollFlow)) {
         context.globalAlpha = 1 - wheelDispersal;
         context.drawImage(liveSmoke.canvas, 0, 0, width, height);
       } else {
@@ -41,34 +38,29 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
           const phase = (reducedMotion ? 0 : elapsed) * .13 + i * 1.73;
           const cloudWidth = width * (.8 + i * .04 + Math.sin(phase * .7) * .08);
           const cloudHeight = height * (.52 + i * .03 + Math.cos(phase * .6) * .06);
-          const x = width * (-.3 + i * .19 + Math.sin(phase) * .09);
-          const y = height * (.06 + (i % 3) * .13 + Math.cos(phase * .71) * .06);
+          const x = width * (cursor.dx * (.4 + i * .11) - .3 + i * .19 + Math.sin(phase) * .09);
+          const y = height * (cursor.dy * (.4 + i * .11) - scrollFlow * .2 + .06 + (i % 3) * .13 + Math.cos(phase * .71) * .06);
           context.globalAlpha = (.58 + Math.sin(phase + i) * .09) * (1 - wheelDispersal);
           context.drawImage(sprite, x, y, cloudWidth, cloudHeight);
         }
-      }
-      if (fluid?.active && maskPixels) {
-        fluid.writeMask(maskPixels.data);
-        maskContext.putImageData(maskPixels, 0, 0);
-        context.globalCompositeOperation = 'destination-out';
-        context.globalAlpha = 1;
-        context.imageSmoothingEnabled = true;
-        context.drawImage(mask, 0, 0, width, height);
       }
       context.globalCompositeOperation = 'source-over';
     };
     const tick = (now: number) => {
       frame = 0;
       if (document.hidden || suspended) return;
-      const interval = 1000 / (mobile ? 24 : fluid?.active ? 60 : 30) - 1;
+      const interval = 1000 / (mobile ? 24 : cursor.dx ** 2 + cursor.dy ** 2 > .000001 ? 60 : 30) - 1;
       if (now - last < interval) { frame = requestAnimationFrame(tick); return; }
       const delta = last ? Math.min((now - last) / 1000, .05) : 0;
       elapsed += delta; last = now;
-      fluid?.step(delta, reducedMotion);
       wheelHold = Math.max(0, wheelHold - delta);
       if (wheelHold === 0) wheelDispersal = Math.max(0, wheelDispersal - delta * .28);
+      const settle = Math.exp(-delta * 6);
+      cursor.dx *= settle;
+      cursor.dy *= settle;
+      scrollFlow *= settle;
       paint();
-      if (!reducedMotion || fluid?.active || wheelDispersal > 0) frame = requestAnimationFrame(tick);
+      if (!reducedMotion || wheelDispersal > 0) frame = requestAnimationFrame(tick);
       else last = 0;
     };
     const stop = () => { cancelAnimationFrame(frame); frame = 0; last = 0; };
@@ -76,17 +68,19 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       stop();
       element.dataset.smokeState = document.hidden ? 'paused' : reducedMotion ? 'reduced-motion' : 'running';
       if (document.hidden || suspended) return;
-      if (reducedMotion && !fluid?.active && wheelDispersal === 0) { paint(); return; }
+      if (reducedMotion && wheelDispersal === 0) { paint(); return; }
       frame = requestAnimationFrame(tick);
     };
     const wake = () => {
       if (!document.hidden && !suspended && !frame) { last = 0; frame = requestAnimationFrame(tick); }
     };
     const pointer = (event: PointerEvent) => {
-      if (suspended || (event.target instanceof Element && event.target.closest('.camera-drag'))) return;
-      if (event.target instanceof Element && event.target.closest('dialog')) return;
+      if (suspended || (event.target instanceof Element && event.target.closest('.camera-drag, dialog, .studio-intro'))) {
+        previousPointer = null;
+        return;
+      }
       const rect = element.getBoundingClientRect();
-      if (!rect.width || !rect.height || !fluid) return;
+      if (!rect.width || !rect.height) return;
       const coalesced = event.getCoalescedEvents?.();
       const samples = coalesced?.length ? coalesced.slice(-8) : [event];
       for (const sample of samples) {
@@ -96,10 +90,15 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
         if (previousPointer && event.type !== 'pointerdown') {
           const distance = Math.hypot((x - previousPointer.x) * rect.width, (y - previousPointer.y) * rect.height);
           if (distance < 1.2) continue;
-          fluid.injectStroke(previousPointer.x, previousPointer.y, x, y, (sample.timeStamp - previousPointer.time) / 1000, rect.width, rect.height);
+          if (!reducedMotion) {
+            cursor.x = x;
+            cursor.y = y;
+            cursor.dx = Math.max(-.08, Math.min(.08, cursor.dx + (x - previousPointer.x) * .65));
+            cursor.dy = Math.max(-.08, Math.min(.08, cursor.dy + (y - previousPointer.y) * .65));
+          }
         }
         // Entering or resting the cursor never stamps a circular hole.
-        previousPointer = { x, y, time: sample.timeStamp };
+        previousPointer = { x, y };
       }
       wake();
     };
@@ -110,8 +109,9 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1;
       const amount = Math.hypot(event.deltaX, event.deltaY) * unit;
       if (!amount) return;
-      wheelDispersal = Math.min(1, wheelDispersal + Math.max(.2, amount / 140));
-      wheelHold = .65;
+      wheelDispersal = Math.min(.65, wheelDispersal + Math.min(.25, amount / 650));
+      wheelHold = .12;
+      if (!reducedMotion) scrollFlow = Math.max(-.24, Math.min(.24, scrollFlow + event.deltaY * unit / 1600));
       // Wheel input preserves broad dispersal without adding a local disk.
       wake();
     };
@@ -122,11 +122,6 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       width = element.width = Math.max(1, Math.round(rect.width * ratio));
       height = element.height = Math.max(1, Math.round(rect.height * ratio));
       liveSmoke?.resize(width, height);
-      const columns = Math.min(240, Math.max(48, Math.ceil(rect.width / 5)));
-      const rows = Math.min(240, Math.max(40, Math.round(columns * rect.height / Math.max(1, rect.width))));
-      fluid = new FluidWake(columns, rows);
-      mask.width = columns; mask.height = rows;
-      maskPixels = maskContext.createImageData(columns, rows);
       previousPointer = null;
       paint();
     };

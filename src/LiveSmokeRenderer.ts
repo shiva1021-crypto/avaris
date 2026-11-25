@@ -5,6 +5,8 @@ export class LiveSmokeRenderer {
   private program: WebGLProgram;
   private buffer: WebGLBuffer;
   private shaders: WebGLShader[] = [];
+  private cursor: WebGLUniformLocation | null;
+  private scroll: WebGLUniformLocation | null;
   private time: WebGLUniformLocation | null;
   private resolution: WebGLUniformLocation | null;
 
@@ -27,6 +29,8 @@ export class LiveSmokeRenderer {
       precision highp float;
       uniform vec2 u_resolution;
       uniform float u_time;
+      uniform vec4 u_cursor;
+      uniform float u_scroll;
 
       float hash(vec2 p) {
         vec3 q = fract(vec3(p.xyx) * 0.1031);
@@ -55,7 +59,12 @@ export class LiveSmokeRenderer {
         float t = u_time;
         vec2 p = vec2(uv.x * u_resolution.x / u_resolution.y, uv.y) * 3.6;
         // Continuous crosswind and slow lift; nested fields fold the wisps.
-        p += vec2(-t * 0.105, t * 0.04);
+        p += vec2(-t * 0.105, t * 0.04 + u_scroll);
+        // Pull the wisps along the pointer and curl the edges of the wake.
+        vec2 relative = (uv - u_cursor.xy) * vec2(u_resolution.x / u_resolution.y, 1.0);
+        float influence = exp(-dot(relative, relative) * 85.0);
+        vec2 swirl = vec2(-relative.y, relative.x) * length(u_cursor.zw);
+        p -= influence * (u_cursor.zw * 4.0 + swirl * 18.0);
         vec2 eddy = vec2(
           fbm(p * 0.72 + vec2(t * 0.055, -t * 0.045)),
           fbm(p * 0.72 + vec2(4.7, 8.2) + vec2(-t * 0.04, t * 0.035))
@@ -85,6 +94,8 @@ export class LiveSmokeRenderer {
     gl.useProgram(program);
     const position = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+    this.cursor = gl.getUniformLocation(program, 'u_cursor');
+    this.scroll = gl.getUniformLocation(program, 'u_scroll');
     this.time = gl.getUniformLocation(program, 'u_time');
     this.resolution = gl.getUniformLocation(program, 'u_resolution');
     gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
@@ -107,10 +118,12 @@ export class LiveSmokeRenderer {
     this.gl.viewport(0, 0, width, height);
   }
 
-  render(seconds: number) {
+  render(seconds: number, cursor: { x: number; y: number; dx: number; dy: number }, scroll: number) {
     const gl = this.gl;
     if (gl.isContextLost()) return false;
     gl.useProgram(this.program);
+    gl.uniform4f(this.cursor, cursor.x, cursor.y, cursor.dx, cursor.dy);
+    gl.uniform1f(this.scroll, scroll);
     gl.uniform1f(this.time, seconds);
     gl.uniform2f(this.resolution, this.canvas.width, this.canvas.height);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

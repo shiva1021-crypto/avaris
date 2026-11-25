@@ -40,13 +40,12 @@ export default function App() {
     return () => { context.revert(); media.removeEventListener('change', change); };
   }, []);
   return <><main inert={playingIntro} ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''}`}>
-    {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><StudioAtmosphere reducedMotion={reducedMotion} /></>}
+    {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1><StudioAtmosphere reducedMotion={reducedMotion} /></>}
     <header className="site-header">
-      <a className="brand" href="/" aria-label="MYBI Digital home"><span className="brand-mark" aria-hidden="true" /><span>MYBI Digital</span></a>
+      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-logo.png" alt="" />{isServicesPage && <span>MYBI Digital</span>}</a>
       <button className="contact-button" onClick={() => dialog.current?.showModal()}>Contact <span aria-hidden="true">↗</span></button>
     </header>
     {isServicesPage ? <ServicesPage onContact={() => dialog.current?.showModal()} /> : <>
-    <h1 className="headline"><span>Shoot.</span>{' '}<span>Scale.</span>{' '}<span className="headline-accent">Shine.</span></h1>
     <div className="camera-stage">
       <HeroCamera onReady={ready} onError={() => setFailed(true)} transition={lensTransition} />
     </div>
