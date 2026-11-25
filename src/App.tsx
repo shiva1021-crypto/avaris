@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import StudioIntro, { shouldPlayIntro } from './StudioIntro';
 import HeroCamera from './HeroCamera';
 import StudioAtmosphere from './StudioAtmosphere';
 import ServicesPage from './ServicesPage';
@@ -18,6 +19,9 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [intro, setIntro] = useState(() => !isServicesPage && shouldPlayIntro());
+  const finishIntro = useRef(() => setIntro(false)).current;
+  const playingIntro = intro && !reducedMotion && !failed;
   const ready = useRef(() => setLoaded(true)).current;
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
@@ -35,10 +39,10 @@ export default function App() {
     }, shell);
     return () => { context.revert(); media.removeEventListener('change', change); };
   }, []);
-  return <main ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''}`}>
+  return <><main inert={playingIntro} ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''}`}>
     {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><StudioAtmosphere reducedMotion={reducedMotion} /></>}
     <header className="site-header">
-      <a className="brand" href="/" aria-label="Avaris home"><span className="brand-mark" aria-hidden="true" /><span>Avaris</span></a>
+      <a className="brand" href="/" aria-label="MYBI Digital home"><span className="brand-mark" aria-hidden="true" /><span>MYBI Digital</span></a>
       <button className="contact-button" onClick={() => dialog.current?.showModal()}>Contact <span aria-hidden="true">↗</span></button>
     </header>
     {isServicesPage ? <ServicesPage onContact={() => dialog.current?.showModal()} /> : <>
@@ -60,12 +64,12 @@ export default function App() {
     {arriving && <div ref={arrival} className="lens-blackout lens-arrival" aria-hidden="true" />}
     <dialog ref={dialog} className="chapter-dialog" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <button className="close-dialog" aria-label="Close dialog" onClick={() => dialog.current?.close()}>×</button>
-      <span className="dialog-label">Avaris / Contact</span>
+      <span className="dialog-label">MYBI Digital / Contact</span>
       <h2>Great things start with a conversation.</h2>
       <p>Our new studio is taking shape. Contact details will be available here soon.</p>
       <button className="back-button" onClick={() => dialog.current?.close()}>Back to the studio</button>
     </dialog>
-  </main>;
+  </main>{playingIntro && <StudioIntro ready={loaded} finish={finishIntro} />}</>;
 }
 
 

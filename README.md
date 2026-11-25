@@ -1,4 +1,4 @@
-# Avaris cinematic agency website
+# MYBI Digital cinematic agency website
 
 ## Pages and theme
 
@@ -14,7 +14,7 @@ The current React / TypeScript / Vite homepage uses a reference-derived transpar
 
 Run `npm install` and `npm run dev`. Build with `npm run build`; serve the build with `npm run preview`.
 
-- The header contains only the Avaris logo and Contact button. The selected compact Montserrat Black headline is retained.
+- The header contains only the MYBI Digital logo and Contact button. The selected compact Montserrat Black headline is retained.
 - Desktop camera placement follows the reference: image height 64.5% of the viewport, bottom-aligned and centered at 47.7% of viewport width. Mobile scales the image by viewport width.
 - `src/HeroCamera.tsx` is the foreground replacement point for the final 3D model. Background and atmosphere are separate layers and can stay intact.
 - `src/StudioAtmosphere.tsx` morphs ribbon paths over 16 and 19 seconds. `src/LiveSmokeRenderer.ts` evolves layered, domain-warped shader noise continuously: crosswind, lift and changing eddies remain active while the pointer is idle. The visible Canvas layer is capped at 1000 pixels wide; a moving/deforming procedural Canvas fallback covers devices without a usable shader context. `src/InteractiveSmoke.tsx` drives `src/FluidWake.ts`, a small velocity/dye solver with advection, pressure projection and vorticity confinement. The starting wake is about 12-16 CSS pixels wide, follows pointer velocity, curls and dissipates. Entering or resting the pointer creates no disk. The fluid grid is capped at 240 cells per axis, with a faster frame loop only while the wake is active. Wheel scrolling retains broad dispersal without a local circular brush. Background loops pause on hidden pages. Reduced-motion preferences stop idle drift while preserving user-triggered clearing and fade-back.
@@ -50,7 +50,7 @@ Build with `npm run build`. Serve the output with `npm run preview`.
 - The supplied 69.5 MB camera is delivered as a 4.68 MB GLB, with its geometry preserved and embedded textures resized and recompressed. `scripts/prepare-assets.py` rebuilds this delivery asset from the original download path.
 - The tripod uses Meshopt and local KTX2/Basis decoders. Its embedded attribution identifies CC0 1.0 / tevy.dev. The supplied camera metadata identifies fab-model-conversion; original asset licensing remains with its source.
 - Fonts and all runtime assets are served locally. No account, backend, CMS or contact form is included.
-- The minimal header contains only the Avaris logo and Contact button. Contact opens a clearly labeled prototype dialog until real contact details are supplied.
+- The minimal header contains only the MYBI Digital logo and Contact button. Contact opens a clearly labeled prototype dialog until real contact details are supplied.
 - Montserrat Black typography uses the earlier compact size on a single line. The camera and tripod use their earlier scale and lower position, with generous space around the headline.
 - The earlier restrained studio lighting and dark materials are restored.
 

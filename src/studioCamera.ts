@@ -140,6 +140,9 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       renderer.setSize(w,h,false);
       cancelAnimationFrame(frame);
       draw();
+      const optic = lens.clone().project(camera);
+      hero.style.setProperty('--optic-x', (viewport.left + (1 + optic.x) * w / 2) + 'px');
+      hero.style.setProperty('--optic-y', (viewport.top + (1 - optic.y) * h / 2) + 'px');
     }
     fit();
     resize = new ResizeObserver(fit);

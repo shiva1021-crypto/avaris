@@ -1,4 +1,4 @@
-# Avaris — theme and services-page brief
+# MYBI Digital — theme and services-page brief
 
 ## Scope
 
@@ -28,11 +28,11 @@ Destination: `/services/`, a real separate page that works on direct load and re
 
 ## Services page
 
-Use the same studio background, live smoke, burgundy ribbons, colors and typography. Keep the header minimal with the Avaris home link and Contact control. Use a subtle dark overlay behind the content for readability. Keep the atmospheric layer fixed to the viewport so a longer page does not stretch the smoke renderer.
+Use the same studio background, live smoke, burgundy ribbons, colors and typography. Keep the header minimal with the MYBI Digital home link and Contact control. Use a subtle dark overlay behind the content for readability. Keep the atmospheric layer fixed to the viewport so a longer page does not stretch the smoke renderer.
 
 Opening headline: **Your business. Our full focus.**
 
-Explain that Avaris connects digital marketing, website creation, content and video production for businesses. Present the services as an editorial list with expandable details, rather than a grid of generic cards.
+Explain that MYBI Digital connects digital marketing, website creation, content and video production for businesses. Present the services as an editorial list with expandable details, rather than a grid of generic cards.
 
 Service groups:
 

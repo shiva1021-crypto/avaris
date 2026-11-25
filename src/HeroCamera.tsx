@@ -89,7 +89,7 @@ export default function HeroCamera({ onReady, onError, transition }: {
       <div ref={flash} className="shutter-flash" aria-hidden="true" />
       <div ref={blackout} className="lens-blackout" aria-hidden="true" />
     </>, document.body)}
-    <canvas className="camera-render" ref={canvas} role="img" aria-label="Avaris cinema camera on its tripod" />
+    <canvas className="camera-render" ref={canvas} role="img" aria-label="MYBI Digital cinema camera on its tripod" />
     {active && <>
       <div className="camera-drag" role="slider" tabIndex={0} aria-label="Rotate cinema camera"
         aria-valuemin={0} aria-valuemax={359} aria-valuenow={heading} aria-valuetext={`${heading} degrees`}

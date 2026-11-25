@@ -68,3 +68,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .shutter-flash { background: #fff; }
 .lens-blackout { background: #000; }
 .lens-arrival { opacity: 1; }
+.studio-intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; }
+.intro-field { position: absolute; inset: 0; background: #090b10; }
+.intro-lockup { position: relative; display: flex; align-items: center; gap: .32em; font: 700 clamp(2.4rem, 6vw, 6rem)/1 'DM Sans', sans-serif; letter-spacing: -.065em; color: #eef0f4; }
+.intro-mark { display: block; width: .44em; height: .7em; transform: skewX(-25deg); background: linear-gradient(135deg,#d34b70,#781b36); }
+.intro-skip { position: absolute; right: max(24px,env(safe-area-inset-right)); bottom: max(20px,env(safe-area-inset-bottom)); padding: 12px; border: 0; background: transparent; color: #bdc0c7; font: inherit; cursor: pointer; }
