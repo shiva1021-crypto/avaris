@@ -100,6 +100,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
       timeline?.kill();
       running.current = false;
       gsap.set([flash.current, overlay], { opacity: 0 });
+      gsap.set(canvas.current, { clearProps: 'transform,willChange' });
       gsap.set(document.querySelectorAll('.site-header, .headline, .chapter-nav'), { clearProps: 'opacity' });
       window.dispatchEvent(new CustomEvent('avaris-transition', { detail: false }));
       turn.current(angle.current);
@@ -115,6 +116,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
       const straight = 48;
       const destination = state.degrees + gsap.utils.wrap(-180, 180, straight - state.degrees);
       const draw = () => turn.current(state.degrees, state.push);
+      if (minimalMotion) gsap.set(canvas.current, { willChange: 'transform' });
       timeline = gsap.timeline({ onComplete: () => {
         try { sessionStorage.setItem('avaris-lens-transition', '1'); } catch { /* Storage may be unavailable. */ }
         location.assign(url);
@@ -124,7 +126,9 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
         .to(flash.current, { opacity: 0, duration: .23, ease: 'power2.out' })
         .addLabel('enterLens', '<.10')
         .to(document.querySelectorAll('.site-header, .headline, .chapter-nav'), { opacity: 0, duration: .32 }, 'enterLens')
-        .to(state, { push: 1, duration: 1.5, ease: 'power2.inOut', onUpdate: draw }, 'enterLens')
+        .to(minimalMotion ? canvas.current : state, minimalMotion
+          ? { scale: 5, duration: 1.15, ease: 'power2.inOut' }
+          : { push: 1, duration: 1.5, ease: 'power2.inOut', onUpdate: draw }, 'enterLens')
         .to(overlay, { opacity: 1, duration: .4, ease: 'power2.out' }, '-=.62')
         .to(overlay, { opacity: 1, duration: .22 });
     };
@@ -134,7 +138,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
       timeline?.kill();
       transition.current = null;
     };
-  }, [transition]);
+  }, [transition, minimalMotion]);
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
     {createPortal(<>

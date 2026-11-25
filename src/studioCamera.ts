@@ -138,6 +138,11 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
         THREE.MathUtils.lerp(offsetX,(referenceWidth-w)/2,push),
         THREE.MathUtils.lerp(offsetY + (renderingCloseup ? 0 : cropTop),(referenceHeight-h)/2,push),w,h);
       renderer.render(scene,camera);
+      if (mobile && push === 0) {
+        const opticalCenter = lens.clone().project(camera);
+        canvas.style.transformOrigin = ((opticalCenter.x + 1) * w / 2) + 'px ' +
+          ((1 - opticalCenter.y) * h / 2) + 'px';
+      }
     };
     function fit() {
       const bounds = holder.getBoundingClientRect();
