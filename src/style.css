@@ -239,6 +239,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
     linear-gradient(var(--focus-mark), var(--focus-mark)) right bottom / 10px 1px,
     linear-gradient(var(--focus-mark), var(--focus-mark)) right bottom / 1px 10px;
   background-repeat: no-repeat;
+  background-color: rgb(10 13 18 / 48%);
+  backdrop-filter: blur(6px);
 }
 .chapter-link::after {
   content: '';

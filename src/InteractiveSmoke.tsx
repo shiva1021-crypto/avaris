@@ -8,8 +8,8 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const element = canvas.current!;
     const context = element.getContext('2d', { alpha: true });
     if (!context) return;
-    const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
-    const liveSmoke = mobile ? null : LiveSmokeRenderer.create();
+    const mobile = matchMedia('(pointer: coarse), (max-width: 767px)').matches;
+    const liveSmoke = LiveSmokeRenderer.create();
     let sprite: HTMLCanvasElement | undefined;
     let suspended = false;
     element.dataset.smokeRenderer = liveSmoke ? 'procedural-airflow' : 'canvas-airflow';
@@ -118,7 +118,9 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const leave = () => { previousPointer = null; };
     const resize = () => {
       const rect = element.getBoundingClientRect();
-      const ratio = mobile ? Math.min(.45, 340 / Math.max(rect.width,rect.height,1)) : Math.min(1, 1000 / Math.max(rect.width, 1));
+      const ratio = mobile
+        ? Math.min(1, Math.sqrt(250_000 / Math.max(rect.width * rect.height, 1)))
+        : Math.min(1, 1000 / Math.max(rect.width, 1));
       width = element.width = Math.max(1, Math.round(rect.width * ratio));
       height = element.height = Math.max(1, Math.round(rect.height * ratio));
       liveSmoke?.resize(width, height);

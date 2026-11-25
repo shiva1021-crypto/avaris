@@ -51,7 +51,7 @@ export default function App() {
     return () => { context.revert(); media.removeEventListener('change', change); mobileLayout.removeEventListener('change', updateLayout); };
   }, []);
   return <><main inert={playingIntro} ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''} ${mobile ? 'is-static-mobile' : ''}`}>
-    {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion || mobile} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1><StudioAtmosphere reducedMotion={reducedMotion || mobile} /></>}
+    {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1><StudioAtmosphere reducedMotion={reducedMotion} /></>}
     <header className="site-header">
       <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" />{isServicesPage && <span>MYBI Digital</span>}</a>
       <nav className="desktop-nav" aria-label="Desktop navigation">
@@ -73,7 +73,7 @@ export default function App() {
       <button className="chapter-neighbor previous" type="button" onClick={() => changeChapter(-1)}>{pages[(selectedIndex - 1 + pages.length) % pages.length].title}</button>
       <button className="chapter-arrow previous" type="button" aria-label="Show previous page" onClick={() => changeChapter(-1)}><span aria-hidden="true" /></button>
       <a className="chapter-link" href={selection.path} onClick={event => {
-        if (mobile || !loaded || reducedMotion || !lensTransition.current || event.metaKey || event.ctrlKey ||
+        if (!loaded || reducedMotion || !lensTransition.current || event.metaKey || event.ctrlKey ||
             event.shiftKey || event.altKey || event.button !== 0) return;
         event.preventDefault();
         lensTransition.current(event.currentTarget.href);
