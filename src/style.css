@@ -127,43 +127,24 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 }
 .studio-intro.is-lit .intro-light-beam { opacity: 1; }
 .intro-light-pool { display: none; }
-.intro-rope {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 50%;
-  width: 64px;
-  height: calc(43svh + 110px);
-  transform: translateX(-50%);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  touch-action: none;
-  cursor: grab;
+.studio-pullcord {
+  --pullcord-top: max(0px, calc(43svh - 176px));
+  --pullcord-right: calc(50% - 32px);
+  --pullcord-z: 2;
+  --pullcord-ink: #a1a5ae;
 }
-.intro-rope:active { cursor: grabbing; }
-.intro-rope:focus-visible { outline: none; }
-.intro-rope:focus-visible .intro-rope-end { outline: 1px solid #d7819f; outline-offset: 5px; }
-.intro-rope-line {
+.studio-pullcord::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 50%;
+  bottom: 100%;
+  left: 31px;
   width: 2px;
-  transform: translateX(-50%);
+  height: max(0px, calc(43svh - 176px));
   background: repeating-linear-gradient(110deg, #858b94 0 2px, #30343e 2px 4px);
-  box-shadow: 1px 0 2px #000;
 }
-.intro-rope-end {
-  position: absolute;
-  top: 43svh;
-  left: 50%;
-  width: 15px;
-  height: 31px;
-  border: 1px solid #9e526a;
-  border-radius: 5px 5px 9px 9px;
-  background: linear-gradient(90deg, #351723, #9a4964 47%, #351723);
-  box-shadow: 0 3px 12px #0008;
-}
+.studio-pullcord stop:first-child { stop-color: #b96d87; }
+.studio-pullcord stop:last-child { stop-color: #471e30; }
+.studio-pullcord .pullcord-knob:focus-visible { outline-color: #df91ab; }
 .intro-instruction {
   position: absolute;
   left: 20px;

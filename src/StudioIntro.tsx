@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { PullCord } from 'pullcord';
+import 'pullcord/pullcord.css';
 
-const seenKey = 'mybi-studio-light-v2';
+const seenKey = 'mybi-studio-light-v3';
 
 export function shouldPlayIntro() {
   const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
@@ -11,17 +13,15 @@ export function shouldPlayIntro() {
 }
 
 export default function StudioIntro({ ready, finish }: { ready: boolean; finish: () => void }) {
-  const switchButton = useRef<HTMLButtonElement>(null);
   const [waitExpired, setWaitExpired] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const pullStart = useRef(0);
-  const dragging = useRef(false);
   const activated = useRef(false);
-  const [pull, setPull] = useState(0);
   const [pulled, setPulled] = useState(false);
 
   useEffect(() => {
-    switchButton.current?.focus({ preventScroll: true });
+    const button = root.current?.querySelector<HTMLButtonElement>('.pullcord-knob');
+    button?.setAttribute('aria-describedby', 'intro-instruction');
+    button?.focus({ preventScroll: true });
     const timer = window.setTimeout(() => setWaitExpired(true), 12000);
     return () => clearTimeout(timer);
   }, []);
@@ -30,7 +30,6 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
     if (activated.current) return;
     activated.current = true;
     setPulled(true);
-    setPull(value => Math.max(value, 32));
   };
 
   useEffect(() => {
@@ -56,43 +55,19 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
       <div className="intro-light-pool" />
 
     </div>
-    <button
-      ref={switchButton}
-      className="intro-rope"
-      type="button"
-      aria-label="Pull the rope to turn on the light and enter the site"
-      aria-pressed={pulled}
-      aria-describedby="intro-instruction"
-      onClick={activate}
-      onPointerDown={event => {
-        if (pulled) return;
-        pullStart.current = event.clientY;
-        dragging.current = true;
-        event.currentTarget.setPointerCapture(event.pointerId);
-      }}
-      onPointerMove={event => {
-        if (!dragging.current) return;
-        setPull(Math.max(0, Math.min(72, event.clientY - pullStart.current)));
-      }}
-      onPointerUp={event => {
-        if (!dragging.current) return;
-        dragging.current = false;
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-        if (event.clientY - pullStart.current >= 24) activate();
-        else setPull(0);
-      }}
-      onPointerCancel={() => {
-        dragging.current = false;
-        setPull(0);
-      }}
-    >
-      <span className="intro-rope-line" style={{ height: `calc(43svh + ${pull}px)` }} />
-      <span className="intro-rope-end" style={{ transform: `translate(-50%, ${pull}px)` }} />
-    </button>
+    <PullCord
+      className="studio-pullcord"
+      noEntrance
+      pulled={pulled}
+      onPull={activate}
+      ariaLabel="Pull the cord to turn on the studio lights"
+      config={{ gravity: 1050, damping: .96, iterations: 16, stretchMax: 48, stretchToggle: 25, maxVelocity: 18 }}
+    />
+
     <div className="intro-instruction" id="intro-instruction">
       <p className="intro-studio-name">MYBI Digital</p>
       <h1>Bring the studio to life.</h1>
-      <p role="status">{pulled ? ready || waitExpired ? 'Lights on.' : 'Getting the studio ready…' : 'Pull the cord to turn on the lights.'}</p>
+      <p role="status">{pulled ? ready || waitExpired ? 'Lights on.' : 'Getting the studio readyâ€¦' : 'Pull the cord to turn on the lights.'}</p>
       {!pulled && <span>Or tap the handle to enter.</span>}
     </div>
   </div>;
