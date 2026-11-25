@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
-const seenKey = 'mybi-rope-intro';
+const seenKey = 'mybi-studio-light-v2';
 
 export function shouldPlayIntro() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
   if (navigation?.type === 'reload') return true;
   try { return !sessionStorage.getItem(seenKey); }
@@ -12,12 +11,20 @@ export function shouldPlayIntro() {
 }
 
 export default function StudioIntro({ ready, finish }: { ready: boolean; finish: () => void }) {
+  const switchButton = useRef<HTMLButtonElement>(null);
+  const [waitExpired, setWaitExpired] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const pullStart = useRef(0);
   const dragging = useRef(false);
   const activated = useRef(false);
   const [pull, setPull] = useState(0);
   const [pulled, setPulled] = useState(false);
+
+  useEffect(() => {
+    switchButton.current?.focus({ preventScroll: true });
+    const timer = window.setTimeout(() => setWaitExpired(true), 12000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const activate = () => {
     if (activated.current) return;
@@ -27,35 +34,35 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
   };
 
   useEffect(() => {
-    if (!pulled || !ready || !root.current) return;
+    if (!pulled || (!ready && !waitExpired) || !root.current) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const fade = gsap.to(root.current, {
       opacity: 0,
-      delay: .7,
-      duration: .8,
+      delay: reduce ? 0 : .35,
+      duration: reduce ? 0 : 1.1,
       ease: 'power2.in',
       onComplete: () => {
         try { sessionStorage.setItem(seenKey, '1'); } catch { /* Playback still works without storage. */ }
         finish();
+        requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>('.brand')?.focus({ preventScroll: true }));
       },
     });
     return () => { fade.kill(); };
-  }, [finish, pulled, ready]);
+  }, [finish, pulled, ready, waitExpired]);
 
   return <div ref={root} className={`studio-intro ${pulled ? 'is-lit' : ''}`} role="dialog" aria-modal="true" aria-label="Pull the rope to turn on the light and enter">
     <div className="intro-room" aria-hidden="true">
       <div className="intro-light-beam" />
       <div className="intro-light-pool" />
-      <div className="intro-pendant">
-        <span className="intro-pendant-wire" />
-        <span className="intro-pendant-shade" />
-        <span className="intro-pendant-bulb" />
-      </div>
+
     </div>
     <button
+      ref={switchButton}
       className="intro-rope"
       type="button"
       aria-label="Pull the rope to turn on the light and enter the site"
       aria-pressed={pulled}
+      aria-describedby="intro-instruction"
       onClick={activate}
       onPointerDown={event => {
         if (pulled) return;
@@ -79,8 +86,14 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
         setPull(0);
       }}
     >
-      <span className="intro-rope-line" style={{ height: `calc(61vh + ${pull}px)` }} />
+      <span className="intro-rope-line" style={{ height: `calc(43svh + ${pull}px)` }} />
       <span className="intro-rope-end" style={{ transform: `translate(-50%, ${pull}px)` }} />
     </button>
+    <div className="intro-instruction" id="intro-instruction">
+      <p className="intro-studio-name">MYBI Digital</p>
+      <h1>Bring the studio to life.</h1>
+      <p role="status">{pulled ? ready || waitExpired ? 'Lights on.' : 'Getting the studio ready…' : 'Pull the cord to turn on the lights.'}</p>
+      {!pulled && <span>Or tap the handle to enter.</span>}
+    </div>
   </div>;
 }

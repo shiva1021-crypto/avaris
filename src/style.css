@@ -102,46 +102,82 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
 .shutter-flash { background: #fff; }
 .lens-blackout { background: #000; }
 .lens-arrival { opacity: 1; }
-.studio-intro { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #020304; isolation: isolate; }
-.intro-room { position: absolute; inset: 0; background: linear-gradient(180deg, #020304 0%, #030405 76%, #070809 100%); }
-.intro-light-beam {
-  position: absolute;
-  top: 13%;
-  right: 0;
-  width: 56%;
-  height: 87%;
-  clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, rgb(255 235 194 / 18%), rgb(255 235 194 / 3%) 70%, transparent);
-  opacity: 0;
-  transition: opacity .75s ease;
-}
-.intro-light-pool {
+.studio-intro { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #030509; isolation: isolate; }
+.intro-room {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 32% 42% at 72% 21%, rgb(255 226 172 / 22%), transparent 72%);
-  opacity: 0;
-  transition: opacity .75s ease;
+  background: #0a0a0a url('/assets/studio-empty.webp') center / 100% 100% no-repeat;
 }
-.intro-pendant { position: absolute; top: 0; right: clamp(82px, 19vw, 280px); width: 72px; height: 180px; }
-.intro-pendant-wire { position: absolute; top: 0; left: 50%; width: 2px; height: 10vh; transform: translateX(-50%); background: linear-gradient(#303238, #5b5549); }
-.intro-pendant-shade { position: absolute; top: calc(10vh - 2px); left: 50%; width: 62px; height: 11px; transform: translateX(-50%); border-radius: 2px 2px 50% 50%; background: linear-gradient(180deg, #393a3a, #17191b); box-shadow: 0 4px 14px #000b; }
-.intro-pendant-bulb { position: absolute; top: calc(10vh + 8px); left: 50%; width: 20px; height: 27px; transform: translateX(-50%); border: 1px solid #6f6655; border-radius: 50% 50% 42% 42%; background: #39352d; box-shadow: 0 0 9px rgb(207 176 115 / 14%); transition: background .2s, box-shadow .4s; }
-.intro-pendant-bulb::after { content: ''; position: absolute; left: 5px; right: 5px; bottom: -5px; height: 6px; border-radius: 0 0 2px 2px; background: #504b41; }
-.studio-intro.is-lit .intro-light-beam, .studio-intro.is-lit .intro-light-pool { opacity: 1; }
-.studio-intro.is-lit .intro-pendant-bulb { background: #fff0c4; box-shadow: 0 0 22px 8px rgb(255 226 172 / 54%), 0 0 95px 28px rgb(255 226 172 / 25%); }
-.intro-rope { position: absolute; z-index: 2; top: 0; right: clamp(24px, 9vw, 130px); width: 56px; height: 100%; padding: 0; border: 0; background: transparent; touch-action: none; cursor: grab; }
+.intro-room::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #020409;
+  opacity: .96;
+  transition: opacity 1.2s ease;
+}
+.studio-intro.is-lit .intro-room::after { opacity: 0; }
+.intro-light-beam {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at 0% 0%, #d9e8ff3d, transparent 58%);
+  transition: opacity .8s ease;
+}
+.studio-intro.is-lit .intro-light-beam { opacity: 1; }
+.intro-light-pool { display: none; }
+.intro-rope {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  width: 64px;
+  height: calc(43svh + 110px);
+  transform: translateX(-50%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  touch-action: none;
+  cursor: grab;
+}
 .intro-rope:active { cursor: grabbing; }
 .intro-rope:focus-visible { outline: none; }
-.intro-rope:focus-visible .intro-rope-end { box-shadow: 0 0 0 3px #df91ab, 0 0 18px #df91ab99; }
-.intro-rope-line { position: absolute; top: 0; left: 50%; width: 2px; transform: translateX(-50%); background: repeating-linear-gradient(180deg, #625b4d 0 3px, #37352f 3px 6px); box-shadow: 0 0 4px #bda77844; }
-.intro-rope-end { position: absolute; top: 61vh; left: 50%; width: 13px; height: 22px; border: 1px solid #84765b; border-radius: 45% 45% 55% 55%; background: linear-gradient(90deg, #514a3c, #b3a17c 48%, #514a3c); box-shadow: 0 0 9px #c6ad7655; animation: rope-invitation 2.4s ease-in-out infinite; }
-.studio-intro.is-lit .intro-rope-end { animation: none; }
-@keyframes rope-invitation { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } }
-@media (max-width: 600px) {
-  .intro-pendant { right: 20vw; transform: scale(.85); transform-origin: top right; }
-  .intro-rope { right: max(24px, 8vw); }
-  .intro-light-beam { width: 74%; right: -9%; }
+.intro-rope:focus-visible .intro-rope-end { outline: 1px solid #d7819f; outline-offset: 5px; }
+.intro-rope-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(110deg, #858b94 0 2px, #30343e 2px 4px);
+  box-shadow: 1px 0 2px #000;
 }
+.intro-rope-end {
+  position: absolute;
+  top: 43svh;
+  left: 50%;
+  width: 15px;
+  height: 31px;
+  border: 1px solid #9e526a;
+  border-radius: 5px 5px 9px 9px;
+  background: linear-gradient(90deg, #351723, #9a4964 47%, #351723);
+  box-shadow: 0 3px 12px #0008;
+}
+.intro-instruction {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: calc(43svh + 125px);
+  text-align: center;
+  color: #d3d7e0;
+  font: 400 15px/1.5 'Host Grotesk', sans-serif;
+}
+.intro-studio-name { color: #b98b9b; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+.intro-instruction h1 { font-size: clamp(24px, 3vw, 40px); font-weight: 500; letter-spacing: -.04em; margin: 12px 0; }
+.intro-instruction p { margin: 8px 0; }
+.intro-instruction > span { font-size: 12px; color: #969ba7; }
+@media (prefers-reduced-motion: reduce) { .intro-room::after, .intro-light-beam { transition: none; } }
 
 .homepage .brand-mark { width: clamp(58px, 5.2vw, 82px); }
 
