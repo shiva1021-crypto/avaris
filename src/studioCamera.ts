@@ -139,7 +139,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       if (!w || !h) return;
       // Smooth thin highlights on high-density phones while bounding the
       // number of pixels rendered during rotation and the lens transition.
-      const mobilePixelRatio = Math.min(1.5, Math.sqrt(900_000 / (w * h)));
+      const mobilePixelRatio = Math.min(1.25, Math.sqrt(500_000 / (w * h)));
       renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? mobilePixelRatio : 1.75));
       renderer.setSize(w,h,false);
       cancelAnimationFrame(frame);

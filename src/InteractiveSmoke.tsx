@@ -49,7 +49,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
     const tick = (now: number) => {
       frame = 0;
       if (document.hidden || suspended) return;
-      const interval = 1000 / (mobile ? 24 : cursor.dx ** 2 + cursor.dy ** 2 > .000001 ? 60 : 30) - 1;
+      const interval = 1000 / (mobile ? 20 : cursor.dx ** 2 + cursor.dy ** 2 > .000001 ? 60 : 30) - 1;
       if (now - last < interval) { frame = requestAnimationFrame(tick); return; }
       const delta = last ? Math.min((now - last) / 1000, .05) : 0;
       elapsed += delta; last = now;
@@ -75,7 +75,7 @@ export default function InteractiveSmoke({ reducedMotion }: { reducedMotion: boo
       if (!document.hidden && !suspended && !frame) { last = 0; frame = requestAnimationFrame(tick); }
     };
     const pointer = (event: PointerEvent) => {
-      if (suspended || (event.target instanceof Element && event.target.closest('.camera-drag, dialog, .studio-intro'))) {
+      if (suspended || (event.target instanceof Element && event.target.closest('dialog, .studio-intro'))) {
         previousPointer = null;
         return;
       }
