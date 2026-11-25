@@ -23,7 +23,7 @@ function reflectionPanel(room: THREE.Scene, position: THREE.Vector3, width: numb
 
 export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: AbortSignal) {
   const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !mobile });
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = !mobile;
@@ -136,7 +136,10 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       offsetY = top - .10*referenceHeight;
       const w=canvas.clientWidth, h=canvas.clientHeight;
       if (!w || !h) return;
-      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1 : 1.75));
+      // Smooth thin highlights on high-density phones while bounding the
+      // number of pixels rendered during rotation and the lens transition.
+      const mobilePixelRatio = Math.min(1.5, Math.sqrt(900_000 / (w * h)));
+      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? mobilePixelRatio : 1.75));
       renderer.setSize(w,h,false);
       cancelAnimationFrame(frame);
       draw();
