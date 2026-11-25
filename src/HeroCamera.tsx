@@ -72,6 +72,10 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
     if (!active || chapterAngle === null || running.current) return;
     hasSelectedChapter.current = true;
     idlePan.current?.pause();
+    const suspendAtmosphere = minimalMotion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const setAtmosphereSuspended = (suspended: boolean) =>
+      window.dispatchEvent(new CustomEvent('avaris-transition', { detail: suspended }));
+    if (suspendAtmosphere) setAtmosphereSuspended(true);
     const pose = { degrees: angle.current };
     chapterTurn.current = gsap.to(pose, {
       degrees: chapterAngle,
@@ -81,8 +85,12 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
         angle.current = pose.degrees;
         turn.current(pose.degrees);
       },
+      onComplete: () => { if (suspendAtmosphere) setAtmosphereSuspended(false); },
     });
-    return () => { chapterTurn.current?.kill(); };
+    return () => {
+      chapterTurn.current?.kill();
+      if (suspendAtmosphere) setAtmosphereSuspended(false);
+    };
   }, [active, chapterAngle, minimalMotion]);
 
   useEffect(() => {
