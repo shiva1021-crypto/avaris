@@ -13,5 +13,49 @@
     "delivery": "public/assets/studio-empty.webp",
     "transparent": false,
     "prompt": "Use case: precise-object-edit. Edit target: supplied empty studio background. Remove ONLY both burgundy/red fabric wave ribbons and their reddish glows. Reconstruct the empty studio behind those ribbons seamlessly. Preserve EXACTLY all other lighting, camera viewpoint, dimensions, composition, smooth cool slate studio haze, near-black onyx environment, upper-left soft white spotlight and dark polished floor including its restrained silver reflections and horizon at 84% height. The entire scene should be an empty smooth dark product studio plate, no visible waves or fabric, no red or burgundy illumination, no equipment, no camera, no text, no logo. Keep the original 16:9 framing. This background will be combined with live animated fabric ribbons and smoke in code."
+  },
+  "digitalMarketing": {
+    "manifest": "public/assets/digital-marketing/asset-manifest.json",
+    "character": {
+      "source": "Breathing Idle.fbx (Mixamo / Adobe; original remains untracked)",
+      "output": "public/assets/digital-marketing/character/mybi-idle-character.glb",
+      "source_bytes": 54754288,
+      "output_bytes": 3723152,
+      "animation": "Armature|mixamo.com|Layer0, frames 1-299, 30 fps, 9.9667 s, 299 keys per track",
+      "verification": "Node GLTFLoader parse passed; 65 bones, 7 skinned meshes, skin weights intact, loop seam 0.0622 degrees and 0 position units.",
+      "license_note": "Mixamo Additional Terms effective 2021-06-23 incorporate use into Adobe General Terms and prohibit AI/ML training. Commercial use appears permitted in finished work, but no standalone redistribution or resale. Adobe Help FAQ was inaccessible in this session (403/404); recheck current terms before public deployment.",
+      "scripts": [
+        "scripts/convert_character.py",
+        "scripts/verify_character_glb.mjs"
+      ]
+    },
+    "globe": {
+      "source": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
+      "output": "public/assets/digital-marketing/globe/earth-land-mask-1024x512.png",
+      "license": "Natural Earth data is public domain.",
+      "details": "1024x512 grayscale equirectangular land mask; land 255, ocean 0.",
+      "script": "scripts/generate_land_mask.py"
+    },
+    "screens": {
+      "directory": "public/assets/digital-marketing/screens/",
+      "manifest": "public/assets/digital-marketing/screens/screen-manifest.json",
+      "sources": [
+        "models/avaris-side.jpg",
+        "models/avaris-three-quarter.jpg",
+        "public/assets/studio-background.webp",
+        "public/assets/studio-empty.webp",
+        "design-archive/camera-reference-cutout.webp",
+        "public/mybi-logo.png",
+        "public/mybi-titanium.png"
+      ],
+      "license": "Existing internal MYBI Digital project assets and user-supplied concept-derived cutout; for temporary use in this site only.",
+      "processing": "WebP quality 88, method 6; source aspect ratios preserved; no burgundy tint, frames, glow or lighting baked into textures.",
+      "script": "scripts/prepare_screen_textures.py"
+    },
+    "reference": {
+      "source": "C:/Users/ACTIVE/Downloads/Digital Marketing Command Center.png",
+      "output": "design-archive/Digital Marketing Command Center.png",
+      "use": "Approved visual reference only; not used as a texture."
+    }
   }
 }

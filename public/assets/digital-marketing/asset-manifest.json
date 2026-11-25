@@ -1,0 +1,191 @@
+{
+  "phase": "A",
+  "title": "Digital marketing scene assets",
+  "generated": "2026-11-25",
+  "status": "Complete; awaiting approval for Phase B",
+  "notes": [
+    "All paths are relative to the repository root.",
+    "The original Breathing Idle.fbx remains untracked and unmodified.",
+    "Screen textures are temporary stand-ins and can be replaced by overwriting same-named WebP files.",
+    "The approved concept image is a visual reference only and is not used as a texture."
+  ],
+  "character": {
+    "source": {
+      "path": "Breathing Idle.fbx",
+      "bytes": 54754288,
+      "provider": "Mixamo / Adobe",
+      "asset": "Ch31 character with Breathing Idle animation",
+      "terms": {
+        "status": "Partially verified; confirm current Adobe terms before public deployment.",
+        "authoritative_document": "https://wwwimages2.adobe.com/content/dam/cc/en/legal/servicetou/Mixamo-Addl-Terms-en_US-20210623.pdf",
+        "effective": "2021-06-23",
+        "finding": "The additional terms incorporate Mixamo use into the Adobe General Terms and prohibit using Mixamo content to train or improve AI/ML systems. Search results indicate free commercial use is permitted, but the Adobe Help FAQ was inaccessible during this session (403/404). Do not redistribute or resell the model as a standalone asset.",
+        "action": "Use only inside the finished website; do not publish the source FBX or a downloadable standalone GLB."
+      }
+    },
+    "output": {
+      "path": "public/assets/digital-marketing/character/mybi-idle-character.glb",
+      "bytes": 3723152,
+      "reduction_percent": 93.2,
+      "dimensions": null,
+      "source_animation": "Armature|mixamo.com|Layer0",
+      "animation_duration_seconds": 9.966666221618652,
+      "animation_frames": [1, 299],
+      "fps": 30,
+      "animation_tracks": 195,
+      "keys_per_track": 299,
+      "loop_delta": {
+        "max_position_units": 0,
+        "max_rotation_degrees": 0.062181511208049094
+      },
+      "armature_bones": 65,
+      "mesh_objects": [
+        "Ch31_Body",
+        "Ch31_Collar",
+        "Ch31_Eyelashes",
+        "Ch31_Hair",
+        "Ch31_Pants",
+        "Ch31_Shoes",
+        "Ch31_Sweater"
+      ],
+      "blender_vertices": 30724,
+      "blender_polygons": 25493,
+      "glb_vertices": 33097,
+      "glb_triangles": 50266,
+      "vertex_note": "GLB vertex count is higher because UV/normal seams are split for GPU rendering; silhouette and skin weights are unchanged.",
+      "textures": {
+        "body_color": "2048x2048 WebP",
+        "normal": "1024x1024 WebP",
+        "specular": "512x512 WebP",
+        "roughness": "1024x1024 WebP",
+        "hair_cards": "1024x1024 WebP with alpha"
+      },
+      "verification": "public/assets/digital-marketing/character/verification-report.json",
+      "verification_result": "GLTFLoader parse passed; clip name, 299 keys, 65 bones, 7 skinned meshes, skin weights and loop seam all passed."
+    },
+    "scripts": [
+      "scripts/convert_character.py",
+      "scripts/verify_character_glb.mjs"
+    ]
+  },
+  "globe": {
+    "path": "public/assets/digital-marketing/globe/earth-land-mask-1024x512.png",
+    "bytes": 8303,
+    "dimensions": [1024, 512],
+    "format": "grayscale PNG; land = 255, ocean = 0",
+    "projection": "equirectangular WGS84",
+    "land_percent": 29.26,
+    "source": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
+    "source_scale": "1:110m",
+    "source_features": 127,
+    "source_license": "Natural Earth data is public domain.",
+    "report": "public/assets/digital-marketing/globe/land-mask-report.json",
+    "preview_text": "design-archive/digital-marketing-mask-preview.txt",
+    "script": "scripts/generate_land_mask.py"
+  },
+  "screens": {
+    "directory": "public/assets/digital-marketing/screens/",
+    "count": 8,
+    "manifest": "public/assets/digital-marketing/screens/screen-manifest.json",
+    "processing": "WebP quality 88, method 6; no burgundy tint, frame, glow or lighting baked into the textures.",
+    "textures": [
+      {
+        "name": "screen-01-camera-side.webp",
+        "dimensions": [1000, 820],
+        "bytes": 23688,
+        "source": "models/avaris-side.jpg",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      },
+      {
+        "name": "screen-02-camera-three-quarter.webp",
+        "dimensions": [1000, 820],
+        "bytes": 24396,
+        "source": "models/avaris-three-quarter.jpg",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      },
+      {
+        "name": "screen-03-studio-background.webp",
+        "dimensions": [1672, 941],
+        "bytes": 27298,
+        "source": "public/assets/studio-background.webp",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      },
+      {
+        "name": "screen-04-studio-empty.webp",
+        "dimensions": [1672, 941],
+        "bytes": 22886,
+        "source": "public/assets/studio-empty.webp",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      },
+      {
+        "name": "screen-05-camera-cutout-onyx.webp",
+        "dimensions": [1600, 900],
+        "bytes": 44392,
+        "source": "design-archive/camera-reference-cutout.webp",
+        "license": "Generated from a user-supplied reference; internal MYBI Digital project asset."
+      },
+      {
+        "name": "screen-06-camera-cutout-slate.webp",
+        "dimensions": [1600, 900],
+        "bytes": 47030,
+        "source": "design-archive/camera-reference-cutout.webp",
+        "license": "Generated from a user-supplied reference; internal MYBI Digital project asset."
+      },
+      {
+        "name": "screen-07-mybi-logo.webp",
+        "dimensions": [1600, 900],
+        "bytes": 23880,
+        "source": "public/mybi-logo.png",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      },
+      {
+        "name": "screen-08-mybi-titanium.webp",
+        "dimensions": [1600, 900],
+        "bytes": 22190,
+        "source": "public/mybi-titanium.png",
+        "license": "Existing MYBI Digital project asset; internal reuse for this site."
+      }
+    ],
+    "script": "scripts/prepare_screen_textures.py"
+  },
+  "reference": {
+    "path": "design-archive/Digital Marketing Command Center.png",
+    "bytes": 1764668,
+    "dimensions": [1672, 941],
+    "source": "C:/Users/ACTIVE/Downloads/Digital Marketing Command Center.png",
+    "use": "Approved visual reference only; not used as a texture.",
+    "license": "User-supplied approved concept image for this project."
+  },
+  "previews": {
+    "combined": "design-archive/digital-marketing-phase-a-previews.png",
+    "combined_bytes": 380892,
+    "mask_ascii": "design-archive/digital-marketing-mask-preview.txt"
+  },
+  "directory_structure": [
+    "public/assets/digital-marketing/",
+    "public/assets/digital-marketing/asset-manifest.json",
+    "public/assets/digital-marketing/character/",
+    "public/assets/digital-marketing/character/conversion-report.json",
+    "public/assets/digital-marketing/character/mybi-idle-character.glb",
+    "public/assets/digital-marketing/character/verification-report.json",
+    "public/assets/digital-marketing/globe/",
+    "public/assets/digital-marketing/globe/earth-land-mask-1024x512.png",
+    "public/assets/digital-marketing/globe/land-mask-report.json",
+    "public/assets/digital-marketing/screens/",
+    "public/assets/digital-marketing/screens/screen-01-camera-side.webp",
+    "public/assets/digital-marketing/screens/screen-02-camera-three-quarter.webp",
+    "public/assets/digital-marketing/screens/screen-03-studio-background.webp",
+    "public/assets/digital-marketing/screens/screen-04-studio-empty.webp",
+    "public/assets/digital-marketing/screens/screen-05-camera-cutout-onyx.webp",
+    "public/assets/digital-marketing/screens/screen-06-camera-cutout-slate.webp",
+    "public/assets/digital-marketing/screens/screen-07-mybi-logo.webp",
+    "public/assets/digital-marketing/screens/screen-08-mybi-titanium.webp",
+    "public/assets/digital-marketing/screens/screen-manifest.json"
+  ],
+  "limitations": [
+    "No browser or headless browser was available; GLTFLoader verification ran in Node with image decoding stubbed. Geometry, skinning and animation were parsed normally.",
+    "Adobe Help FAQ pages returned 403/404 in this session; Mixamo terms are only partially verified and should be confirmed again before public deployment.",
+    "Natural Earth 1:110m land data is intentionally coarse at small scales; small islands may be simplified in the 1024x512 mask.",
+    "Screen textures are stand-ins from existing project imagery, not the eight final photographs."
+  ]
+}

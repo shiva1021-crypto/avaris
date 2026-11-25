@@ -1,0 +1,133 @@
+{
+  "verifiedAt": "2026-11-25T18:42:01.969Z",
+  "file": "public/assets/digital-marketing/character/mybi-idle-character.glb",
+  "bytes": 3723152,
+  "extensionsUsed": [
+    "EXT_texture_webp",
+    "KHR_materials_specular"
+  ],
+  "images": [
+    {
+      "index": 0,
+      "name": "Ch31_1001_Specular",
+      "mimeType": "image/webp",
+      "bytes": 528
+    },
+    {
+      "index": 1,
+      "name": "Ch31_1001_Normal",
+      "mimeType": "image/webp",
+      "bytes": 101064
+    },
+    {
+      "index": 2,
+      "name": "Ch31_1001_Diffuse",
+      "mimeType": "image/webp",
+      "bytes": 153226
+    },
+    {
+      "index": 3,
+      "name": "Ch31_1001_Glossiness",
+      "mimeType": "image/webp",
+      "bytes": 37846
+    },
+    {
+      "index": 4,
+      "name": "Ch31_1002_Diffuse",
+      "mimeType": "image/webp",
+      "bytes": 554344
+    }
+  ],
+  "scene": {
+    "bones": 65,
+    "skinnedMeshes": [
+      {
+        "name": "Ch31_Body",
+        "vertices": 9795,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Collar",
+        "vertices": 2219,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Eyelashes",
+        "vertices": 553,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Hair",
+        "vertices": 10724,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Pants",
+        "vertices": 3136,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Shoes",
+        "vertices": 2906,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      },
+      {
+        "name": "Ch31_Sweater",
+        "vertices": 3764,
+        "bones": 65,
+        "hasSkinIndices": true,
+        "hasSkinWeights": true
+      }
+    ],
+    "vertices": 33097,
+    "triangles": 50266,
+    "bounds": {
+      "min": [
+        -0.35363370737480326,
+        -0.0023169674710260117,
+        -0.15137036322906902
+      ],
+      "max": [
+        0.34900808413015305,
+        1.772626877403275,
+        0.2170154756155692
+      ],
+      "height": 1.774943844874301
+    }
+  },
+  "animation": {
+    "name": "Armature|mixamo.com|Layer0",
+    "durationSeconds": 9.966666221618652,
+    "firstKeyframeSeconds": 0.03333333507180214,
+    "lastKeyframeSeconds": 9.966666221618652,
+    "tracks": 195,
+    "keysPerTrack": 299,
+    "loopDelta": {
+      "maxPosition": 0,
+      "maxRotationDegrees": 0.062181511208049094
+    }
+  },
+  "checks": {
+    "glbLoaded": true,
+    "singleAnimationClip": true,
+    "originalClipName": true,
+    "fullFrameRange": true,
+    "allBonesPresent": true,
+    "sevenSkinnedMeshes": true,
+    "skinWeightsPresent": true,
+    "loopSeamWithinTolerance": true
+  },
+  "allChecksPassed": true
+}

@@ -1,0 +1,106 @@
+{
+  "source": "Breathing Idle.fbx",
+  "output": "public/assets/digital-marketing/character/mybi-idle-character.glb",
+  "source_bytes": 54754288,
+  "output_bytes": 3723152,
+  "animation_action": "Armature|mixamo.com|Layer0",
+  "animation_frames": [
+    1,
+    299
+  ],
+  "fps": 30,
+  "armature_bones": 65,
+  "mesh_objects": [
+    "Ch31_Body",
+    "Ch31_Collar",
+    "Ch31_Eyelashes",
+    "Ch31_Hair",
+    "Ch31_Pants",
+    "Ch31_Shoes",
+    "Ch31_Sweater"
+  ],
+  "vertices": 30724,
+  "polygons": 25493,
+  "textures": {
+    "file3": {
+      "original": [
+        4096,
+        4096
+      ],
+      "exported": [
+        1024,
+        1024
+      ]
+    },
+    "file4": {
+      "original": [
+        4096,
+        4096
+      ],
+      "exported": [
+        512,
+        512
+      ]
+    },
+    "file5": {
+      "original": [
+        4096,
+        4096
+      ],
+      "exported": [
+        1024,
+        1024
+      ]
+    },
+    "file6": {
+      "original": [
+        2048,
+        2048
+      ],
+      "exported": [
+        1024,
+        1024
+      ]
+    },
+    "file6.001": {
+      "original": [
+        2048,
+        2048
+      ],
+      "exported": [
+        1024,
+        1024
+      ]
+    },
+    "file6.002": {
+      "original": [
+        2048,
+        2048
+      ],
+      "exported": [
+        1024,
+        1024
+      ]
+    },
+    "file9": {
+      "original": [
+        4096,
+        4096
+      ],
+      "exported": [
+        2048,
+        2048
+      ]
+    },
+    "Viewer Node": {
+      "original": [
+        256,
+        256
+      ],
+      "exported": [
+        256,
+        256
+      ]
+    }
+  }
+}

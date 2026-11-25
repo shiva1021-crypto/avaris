@@ -1,0 +1,18 @@
+{
+  "output": "public/assets/digital-marketing/globe/earth-land-mask-1024x512.png",
+  "size": [
+    1024,
+    512
+  ],
+  "projection": "equirectangular WGS84",
+  "land_value": 255,
+  "ocean_value": 0,
+  "source": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
+  "source_used": "local cache",
+  "source_license": "Natural Earth data is public domain.",
+  "source_scale": "1:110m",
+  "features": 127,
+  "land_pixels": 153417,
+  "land_percent": 29.26,
+  "bytes": 8303
+}

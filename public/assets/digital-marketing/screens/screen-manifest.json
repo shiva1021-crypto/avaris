@@ -1,0 +1,183 @@
+{
+  "purpose": "Temporary stand-in textures for the eight floating digital marketing screens.",
+  "replacement_instruction": "Overwrite a same-named WebP with a landscape photograph; keep the filename so the scene needs no code change.",
+  "processing": "WebP quality 88, method 6. No colour tint, frame, glow or lighting baked into the texture.",
+  "textures": [
+    {
+      "filename": "screen-01-camera-side.webp",
+      "path": "public/assets/digital-marketing/screens/screen-01-camera-side.webp",
+      "source": "models/avaris-side.jpg",
+      "source_dimensions": [
+        1000,
+        820
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1000,
+        820
+      ],
+      "bytes": 23688,
+      "method": "resize",
+      "background": null,
+      "source_aspect_ratio": 1.2195,
+      "output_aspect_ratio": 1.2195,
+      "aspect_ratio_preserved": true,
+      "note": "Camera plate, original aspect ratio retained.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-02-camera-three-quarter.webp",
+      "path": "public/assets/digital-marketing/screens/screen-02-camera-three-quarter.webp",
+      "source": "models/avaris-three-quarter.jpg",
+      "source_dimensions": [
+        1000,
+        820
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1000,
+        820
+      ],
+      "bytes": 24396,
+      "method": "resize",
+      "background": null,
+      "source_aspect_ratio": 1.2195,
+      "output_aspect_ratio": 1.2195,
+      "aspect_ratio_preserved": true,
+      "note": "Camera plate, original aspect ratio retained.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-03-studio-background.webp",
+      "path": "public/assets/digital-marketing/screens/screen-03-studio-background.webp",
+      "source": "public/assets/studio-background.webp",
+      "source_dimensions": [
+        1672,
+        941
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 27298,
+      "method": "resize",
+      "background": null,
+      "source_aspect_ratio": 1.7768,
+      "output_aspect_ratio": 1.7768,
+      "aspect_ratio_preserved": true,
+      "note": "Wide studio plate, original aspect ratio retained.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-04-studio-empty.webp",
+      "path": "public/assets/digital-marketing/screens/screen-04-studio-empty.webp",
+      "source": "public/assets/studio-empty.webp",
+      "source_dimensions": [
+        1672,
+        941
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 22886,
+      "method": "resize",
+      "background": null,
+      "source_aspect_ratio": 1.7768,
+      "output_aspect_ratio": 1.7768,
+      "aspect_ratio_preserved": true,
+      "note": "Clean studio plate, original aspect ratio retained.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-05-camera-cutout-onyx.webp",
+      "path": "public/assets/digital-marketing/screens/screen-05-camera-cutout-onyx.webp",
+      "source": "design-archive/camera-reference-cutout.webp",
+      "source_dimensions": [
+        1254,
+        1254
+      ],
+      "source_license": "Generated from a user-supplied reference; internal MYBI Digital project asset.",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 44392,
+      "method": "fit",
+      "background": "#0A0A0A",
+      "source_aspect_ratio": 1.0,
+      "output_aspect_ratio": 1.7778,
+      "aspect_ratio_preserved": true,
+      "note": "Transparent camera cutout on plain onyx; no frame or glow added.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-06-camera-cutout-slate.webp",
+      "path": "public/assets/digital-marketing/screens/screen-06-camera-cutout-slate.webp",
+      "source": "design-archive/camera-reference-cutout.webp",
+      "source_dimensions": [
+        1254,
+        1254
+      ],
+      "source_license": "Generated from a user-supplied reference; internal MYBI Digital project asset.",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 47030,
+      "method": "fit",
+      "background": "#536878",
+      "source_aspect_ratio": 1.0,
+      "output_aspect_ratio": 1.7778,
+      "aspect_ratio_preserved": true,
+      "note": "Transparent camera cutout on plain blue slate; no frame or glow added.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-07-mybi-logo.webp",
+      "path": "public/assets/digital-marketing/screens/screen-07-mybi-logo.webp",
+      "source": "public/mybi-logo.png",
+      "source_dimensions": [
+        480,
+        297
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 23880,
+      "method": "fit",
+      "background": "#0A0A0A",
+      "source_aspect_ratio": 1.6162,
+      "output_aspect_ratio": 1.7778,
+      "aspect_ratio_preserved": true,
+      "note": "Brand mark stand-in on plain onyx.",
+      "replaceable": true
+    },
+    {
+      "filename": "screen-08-mybi-titanium.webp",
+      "path": "public/assets/digital-marketing/screens/screen-08-mybi-titanium.webp",
+      "source": "public/mybi-titanium.png",
+      "source_dimensions": [
+        512,
+        341
+      ],
+      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "bytes": 22190,
+      "method": "fit",
+      "background": "#E5E4E2",
+      "source_aspect_ratio": 1.5015,
+      "output_aspect_ratio": 1.7778,
+      "aspect_ratio_preserved": true,
+      "note": "Titanium mark stand-in on plain alabaster.",
+      "replaceable": true
+    }
+  ]
+}

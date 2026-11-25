@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import StudioIntro, { shouldPlayIntro } from './StudioIntro';
 import HeroCamera from './HeroCamera';
 import StudioAtmosphere from './StudioAtmosphere';
 import { pages } from './pages';
 
+const DigitalMarketingPage = lazy(() => import('./DigitalMarketingPage'));
+const digitalMarketingPath = window.location.pathname.replace(/\/+$/, '') || '/';
+const isDigitalMarketing = digitalMarketingPath === '/digital-marketing' || digitalMarketingPath === '/digital-marketing/index.html';
+
 const currentPage = pages.find(page => page.path === window.location.pathname.replace(/\/?$/, '/'));
 const isServicesPage = Boolean(currentPage);
 
-export default function App() {
+function StudioApp() {
   const lensTransition = useRef<((url: string) => void) | null>(null);
   const arrival = useRef<HTMLDivElement>(null);
   const [arriving] = useState(() => {
@@ -96,6 +100,15 @@ export default function App() {
       </nav>
     </dialog>
   </main>{playingIntro && <StudioIntro ready={loaded || failed} finish={finishIntro} />}</>;
+}
+
+export default function App() {
+  if (isDigitalMarketing) {
+    return <Suspense fallback={
+      <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
+    }><DigitalMarketingPage /></Suspense>;
+  }
+  return <StudioApp />;
 }
 
 
