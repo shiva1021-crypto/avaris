@@ -113,6 +113,19 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     const holder = canvas.parentElement!;
     const hero = holder.closest('main')!;
     let w = 0, h = 0;
+    let viewportHeight = 0, canvasTop = 0, cropTop = 0;
+    let renderingCloseup = false;
+    const sizeSurface = () => {
+      // The rig occupies the lower portion of the mobile hero during the pan.
+      // Restore the full surface as the lens transition starts to fill the screen.
+      const inset = renderingCloseup ? 0 : cropTop;
+      h = viewportHeight - inset;
+      canvas.style.top = canvasTop + inset + 'px';
+      canvas.style.height = h + 'px';
+      const ratio = mobile ? Math.min(1.25, Math.sqrt(500_000 / (w * viewportHeight))) : 1.75;
+      renderer.setPixelRatio(Math.min(devicePixelRatio, ratio));
+      renderer.setSize(w, h, false);
+    };
     let referenceWidth = 1, referenceHeight = 1, offsetX = 0, offsetY = 0;
     const draw = () => {
       frame = 0;
@@ -123,7 +136,7 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       camera.near = .001;
       camera.setViewOffset(referenceWidth,referenceHeight,
         THREE.MathUtils.lerp(offsetX,(referenceWidth-w)/2,push),
-        THREE.MathUtils.lerp(offsetY,(referenceHeight-h)/2,push),w,h);
+        THREE.MathUtils.lerp(offsetY + (renderingCloseup ? 0 : cropTop),(referenceHeight-h)/2,push),w,h);
       renderer.render(scene,camera);
     };
     function fit() {
@@ -132,29 +145,33 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       referenceWidth = bounds.width * 1.34;
       referenceHeight = bounds.height;
       const left = viewport.left - bounds.left, top = viewport.top - bounds.top;
-      Object.assign(canvas.style, { left: left+'px', top: top+'px', width: viewport.width+'px', height: viewport.height+'px' });
+      Object.assign(canvas.style, { left: left+'px', width: viewport.width+'px' });
       const narrowLayout = viewport.width <= 600;
       offsetX = left + bounds.width * .17 - (narrowLayout ? .018 : .075) * referenceHeight;
       offsetY = top - .10*referenceHeight;
       w = Math.round(viewport.width);
-      h = Math.round(viewport.height);
-      if (!w || !h) return;
-      // Smooth thin highlights on high-density phones while bounding the
-      // number of pixels rendered during rotation and the lens transition.
-      const mobilePixelRatio = Math.min(1.25, Math.sqrt(500_000 / (w * h)));
-      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? mobilePixelRatio : 1.75));
-      renderer.setSize(w,h,false);
+      viewportHeight = Math.round(viewport.height);
+      if (!w || !viewportHeight) return;
+      canvasTop = top;
+      cropTop = mobile && narrowLayout ? Math.max(0, Math.floor(Math.min(-top - bounds.height * .18, viewportHeight * .36))) : 0;
+      sizeSurface();
       cancelAnimationFrame(frame);
       draw();
       const optic = lens.clone().project(camera);
       hero.style.setProperty('--optic-x', (viewport.left + (1 + optic.x) * w / 2) + 'px');
-      hero.style.setProperty('--optic-y', (viewport.top + (1 - optic.y) * h / 2) + 'px');
+      hero.style.setProperty('--optic-y', (viewport.top + (renderingCloseup ? 0 : cropTop) + (1 - optic.y) * h / 2) + 'px');
     }
     fit();
     resize = new ResizeObserver(fit);
     resize.observe(hero);
     resize.observe(holder);
     return (degrees: number, lensPush = 0) => {
+      const closeup = lensPush > 0;
+      if (renderingCloseup !== closeup) {
+        renderingCloseup = closeup;
+        if (cropTop) sizeSurface();
+      }
+      if (lensPush === push && THREE.MathUtils.degToRad(degrees) === head.rotation.y) return;
       push = lensPush;
       const yaw = THREE.MathUtils.degToRad(degrees);
       if (yaw !== head.rotation.y) renderer.shadowMap.needsUpdate = true;
