@@ -132,7 +132,8 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
       referenceHeight = bounds.height;
       const left = viewport.left - bounds.left, top = viewport.top - bounds.top;
       Object.assign(canvas.style, { left: left+'px', top: top+'px', width: viewport.width+'px', height: viewport.height+'px' });
-      offsetX = left + bounds.width*.17 - .075*referenceHeight;
+      const narrowLayout = viewport.width <= 600;
+      offsetX = left + bounds.width * .17 - (narrowLayout ? .018 : .075) * referenceHeight;
       offsetY = top - .10*referenceHeight;
       const w=canvas.clientWidth, h=canvas.clientHeight;
       if (!w || !h) return;

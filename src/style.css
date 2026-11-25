@@ -78,8 +78,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid #df6683; outline-offs
   .brand-mark { width: 34px; }
   .contact-button { margin-left: auto; min-height: 36px; padding: 6px 14px; border-width: 1px; font-size: 14px; gap: 8px; }
   .contact-button span { font-size: 18px; }
-  .headline { top: 20%; }
-  .camera-frame { height: auto; width: 86%; left: 50%; }
+  .headline {
+    top: clamp(105px, 19%, 160px);
+    font-size: 13.7vw;
+    line-height: 1.23;
+  }
+  .headline span { scale: 1 1.13; }
+  .camera-frame {
+    bottom: 18%;
+    left: 50%;
+    width: min(94%, 60svh);
+    height: auto;
+  }
   .chapter-dialog { padding: 54px 28px 30px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
