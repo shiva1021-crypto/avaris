@@ -27,9 +27,9 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [intro, setIntro] = useState(() => !isServicesPage && !mobile && shouldPlayIntro());
+  const [intro, setIntro] = useState(() => !isServicesPage && shouldPlayIntro());
   const finishIntro = useRef(() => setIntro(false)).current;
-  const playingIntro = intro && !mobile && !reducedMotion && !failed;
+  const playingIntro = intro;
   const ready = useRef(() => setLoaded(true)).current;
   useEffect(() => {
     const mobileLayout = matchMedia('(max-width: 767px), (pointer: coarse)');
@@ -95,7 +95,7 @@ export default function App() {
         {pages.map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
       </nav>
     </dialog>
-  </main>{playingIntro && <StudioIntro ready={loaded} finish={finishIntro} />}</>;
+  </main>{playingIntro && <StudioIntro ready={loaded || failed} finish={finishIntro} />}</>;
 }
 
 

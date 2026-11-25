@@ -1,7 +1,7 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
-const seenKey = 'mybi-studio-intro';
+const seenKey = 'mybi-rope-intro';
 
 export function shouldPlayIntro() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
@@ -13,49 +13,74 @@ export function shouldPlayIntro() {
 
 export default function StudioIntro({ ready, finish }: { ready: boolean; finish: () => void }) {
   const root = useRef<HTMLDivElement>(null);
-  const release = useRef<() => void>(() => {});
+  const pullStart = useRef(0);
+  const dragging = useRef(false);
+  const activated = useRef(false);
+  const [pull, setPull] = useState(0);
+  const [pulled, setPulled] = useState(false);
 
-  useLayoutEffect(() => {
-    const overlay = root.current!;
-    const word = overlay.querySelector('.intro-name')!;
-    const mark = overlay.querySelector('.intro-mark')!;
-    const field = overlay.querySelector('.intro-field')!;
-    const skip = overlay.querySelector('.intro-skip')!;
-    const hero = document.getElementById('home')!;
-    let released = false;
-    const target = (axis: 'x' | 'y') => {
-      const opticalCenter = parseFloat(hero.style.getPropertyValue('--optic-' + axis));
-      const box = mark.getBoundingClientRect();
-      const center = axis === 'x' ? box.left + box.width / 2 : box.top + box.height / 2;
-      const fallback = axis === 'x' ? innerWidth * .44 : innerHeight * .62;
-      return (Number.isFinite(opticalCenter) ? opticalCenter : fallback) - center;
-    };
-    const tl = gsap.timeline({ onComplete: finish });
-    tl.fromTo(mark, { opacity: 0, scale: .78 }, { opacity: 1, scale: 1, duration: .4 })
-      .fromTo(word, { yPercent: 110 }, { yPercent: 0, duration: .65, ease: 'power4.out' }, .09)
-      .addLabel('hold', .82)
-      .call(() => { if (!released) tl.pause(); }, [], 'hold')
-      .to(word, { yPercent: -115, duration: .47, ease: 'power3.inOut' }, 'hold')
-      .to(skip, { opacity: 0, duration: .24 }, 'hold')
-      .to(mark, { x: () => target('x'), y: () => target('y'), scale: .24, rotation: -28,
-        borderRadius: '80% 10%', duration: .78, ease: 'power3.inOut' }, 'hold')
-      .to(field, { '--reveal': '155vmax', duration: .95, ease: 'power3.inOut' }, 'hold+=.3')
-      .to(mark, { opacity: 0, duration: .28 }, 'hold+=.78');
-    tl.call(() => {
-      const x = hero.style.getPropertyValue('--optic-x') || '50%';
-      const y = hero.style.getPropertyValue('--optic-y') || '60%';
-      gsap.set(field, { '--reveal-x': x, '--reveal-y': y });
-    }, [], 'hold+=.01');
-    release.current = () => { released = true; tl.play(); };
-    const timeout = window.setTimeout(() => release.current(), 2400);
-    try { sessionStorage.setItem(seenKey, '1'); } catch { /* Playback still works without storage. */ }
-    return () => { clearTimeout(timeout); tl.kill(); };
-  }, [finish]);
+  const activate = () => {
+    if (activated.current) return;
+    activated.current = true;
+    setPulled(true);
+    setPull(value => Math.max(value, 32));
+  };
 
-  useLayoutEffect(() => { if (ready) release.current(); }, [ready]);
-  return <div ref={root} className="studio-intro" aria-label="MYBI Digital introduction">
-    <div className="intro-field" />
-    <div className="intro-lockup" aria-hidden="true"><img className="intro-mark" src="/mybi-titanium.png" alt="" /><span className="intro-name-clip"><span className="intro-name">MYBI Digital</span></span></div>
-    <button className="intro-skip" onClick={finish}>Skip intro</button>
+  useEffect(() => {
+    if (!pulled || !ready || !root.current) return;
+    const fade = gsap.to(root.current, {
+      opacity: 0,
+      delay: .7,
+      duration: .8,
+      ease: 'power2.in',
+      onComplete: () => {
+        try { sessionStorage.setItem(seenKey, '1'); } catch { /* Playback still works without storage. */ }
+        finish();
+      },
+    });
+    return () => { fade.kill(); };
+  }, [finish, pulled, ready]);
+
+  return <div ref={root} className={`studio-intro ${pulled ? 'is-lit' : ''}`} role="dialog" aria-modal="true" aria-label="Pull the rope to turn on the light and enter">
+    <div className="intro-room" aria-hidden="true">
+      <div className="intro-light-beam" />
+      <div className="intro-light-pool" />
+      <div className="intro-pendant">
+        <span className="intro-pendant-wire" />
+        <span className="intro-pendant-shade" />
+        <span className="intro-pendant-bulb" />
+      </div>
+    </div>
+    <button
+      className="intro-rope"
+      type="button"
+      aria-label="Pull the rope to turn on the light and enter the site"
+      aria-pressed={pulled}
+      onClick={activate}
+      onPointerDown={event => {
+        if (pulled) return;
+        pullStart.current = event.clientY;
+        dragging.current = true;
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={event => {
+        if (!dragging.current) return;
+        setPull(Math.max(0, Math.min(72, event.clientY - pullStart.current)));
+      }}
+      onPointerUp={event => {
+        if (!dragging.current) return;
+        dragging.current = false;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        if (event.clientY - pullStart.current >= 24) activate();
+        else setPull(0);
+      }}
+      onPointerCancel={() => {
+        dragging.current = false;
+        setPull(0);
+      }}
+    >
+      <span className="intro-rope-line" style={{ height: `calc(61vh + ${pull}px)` }} />
+      <span className="intro-rope-end" style={{ transform: `translate(-50%, ${pull}px)` }} />
+    </button>
   </div>;
 }
