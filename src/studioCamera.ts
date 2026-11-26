@@ -2,8 +2,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import rigUrl from '../models/avaris-camera-tripod.glb?url';
-import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
 
 // Feathered reflection panels are baked once into the lighting environment.
 // Their gradients remain visible on black glass and brushed metal as the rig turns.
@@ -23,7 +21,7 @@ function reflectionPanel(room: THREE.Scene, position: THREE.Vector3, width: numb
   room.add(panel);
 }
 
-export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: AbortSignal) {
+export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: AbortSignal, rigData: ArrayBuffer) {
   const mobile = matchMedia('(pointer: coarse), (max-width: 600px)').matches;
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setClearColor(0x000000, 0);
@@ -68,9 +66,8 @@ export async function mountStudioCamera(canvas: HTMLCanvasElement, signal: Abort
     renderer.dispose();
   }
   try {
-    const response = await fetch(mobile ? mobileRigUrl : rigUrl, { signal });
-    if (!response.ok) throw new Error('Camera model unavailable');
-    const rig = await loader.parseAsync(await response.arrayBuffer(), '');
+    if (signal.aborted) { dispose(); return; }
+    const rig = await loader.parseAsync(rigData, '');
     scene.add(rig.scene);
     if (signal.aborted) { dispose(); return; }
     signal.addEventListener('abort', dispose, { once: true });

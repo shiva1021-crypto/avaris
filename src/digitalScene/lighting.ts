@@ -78,9 +78,8 @@ export function createLighting(scene: THREE.Scene, renderer: THREE.WebGLRenderer
   glow.position.set(0, 1.75, -4.15);
   glow.scale.set(6.8, 3.4, 1);
   glow.renderOrder = 1;
-  // Layer 1 is enabled on the main camera only. The planar reflector uses its
-  // own layer-0 camera, so the broad halo does not become two neon pillars in
-  // the floor reflection.
+  // Layer 1 is enabled on the main camera only so the broad halo stays behind
+  // the scene and does not wash across the solid floor.
   glow.layers.set(1);
   scene.add(glow);
 

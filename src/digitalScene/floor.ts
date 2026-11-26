@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 import { digitalSceneConfig } from './config';
 import {
   contactShadowFragmentShader,
@@ -10,12 +9,10 @@ import {
   floorOverlayFragmentShader,
   floorOverlayVertexShader,
   floorSheenFragmentShader,
-  reflectorShader,
 } from './shaders';
 
 export interface FloorHandle {
   root: THREE.Group;
-  hasPlanarReflection: boolean;
   dispose(): void;
 }
 
@@ -31,12 +28,11 @@ export function createFloor(mobile: boolean): FloorHandle {
   const root = new THREE.Group();
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
-  let reflector: Reflector | undefined;
 
   const baseGeometry = new THREE.PlaneGeometry(floor.size, floor.size);
-  // The base is unlit and fades out with distance so the floor dissolves into
-  // the backdrop instead of ending on a hard horizon line. All visible sheen
-  // comes from the reflection and localized glow layers.
+  // The floor stays solid and unlit; it fades with distance so it dissolves
+  // into the backdrop instead of ending on a hard horizon line. Only the
+  // restrained stage glow layers sit above it.
   const baseMaterial = new THREE.ShaderMaterial({
     name: 'StudioFloorBase',
     uniforms: { uColor: { value: new THREE.Color(0x050608) } },
@@ -52,29 +48,6 @@ export function createFloor(mobile: boolean): FloorHandle {
   root.add(base);
   geometries.add(baseGeometry);
   materials.add(baseMaterial);
-
-  if (!mobile) {
-    // A compact plane keeps the 512px reflection target concentrated on the
-    // figure and stage; a large plane wasted most of its pixels on black.
-    const reflectorGeometry = new THREE.PlaneGeometry(26, 26);
-    reflector = new Reflector(reflectorGeometry, {
-      color: 0xc0b2b4,
-      textureWidth: floor.reflectorSize,
-      textureHeight: floor.reflectorSize,
-      clipBias: 0.003,
-      multisample: 0,
-      shader: reflectorShader,
-    });
-    reflector.position.set(0, floor.y, character.position[2] - 0.15);
-    reflector.rotation.x = -Math.PI / 2;
-    reflector.renderOrder = 1;
-    const reflectorMaterial = reflector.material as THREE.ShaderMaterial;
-    reflectorMaterial.transparent = true;
-    reflectorMaterial.depthWrite = false;
-    root.add(reflector);
-    geometries.add(reflectorGeometry);
-    materials.add(reflectorMaterial);
-  }
 
   const sheenGeometry = new THREE.PlaneGeometry(16, 10);
   const sheenMaterial = new THREE.ShaderMaterial({
@@ -96,29 +69,6 @@ export function createFloor(mobile: boolean): FloorHandle {
   root.add(sheen);
   geometries.add(sheenGeometry);
   materials.add(sheenMaterial);
-
-  // A second, warmer pool under the globe suggests its reflection without
-  // turning the whole floor into a grey slab.
-  const hazeGeometry = new THREE.PlaneGeometry(14, 7);
-  const hazeMaterial = new THREE.ShaderMaterial({
-    name: 'GlobeFloorReflection',
-    uniforms: {
-      uColor: { value: new THREE.Color(0x8a1f3b) },
-      uOpacity: { value: mobile ? 0.18 : 0.14 },
-    },
-    vertexShader: floorGlowVertexShader,
-    fragmentShader: floorSheenFragmentShader,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  const haze = horizontalPlane(hazeGeometry, floor.y + 0.0025);
-  haze.position.z = -2.4;
-  haze.material = hazeMaterial;
-  haze.renderOrder = 3;
-  root.add(haze);
-  geometries.add(hazeGeometry);
-  materials.add(hazeMaterial);
 
   const glowGeometry = new THREE.PlaneGeometry(8.4, 5.6);
   const glowMaterial = new THREE.ShaderMaterial({
@@ -183,11 +133,9 @@ export function createFloor(mobile: boolean): FloorHandle {
   let disposed = false;
   return {
     root,
-    hasPlanarReflection: Boolean(reflector),
     dispose() {
       if (disposed) return;
       disposed = true;
-      reflector?.dispose();
       geometries.forEach(geometry => geometry.dispose());
       materials.forEach(material => material.dispose());
       root.clear();

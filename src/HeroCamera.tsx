@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import gsap from 'gsap';
 import { createPortal } from 'react-dom';
+import { loadCachedBinary } from './digitalScene/assetCache';
+import desktopRigUrl from '../models/avaris-camera-tripod.glb?url';
+import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
+
+const cameraPosterUrl = new URL('../design-archive/camera-reference-cutout.webp', import.meta.url).href;
 
 export default function HeroCamera({ onReady, onError, transition, chapterAngle, minimalMotion }: {
   minimalMotion: boolean;
@@ -24,9 +29,13 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
     const surface = canvas.current!;
     surface.addEventListener('webglcontextlost', fail);
     async function load() {
-      const { mountStudioCamera } = await import('./studioCamera');
+      const rigUrl = matchMedia('(pointer: coarse), (max-width: 600px)').matches ? mobileRigUrl : desktopRigUrl;
+      const [studioCamera, rigData] = await Promise.all([
+        import('./studioCamera'),
+        loadCachedBinary(rigUrl),
+      ]);
       if (lifetime.signal.aborted) return;
-      const rotate = await mountStudioCamera(surface, lifetime.signal);
+      const rotate = await studioCamera.mountStudioCamera(surface, lifetime.signal, rigData);
       if (!rotate || lifetime.signal.aborted) return;
       turn.current = rotate;
       onReady();
@@ -146,6 +155,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
   }, [transition, minimalMotion]);
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
+    <img className="camera-poster" src={cameraPosterUrl} alt="" aria-hidden="true" fetchPriority="high" />
     {createPortal(<>
       <div ref={flash} className="shutter-flash" aria-hidden="true" />
       <div ref={blackout} className="lens-blackout" aria-hidden="true" />

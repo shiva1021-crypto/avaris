@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { preloadCachedBinary } from './digitalScene/assetCache';
+import { digitalSceneConfig } from './digitalScene/config';
+import { pages } from './pages';
 import './digital-marketing.css';
+
+// Start warming the scene assets as soon as this route's chunk is evaluated.
+// The loader shares the same cache, so reloads reuse these bytes.
+preloadCachedBinary(digitalSceneConfig.character.url);
+preloadCachedBinary(digitalSceneConfig.globe.mask);
 
 type SceneStatus = 'loading' | 'ready' | 'error';
 
 export default function DigitalMarketingPage() {
   const host = useRef<HTMLDivElement>(null);
   const arrival = useRef<HTMLDivElement>(null);
+  const menu = useRef<HTMLDialogElement>(null);
+  const currentPage = pages.find(page => page.path === '/services/');
   const [arriving, setArriving] = useState(() => {
     try { return sessionStorage.getItem('avaris-lens-transition') === '1'; }
     catch { return false; }
@@ -76,39 +86,29 @@ export default function DigitalMarketingPage() {
       aria-busy={status === 'loading'}
       aria-label={status === 'ready'
         ? 'A figure seen from behind in a cinematic studio, with a large holographic Earth and burgundy orbital rings.'
-        : 'Cinematic studio environment for MYBI Digital marketing.'}
+        : 'Cinematic studio environment for MYBI Digital.'}
     >
       <div className="digital-stage-fallback" aria-hidden="true" />
       <p className="digital-scene-notice" aria-hidden="true">Static studio view — 3D scene unavailable</p>
     </div>
 
-    <header className="site-header digital-header">
-      <a className="brand" href="/" aria-label="MYBI Digital home">
-        <img className="brand-mark" src="/mybi-titanium.png" alt="" />
-        <span><span className="digital-brand-mybi">MYBI</span> <span className="digital-brand-digital">Digital</span></span>
-      </a>
-      <a className="header-contact" href="/contact/">
-        Contact
-        <span className="digital-contact-arrow" aria-hidden="true">↗</span>
-      </a>
+    <header className="site-header">
+      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
+      <nav className="desktop-nav" aria-label="Desktop navigation">
+        {pages.slice(0, -1).map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
+      </nav>
+      <button className="contact-button site-menu-toggle" aria-haspopup="dialog" onClick={() => menu.current?.showModal()}><span>Menu</span><span className="menu-lines" aria-hidden="true" /></button>
     </header>
 
-    <div className="digital-typography">
-      <h1 className="digital-headline">
-        <span className="digital-headline-small">Digital</span>
-        <span className="digital-headline-large">Marketing</span>
-      </h1>
-      <p className="digital-tagline">
-        <span>Strategy</span>
-        <span className="digital-tagline-dot" aria-hidden="true">·</span>
-        <span>Content</span>
-        <span className="digital-tagline-dot" aria-hidden="true">·</span>
-        <span>Campaigns</span>
-        <span className="digital-tagline-dot" aria-hidden="true">·</span>
-        <span>Growth</span>
-      </p>
-    </div>
+    <dialog ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
+      <button className="close-dialog" aria-label="Close menu" onClick={() => menu.current?.close()}>×</button>
+      <nav aria-label="Main navigation">
+        <a href="/">Home</a>
+        {pages.map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
+      </nav>
+    </dialog>
 
+    <h1 className="digital-sr-only">Business Marketing</h1>
     <p className="digital-sr-only" role="status" aria-live="polite">{statusText}</p>
     {arriving && <div ref={arrival} className="lens-blackout lens-arrival" aria-hidden="true" />}
   </main>;

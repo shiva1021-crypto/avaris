@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { loadCachedBinary } from './assetCache';
 import { digitalSceneConfig } from './config';
 import {
   globeFragmentShader,
@@ -29,10 +30,10 @@ function abortError() {
 
 async function loadLandMask(signal: AbortSignal) {
   const { mask } = digitalSceneConfig.globe;
-  const response = await fetch(mask, { signal });
-  if (!response.ok) throw new Error('The Earth land mask could not be loaded.');
+  const buffer = await loadCachedBinary(mask);
+  if (signal.aborted) throw abortError();
 
-  const blob = await response.blob();
+  const blob = new Blob([buffer], { type: 'image/png' });
   const objectUrl = URL.createObjectURL(blob);
   try {
     const image = new Image();

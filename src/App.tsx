@@ -57,11 +57,10 @@ function StudioApp() {
   return <><main inert={playingIntro} ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''} ${mobile ? 'is-static-mobile' : ''}`}>
     {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion || mobile} fullBackdrop /></div> : <><div className="studio-background" aria-hidden="true" /><h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1><StudioAtmosphere reducedMotion={reducedMotion || mobile} /></>}
     <header className="site-header">
-      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" />{isServicesPage && <span>MYBI Digital</span>}</a>
+      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
       <nav className="desktop-nav" aria-label="Desktop navigation">
         {pages.slice(0, -1).map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
       </nav>
-      <a className="header-contact" href="/contact/">Contact</a>
       <button className="contact-button site-menu-toggle" aria-haspopup="dialog" onClick={() => menu.current?.showModal()}><span>Menu</span><span className="menu-lines" aria-hidden="true" /></button>
     </header>
     {currentPage ? <section className="services-opening page-copy">
@@ -89,7 +88,7 @@ function StudioApp() {
       <button className="chapter-arrow next" type="button" aria-label="Show next page" onClick={() => changeChapter(1)}><span aria-hidden="true" /></button>
       <button className="chapter-neighbor next" type="button" onClick={() => changeChapter(1)}>{pages[(selectedIndex + 1) % pages.length].title}</button>
     </nav>
-    {!loaded && <div className="loading-label" role="status">{failed ? 'The studio could not load.' : 'Bringing the studio into focus'}{!failed && <span className="loading-line" />}{failed && <button onClick={() => location.reload()}>Try again</button>}</div>}
+    {failed && <div className="loading-label" role="status">The studio could not load.<button onClick={() => location.reload()}>Try again</button></div>}
     </>}
     {arriving && <div ref={arrival} className="lens-blackout lens-arrival" aria-hidden="true" />}
     <dialog ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>

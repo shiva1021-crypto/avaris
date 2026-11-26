@@ -46,7 +46,6 @@ export const digitalSceneConfig = {
   floor: {
     y: 0,
     size: 120,
-    reflectorSize: 512,
   },
   lighting: {
     key: 1.45,

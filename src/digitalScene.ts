@@ -190,8 +190,8 @@ export async function mountDigitalScene(host: HTMLElement, signal: AbortSignal):
       digitalSceneConfig.camera.near,
       digitalSceneConfig.camera.far,
     );
-    // Layer 1 carries the atmosphere halo; the reflector camera stays on
-    // layer 0 so the glow does not smear into the floor reflection.
+    // Layer 1 carries the atmosphere halo; the main camera sees it without
+    // affecting the solid floor.
     camera.layers.enable(1);
 
     lighting = createLighting(scene, renderer, mobile);

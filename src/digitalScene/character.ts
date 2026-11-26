@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { loadCachedBinary } from './assetCache';
 import { digitalSceneConfig } from './config';
 
 export interface CharacterHandle {
@@ -17,11 +18,11 @@ function abortError() {
 
 export async function loadCharacter(signal: AbortSignal): Promise<CharacterHandle> {
   const { character, floor } = digitalSceneConfig;
-  const response = await fetch(character.url, { signal });
-  if (!response.ok) throw new Error('The character model could not be loaded.');
+  const buffer = await loadCachedBinary(character.url);
+  if (signal.aborted) throw abortError();
 
   const loader = new GLTFLoader();
-  const gltf = await loader.parseAsync(await response.arrayBuffer(), '');
+  const gltf = await loader.parseAsync(buffer, '');
   if (signal.aborted) throw abortError();
 
   const clip = gltf.animations.find(item => item.name === 'Armature|mixamo.com|Layer0') ?? gltf.animations[0];
