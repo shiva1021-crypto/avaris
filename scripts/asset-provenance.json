@@ -56,6 +56,16 @@
       "source": "C:/Users/ACTIVE/Downloads/Digital Marketing Command Center.png",
       "output": "design-archive/Digital Marketing Command Center.png",
       "use": "Approved visual reference only; not used as a texture."
+    },
+    "brandFilmsScreens": {
+      "directory": "public/assets/digital-marketing/brand-films/",
+      "mode": "Built-in image-generator tool converted to 1280x714 WebP",
+      "assets": [
+        "public/assets/digital-marketing/brand-films/screen-portrait-silk.webp",
+        "public/assets/digital-marketing/brand-films/screen-fragrance-macro.webp",
+        "public/assets/digital-marketing/brand-films/screen-coastal-drive.webp"
+      ],
+      "license": "Generated project-specific film still stand-ins for MYBI Digital Shop & Brand Films studio screens."
     }
   }
 }

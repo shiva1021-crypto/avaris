@@ -1,10 +1,34 @@
-// Independently adjustable composition parameters for the digital marketing scene.
+// Independently adjustable composition parameters for the 360-degree MYBI studio.
 // Values are in metres and radians unless stated otherwise.
 
+export type StudioRoomId = 'marketing' | 'brand-films';
+
 export const digitalSceneConfig = {
+  // The 360-degree camera pivot sits at (0, y, 7.08). At yaw = 0 it faces -Z
+  // (Business Marketing); turning right by +90 deg (+PI/2) faces +X (Shop & Brand Films).
+  hub: [0, 0, 7.08] as const,
+  rooms: {
+    marketing: {
+      yaw: 0,
+      cameraY: 1.0,
+      targetY: 1.8,
+      distance: 7.08,
+      narrowPull: 1.08,
+      fov: 38,
+      narrowFov: 44,
+    },
+    'brand-films': {
+      yaw: Math.PI / 2,
+      cameraY: 1.12,
+      targetY: 1.44,
+      distance: 7.08,
+      narrowPull: -0.45,
+      fov: 39,
+      narrowFov: 48,
+    },
+  },
   camera: {
-    // The camera sits at chest height and looks slightly up so the figure reads
-    // low in frame and the lit floor only occupies the bottom third.
+    // Kept for backwards reference and clip bounds.
     fov: 38,
     narrowFov: 44,
     position: [0, 1.0, 7.08] as const,
@@ -12,7 +36,7 @@ export const digitalSceneConfig = {
     target: [0, 1.8, 0] as const,
     narrowTarget: [0, 1.8, 0] as const,
     near: 0.05,
-    far: 60,
+    far: 70,
   },
   globe: {
     // Roughly 40% of the viewport height, centred behind the figure's head and
@@ -43,9 +67,20 @@ export const digitalSceneConfig = {
     rotationY: Math.PI,
     scale: 1,
   },
+  brandFilms: {
+    // Placed 90 degrees to the right of Business Marketing around the 360 hub.
+    position: [7.08, 0, 7.08] as const,
+    rotationY: -Math.PI / 2,
+    studioLightUrl: '/assets/digital-marketing/equipment/simple_studio_light.glb',
+    screens: {
+      left: '/assets/digital-marketing/brand-films/screen-portrait-silk.webp',
+      upperRight: '/assets/digital-marketing/brand-films/screen-fragrance-macro.webp',
+      lowerRight: '/assets/digital-marketing/brand-films/screen-coastal-drive.webp',
+    },
+  },
   floor: {
     y: 0,
-    size: 120,
+    size: 140,
   },
   lighting: {
     key: 1.45,

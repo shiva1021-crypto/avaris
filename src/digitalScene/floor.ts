@@ -24,15 +24,14 @@ function horizontalPlane(geometry: THREE.BufferGeometry, y: number) {
 }
 
 export function createFloor(mobile: boolean): FloorHandle {
-  const { floor, character } = digitalSceneConfig;
+  const { floor, character, hub } = digitalSceneConfig;
   const root = new THREE.Group();
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
 
   const baseGeometry = new THREE.PlaneGeometry(floor.size, floor.size);
-  // The floor stays solid and unlit; it fades with distance so it dissolves
-  // into the backdrop instead of ending on a hard horizon line. Only the
-  // restrained stage glow layers sit above it.
+  // The floor stays solid and unlit; it fades with distance from the 360 hub
+  // so every room quadrant shares the same endless dark reflective horizon.
   const baseMaterial = new THREE.ShaderMaterial({
     name: 'StudioFloorBase',
     uniforms: { uColor: { value: new THREE.Color(0x050608) } },
@@ -42,6 +41,7 @@ export function createFloor(mobile: boolean): FloorHandle {
     depthWrite: false,
   });
   const base = horizontalPlane(baseGeometry, floor.y - 0.012);
+  base.position.set(hub[0], floor.y - 0.012, hub[2]);
   base.material = baseMaterial;
   base.receiveShadow = false;
   base.renderOrder = -1;
@@ -107,6 +107,7 @@ export function createFloor(mobile: boolean): FloorHandle {
     depthWrite: false,
   });
   const overlay = horizontalPlane(overlayGeometry, floor.y + 0.002);
+  overlay.position.set(hub[0], floor.y + 0.002, hub[2]);
   overlay.material = overlayMaterial;
   overlay.renderOrder = 2;
   root.add(overlay);
