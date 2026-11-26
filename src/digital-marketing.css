@@ -61,28 +61,6 @@
   animation: digital-drift-b 30s ease-in-out infinite alternate;
 }
 
-.studio-silk-accent {
-  position: absolute;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.studio-silk-top-left {
-  top: 0;
-  left: 0;
-  width: min(44vw, 560px);
-  height: min(26vh, 220px);
-  opacity: .85;
-}
-
-.studio-silk-bottom-right {
-  right: 0;
-  bottom: 0;
-  width: min(48vw, 620px);
-  height: min(24vh, 210px);
-  opacity: .82;
-}
-
 .digital-canvas-host {
   position: absolute;
   inset: 0;
@@ -145,133 +123,6 @@
   bottom: 16%;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(83, 104, 120, .32), transparent);
-}
-
-/* Header & Brand Wordmark */
-.digital-header {
-  gap: 18px;
-}
-
-.digital-header .brand {
-  gap: clamp(10px, 1vw, 15px);
-  font-size: clamp(18px, 1.55vw, 24px);
-  font-weight: 700;
-  letter-spacing: -.03em;
-}
-
-.digital-header .brand-mark {
-  width: clamp(34px, 2.8vw, 46px);
-}
-
-.digital-brand-mybi {
-  color: #f0efee;
-}
-
-.digital-brand-digital {
-  color: #c93256;
-}
-
-.digital-contact-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding: 0 18px;
-  border: 1px solid rgba(155, 41, 70, .78);
-  border-radius: 999px;
-  background: rgba(12, 13, 17, .74);
-  backdrop-filter: blur(10px);
-  font: 500 13px/1 'Host Grotesk', 'DM Sans', sans-serif;
-  letter-spacing: .01em;
-  color: #eceae8;
-  white-space: nowrap;
-  transition: border-color .28s ease, background-color .28s ease, transform .28s ease;
-}
-
-.digital-contact-pill:hover,
-.digital-contact-pill:focus-visible {
-  border-color: #df5c7c;
-  background: rgba(123, 29, 54, .28);
-  transform: translateY(-1px);
-}
-
-.digital-contact-arrow {
-  font-size: 13px;
-  color: #e6a8b9;
-}
-
-/* Centered Studio Hero Typography */
-.digital-typography {
-  position: absolute;
-  z-index: 4;
-  top: clamp(74px, 9.8svh, 108px);
-  inset-inline: 24px;
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  pointer-events: none;
-}
-
-.digital-headline {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-transform: uppercase;
-}
-
-.digital-headline-small {
-  display: block;
-  padding-inline-start: .56em;
-  font: 500 clamp(12px, 1.35vw, 19px)/1.1 'DM Sans', 'Host Grotesk', sans-serif;
-  letter-spacing: .56em;
-  color: rgba(243, 239, 236, .92);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, .55);
-}
-
-.digital-headline-large {
-  display: block;
-  margin-top: clamp(2px, .4vh, 6px);
-  font: 900 clamp(38px, 5.8vw, 86px)/.88 'Montserrat', 'DM Sans', sans-serif;
-  letter-spacing: -.035em;
-  white-space: nowrap;
-  background: linear-gradient(96deg,
-      #ffffff 0%,
-      #f1f2f5 36%,
-      #d7a1ad 72%,
-      #b5556e 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 22px rgba(229, 228, 226, .12)) drop-shadow(0 10px 24px rgba(0, 0, 0, .62));
-  transform: skewX(-7deg);
-  transform-origin: 50% 70%;
-}
-
-.digital-tagline {
-  margin: clamp(8px, 1.1svh, 14px) 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 8px 14px;
-  font: 500 clamp(9.5px, .8vw, 11.5px)/1.4 'DM Sans', sans-serif;
-  letter-spacing: .32em;
-  text-transform: uppercase;
-  color: rgba(222, 216, 213, .85);
-  text-shadow: 0 2px 12px rgba(0, 0, 0, .65);
-}
-
-.digital-tagline-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.digital-tagline-dot {
-  color: #c93b5e;
-  font-size: 11px;
-  text-shadow: 0 0 12px rgba(196, 62, 92, .65);
 }
 
 /* 360° Studio Room Navigation Control */
@@ -374,15 +225,6 @@
 
 @media (max-width: 767px), (pointer: coarse) {
   .digital-marketing-page { min-height: 560px; }
-  .digital-header .digital-contact-pill { display: none; }
-  .digital-header .site-menu-toggle { margin-inline-start: auto; }
-  .digital-typography { top: 84px; inset-inline: 16px; }
-  .digital-headline-small { font-size: 11px; letter-spacing: .38em; padding-inline-start: .38em; }
-  .digital-headline-large { font-size: clamp(32px, 10.5vw, 52px); }
-  .digital-tagline { gap: 6px 10px; letter-spacing: .18em; font-size: 9px; }
-  .digital-tagline-item { gap: 10px; }
-  .studio-silk-top-left { width: 65vw; height: 150px; }
-  .studio-silk-bottom-right { width: 70vw; height: 150px; }
   .studio-room-switch {
     left: 16px;
     right: 16px;
@@ -404,6 +246,5 @@
   .digital-atmosphere::after { animation: none; }
   .digital-stage-fallback,
   .studio-room-switch,
-  .studio-room-switch-arrow,
-  .digital-contact-pill { transition: none; }
+  .studio-room-switch-arrow { transition: none; }
 }
