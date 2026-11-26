@@ -5,8 +5,6 @@ import { loadCachedBinary } from './digitalScene/assetCache';
 import desktopRigUrl from '../models/avaris-camera-tripod.glb?url';
 import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
 
-const cameraPosterUrl = new URL('../design-archive/camera-reference-cutout.webp', import.meta.url).href;
-
 export default function HeroCamera({ onReady, onError, transition, chapterAngle, minimalMotion }: {
   minimalMotion: boolean;
   chapterAngle: number | null;
@@ -155,7 +153,6 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
   }, [transition, minimalMotion]);
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
-    <img className="camera-poster" src={cameraPosterUrl} alt="" aria-hidden="true" fetchPriority="high" />
     {createPortal(<>
       <div ref={flash} className="shutter-flash" aria-hidden="true" />
       <div ref={blackout} className="lens-blackout" aria-hidden="true" />
