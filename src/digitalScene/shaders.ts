@@ -84,7 +84,7 @@ export const globeFragmentShader = `
 
     float fresnel = pow(1.0 - max(dot(normalize(vNormalView), normalize(vViewDir)), 0.0), 2.8);
     float rim = fresnel * (0.3 + 0.7 * pow(light, 1.4));
-    float warmRim = fresnel * sideRim;
+    float directionalRim = fresnel * sideRim;
     float scan = 0.5 + 0.5 * sin(sphereUv.y * 52.0 - uTime * 0.24);
 
     vec3 ocean = uOceanColor * (0.55 + scan * 0.12);
@@ -92,7 +92,7 @@ export const globeFragmentShader = `
     vec3 colour = mix(ocean, landTint, land * 0.88);
     colour += uGridColor * grid * (0.1 + land * 0.05) * (0.6 + 0.5 * light);
     colour += uFresnelColor * rim * 0.9;
-    colour += uRimColor * warmRim * 0.7;
+    colour += uRimColor * directionalRim * 0.7;
 
     float alpha = uOpacity * (
       0.065 +
@@ -101,7 +101,7 @@ export const globeFragmentShader = `
       edge * 0.24 +
       grid * 0.05 +
       rim * 0.4 +
-      warmRim * 0.26
+      directionalRim * 0.26
     );
     gl_FragColor = vec4(colour, clamp(alpha, 0.0, 0.86));
   }

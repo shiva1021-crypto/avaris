@@ -160,11 +160,11 @@ export async function loadGlobe(
     name: 'HolographicEarth',
     uniforms: {
       uLandMask: { value: maskTexture },
-      uLandColor: { value: new THREE.Color(0xf7adc1) },
-      uOceanColor: { value: new THREE.Color(0x230910) },
-      uGridColor: { value: new THREE.Color(0xd65376) },
-      uFresnelColor: { value: new THREE.Color(0xffc2d1) },
-      uRimColor: { value: new THREE.Color(0xf06b8d) },
+      uLandColor: { value: new THREE.Color(0xb9bec4) },
+      uOceanColor: { value: new THREE.Color(0x11151a) },
+      uGridColor: { value: new THREE.Color(0x81878d) },
+      uFresnelColor: { value: new THREE.Color(0xd9dde1) },
+      uRimColor: { value: new THREE.Color(0xaab0b6) },
       uLightDirection: { value: new THREE.Vector3(-0.35, 0.55, 0.75).normalize() },
       uRimDirection: { value: new THREE.Vector3(0.7, 0.1, 0.65).normalize() },
       uOpacity: { value: 1 },
@@ -187,7 +187,7 @@ export async function loadGlobe(
   );
   const particleSprite = createParticleSprite();
   const particleMaterial = new THREE.PointsMaterial({
-    color: 0xff9bb4,
+    color: 0xc5c9cd,
     map: particleSprite,
     size: 0.026,
     sizeAttenuation: true,

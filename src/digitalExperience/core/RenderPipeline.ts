@@ -91,7 +91,7 @@ export class RenderPipeline {
       uResolution: { value: new THREE.Vector2(1, 1) },
       uTime: { value: 0 },
       uBloomStrength: { value: 0.88 },
-      uVignetteStrength: { value: 0.0 },
+      uVignetteStrength: { value: 0.38 },
       uDistortion: { value: 0.018 },
       uGrain: { value: 0.018 },
     },

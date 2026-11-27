@@ -53,8 +53,7 @@ const screenFragmentShader = `
     media += texture2D(uTexture, vUv + vec2(0.0, blurStep.y)).rgb * 0.15;
     media += texture2D(uTexture, vUv - vec2(0.0, blurStep.y)).rgb * 0.15;
     float mediaLuma = dot(media, vec3(0.299, 0.587, 0.114));
-    media = mix(media, media * uAccent * 1.12, 0.16);
-    vec3 glass = vec3(0.018, 0.025, 0.038) + uAccent * softField;
+    vec3 glass = vec3(0.024) + uAccent * softField;
     glass = mix(glass, media * (0.92 + mediaLuma * 0.18), uTextureReady * 0.97);
     glass += grain;
     float alpha = mix(0.9, 1.0, edge) * uIntensity * uEdgeFade;
@@ -135,7 +134,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   // Broad polished floor. The actual reflection texture is supplied by the
   // multipass renderer after the mirrored-camera blur passes.
   const floorMaterial = new ReflectiveFloorMaterial();
-  floorMaterial.uniforms.uReflectionStrength.value = 0.72;
+  floorMaterial.uniforms.uReflectionStrength.value = 0.78;
   floorMaterial.uniforms.uBaseColor.value.set(0x030406);
   materials.add(floorMaterial);
   const floorGeometry = new THREE.PlaneGeometry(80, 80);
@@ -168,9 +167,6 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   }) {
     const ring = new THREE.Group();
     ring.position.set(0, 0, 7.08);
-    const titanium = new THREE.Color(0x7d858d);
-    const burgundy = new THREE.Color(0x716b70);
-
     for (let index = 0; index < options.angles.length; index += 1) {
       const progress = index / Math.max(1, options.angles.length - 1);
       const angle = options.angles[index];
@@ -180,15 +176,14 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       const foregroundScale = depthOffset < 0 ? 1.24 : 0.92;
       const width = THREE.MathUtils.lerp(1.2, 1.7, edgeWeight) * options.rowScale * foregroundScale;
       const height = width * 0.49;
-      const accent = titanium.clone().lerp(burgundy, progress);
       const material = new THREE.ShaderMaterial({
         uniforms: {
-          uAccent: { value: accent },
+          uAccent: { value: new THREE.Color(0x9ca3aa) },
           uTexture: { value: fallbackTexture },
           uTextureReady: { value: 0 },
           uFocusBlur: { value: depthOffset < 0 ? 0.006 : 0.0008 },
           uEdgeFade: { value: 1 },
-          uIntensity: { value: 1.0 },
+          uIntensity: { value: 1.13 },
           uPhase: { value: progress * 2.3 + options.y * 0.17 },
           uTime: { value: 0 },
         },
@@ -277,9 +272,9 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
 
   const apertureRimGeometry = new THREE.TorusGeometry(2.65, 0.014, 6, 192);
   const apertureRimMaterial = new THREE.MeshBasicMaterial({
-    color: 0x777b80,
+    color: 0xb9bec4,
     transparent: true,
-    opacity: 0.16,
+    opacity: 0.18,
     toneMapped: false,
   });
   geometries.add(apertureRimGeometry);
@@ -289,38 +284,30 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   apertureRim.position.set(0, 0.014, -2.45);
   root.add(apertureRim);
 
-  // Large diffused glows create the asymmetric titanium/burgundy light pools
-  // from the approved reference without exposing any lamp geometry.
-  const coolGlowTexture = createRadialTexture('rgba(220,224,228,.68)', 'rgba(92,98,106,.18)');
-  const warmGlowTexture = createRadialTexture('rgba(216,218,222,.64)', 'rgba(82,86,92,.16)');
-  textures.add(coolGlowTexture);
-  textures.add(warmGlowTexture);
+  // A single neutral haze keeps the room focused without colored side pools.
+  const centreGlowTexture = createRadialTexture('rgba(235,235,235,.62)', 'rgba(190,195,200,.12)');
+  textures.add(centreGlowTexture);
   const glowSprites: THREE.Sprite[] = [];
-  for (const [x, z, color, texture] of [
-    [-6.5, -4.8, 0xaeb3b8, coolGlowTexture],
-    [6.5, -4.8, 0xa4a6aa, warmGlowTexture],
-  ] as const) {
-    const material = new THREE.SpriteMaterial({
-      map: texture,
-      color,
-      transparent: true,
-      opacity: mobile ? 0.38 : 0.46,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    materials.add(material);
-    const glow = new THREE.Sprite(material);
-    glow.position.set(x, 1.15, z);
-    glow.scale.set(12.5, 7.2, 1);
-    glow.renderOrder = 0;
-    root.add(glow);
-    glowSprites.push(glow);
-    reflectionExclusions.push(glow);
-  }
+  const centreGlowMaterial = new THREE.SpriteMaterial({
+    map: centreGlowTexture,
+    color: 0xffffff,
+    transparent: true,
+    opacity: mobile ? 0.28 : 0.36,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  materials.add(centreGlowMaterial);
+  const centreGlow = new THREE.Sprite(centreGlowMaterial);
+  centreGlow.position.set(0, 1.15, -4.8);
+  centreGlow.scale.set(15, 8, 1);
+  centreGlow.renderOrder = 0;
+  root.add(centreGlow);
+  glowSprites.push(centreGlow);
+  reflectionExclusions.push(centreGlow);
 
   // Sparse atmospheric particles are deliberately smaller and dimmer than the
   // future globe particles. Their job is only to reveal depth in the room.
-  const dustTexture = createRadialTexture('rgba(255,255,255,1)', 'rgba(255,225,220,.42)');
+  const dustTexture = createRadialTexture('rgba(255,255,255,1)', 'rgba(210,214,218,.42)');
   textures.add(dustTexture);
   const random = seededRandom(0x4d594249);
   const dustCount = mobile ? 55 : 130;
@@ -339,7 +326,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   geometries.add(dustGeometry);
   const dustMaterial = new THREE.PointsMaterial({
     map: dustTexture,
-    color: 0xd8c5c4,
+    color: 0xd8dadd,
     size: 0.018,
     opacity: 0.25,
     transparent: true,
@@ -351,15 +338,11 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   root.add(dust);
   reflectionExclusions.push(dust);
 
-  const hemisphere = new THREE.HemisphereLight(0x73777c, 0x020203, 0.38);
-  const coolLight = new THREE.PointLight(0xb8bdc2, 34, 18, 1.8);
-  coolLight.position.set(-6.2, 1.3, -2.3);
-  const warmLight = new THREE.PointLight(0xaeb0b4, 36, 18, 1.85);
-  warmLight.position.set(6.2, 1.15, -2.8);
-  const centreFill = new THREE.SpotLight(0xe6e9ea, 10, 20, 0.78, 0.9, 1.35);
+  const hemisphere = new THREE.HemisphereLight(0xbdbfc2, 0x030303, 0.46);
+  const centreFill = new THREE.SpotLight(0xeeeeec, 16, 20, 0.78, 0.9, 1.35);
   centreFill.position.set(0, 6.8, 2.5);
   centreFill.target.position.set(0, 0, -2.4);
-  root.add(hemisphere, coolLight, warmLight, centreFill, centreFill.target);
+  root.add(hemisphere, centreFill, centreFill.target);
 
   let disposed = false;
   let motionEnabled = true;

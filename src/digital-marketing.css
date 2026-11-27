@@ -13,6 +13,11 @@ body:has(.digital-marketing-page) {
 }
 
 .digital-marketing-page {
+  --digital-ink: #080808;
+  --digital-graphite: #151515;
+  --digital-silver: #c5c9cd;
+  --digital-white: #f1f2f3;
+  --digital-stone: #9a9da0;
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -24,14 +29,33 @@ body:has(.digital-marketing-page) {
   color: #e5e4e2;
 }
 
+.digital-marketing-page.has-scroll-content {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.digital-hero {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 560px;
+  overflow: hidden;
+  background: var(--digital-ink);
+}
+
+.digital-hero-fade {
+  transform-origin: 50% 48%;
+  will-change: transform, opacity, filter;
+}
+
 .digital-environment {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 48% 40% at 50% 48%, rgba(123, 29, 54, .14), transparent 72%),
-    radial-gradient(ellipse 56% 42% at 28% 24%, rgba(83, 104, 120, .11), transparent 76%),
+    radial-gradient(ellipse 48% 40% at 50% 48%, rgba(210, 214, 218, .075), transparent 72%),
     #040507;
 }
 
@@ -39,7 +63,7 @@ body:has(.digital-marketing-page) {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 44%, transparent 28%, rgba(3, 4, 6, .64) 74%, #030405 100%);
+  background: radial-gradient(ellipse at 50% 44%, transparent 24%, rgba(3, 4, 6, .56) 66%, #030405 100%);
 }
 
 .digital-atmosphere {
@@ -50,30 +74,17 @@ body:has(.digital-marketing-page) {
   opacity: .55;
 }
 
-.digital-atmosphere::before,
-.digital-atmosphere::after {
+.digital-atmosphere::before {
   content: '';
   position: absolute;
   border-radius: 50%;
   filter: blur(70px);
-}
-
-.digital-atmosphere::before {
-  width: 60vw;
-  height: 38vh;
-  left: 12%;
-  top: 32%;
-  background: radial-gradient(ellipse at center, rgba(83, 104, 120, .14), transparent 70%);
+  width: 66vw;
+  height: 42vh;
+  left: 17%;
+  top: 30%;
+  background: radial-gradient(ellipse at center, rgba(205, 210, 215, .105), transparent 72%);
   animation: digital-drift-a 24s ease-in-out infinite alternate;
-}
-
-.digital-atmosphere::after {
-  width: 44vw;
-  height: 30vh;
-  right: 8%;
-  bottom: 14%;
-  background: radial-gradient(ellipse at center, rgba(123, 29, 54, .12), transparent 72%);
-  animation: digital-drift-b 30s ease-in-out infinite alternate;
 }
 
 .digital-canvas-host {
@@ -81,6 +92,31 @@ body:has(.digital-marketing-page) {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+}
+
+.digital-hero-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 52% 32% at 50% 76%,
+      rgba(205, 210, 215, .14) 0%,
+      rgba(165, 170, 175, .045) 38%,
+      transparent 78%
+    ),
+    radial-gradient(ellipse at 50% 44%, transparent 34%, rgba(3, 4, 6, .22) 72%, rgba(3, 4, 6, .66) 100%),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 44%,
+      rgba(8, 8, 8, .08) 54%,
+      rgba(8, 8, 8, .58) 72%,
+      rgba(8, 8, 8, .94) 91%,
+      #080808 100%
+    );
+  will-change: opacity, transform;
 }
 
 .marketing-studio-reference {
@@ -281,7 +317,7 @@ body:has(.digital-marketing-page) {
   width: 34%;
   opacity: .28;
   filter: blur(24px);
-  background: linear-gradient(90deg, transparent, rgba(155, 41, 70, .26), rgba(229, 228, 226, .1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(210, 214, 218, .18), transparent);
   transform: skewX(-9deg);
 }
 
@@ -346,7 +382,7 @@ body:has(.digital-marketing-page) {
   height: min(44vh, 440px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(229, 228, 226, .08), rgba(123, 29, 54, .08) 44%, transparent 74%);
+  background: radial-gradient(ellipse at center, rgba(220, 223, 226, .07), transparent 58%);
   filter: blur(28px);
 }
 
@@ -412,6 +448,245 @@ body:has(.digital-marketing-page) {
 
 .studio-room-switch-arrow {
   font: 300 30px/1 'Host Grotesk', 'DM Sans', sans-serif;
+}
+
+.digital-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+  z-index: 6;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: rgba(230, 233, 236, .72);
+  font: 500 10px/1 'DM Sans', sans-serif;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.digital-scroll-cue i {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 34px;
+  overflow: hidden;
+  background: rgba(230, 233, 236, .18);
+}
+
+.digital-scroll-cue i::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, var(--digital-silver), transparent);
+  animation: digital-scroll-pulse 1.8s ease-in-out infinite;
+}
+
+.digital-content {
+  --digital-seam-fade: clamp(240px, 40vh, 380px);
+  position: relative;
+  z-index: 7;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: linear-gradient(
+    180deg,
+    #080808 0%,
+    #080808 12%,
+    #0d0d0d 38%,
+    #101010 64%,
+    #080808 100%
+  );
+  color: var(--digital-white);
+}
+
+.digital-content::before {
+  content: '';
+  position: absolute;
+  top: calc(0px - var(--digital-seam-fade));
+  left: 0;
+  right: 0;
+  z-index: 0;
+  height: var(--digital-seam-fade);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0) 0%,
+    rgba(8, 8, 8, .22) 36%,
+    rgba(8, 8, 8, .72) 74%,
+    #080808 100%
+  );
+  pointer-events: none;
+}
+
+.digital-scroll-glow {
+  position: absolute;
+  right: -18vw;
+  top: 24vh;
+  width: 62vw;
+  height: 62vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(205, 210, 215, .1), rgba(150, 155, 160, .045) 34%, transparent 68%);
+  filter: blur(30px);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.digital-manifesto,
+.digital-capabilities,
+.digital-closing {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 96px));
+  margin: 0 auto;
+}
+
+.digital-manifesto {
+  display: flex;
+  min-height: 100dvh;
+  padding: clamp(110px, 16vh, 180px) 0 clamp(90px, 14vh, 150px);
+  flex-direction: column;
+  justify-content: center;
+}
+
+.digital-content-kicker {
+  margin: 0 0 30px;
+  color: var(--digital-silver);
+  font: 600 11px/1.3 'DM Sans', sans-serif;
+  letter-spacing: .18em;
+}
+
+.digital-manifesto h2,
+.digital-capabilities h2,
+.digital-closing h2 {
+  margin: 0;
+  max-width: 13ch;
+  color: var(--digital-white);
+  font: 430 clamp(58px, 7.4vw, 118px)/.96 'Host Grotesk', 'DM Sans', sans-serif;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+
+.digital-content h2 em {
+  color: var(--digital-silver);
+  font-style: normal;
+}
+
+.digital-content-rule {
+  width: 62%;
+  height: 1px;
+  margin: clamp(64px, 9vh, 104px) 0 clamp(50px, 7vh, 82px);
+  background: linear-gradient(90deg, rgba(205, 210, 215, .42), rgba(230, 233, 236, .06));
+}
+
+.digital-content-intro {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(320px, 1.15fr);
+  gap: clamp(42px, 8vw, 130px);
+  width: 74%;
+  margin-left: auto;
+}
+
+.digital-content-intro p {
+  margin: 0;
+  color: var(--digital-stone);
+  font: 450 clamp(19px, 1.55vw, 25px)/1.48 'DM Sans', sans-serif;
+}
+
+.digital-content-intro p:first-child {
+  color: rgba(230, 233, 236, .62);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+}
+
+.digital-capabilities {
+  min-height: 110dvh;
+  padding: clamp(120px, 16vh, 190px) 0;
+}
+
+.digital-capabilities > header {
+  display: grid;
+  grid-template-columns: .6fr 1.4fr;
+  align-items: start;
+  gap: 56px;
+  margin-bottom: clamp(80px, 12vh, 150px);
+}
+
+.digital-capabilities > header h2 {
+  max-width: 11ch;
+  font-size: clamp(48px, 6vw, 92px);
+}
+
+.digital-capability-list {
+  border-top: 1px solid rgba(230, 233, 236, .16);
+}
+
+.digital-capability-list article {
+  display: grid;
+  grid-template-columns: 80px minmax(220px, .8fr) minmax(300px, 1.1fr);
+  gap: 30px;
+  align-items: center;
+  min-height: 180px;
+  border-bottom: 1px solid rgba(230, 233, 236, .16);
+}
+
+.digital-capability-list span {
+  color: var(--digital-silver);
+  font: 500 12px/1 'DM Sans', sans-serif;
+  letter-spacing: .14em;
+}
+
+.digital-capability-list h3 {
+  margin: 0;
+  color: var(--digital-white);
+  font: 500 clamp(30px, 3.2vw, 50px)/1 'Host Grotesk', 'DM Sans', sans-serif;
+  letter-spacing: -.04em;
+}
+
+.digital-capability-list p {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--digital-stone);
+  font: 450 17px/1.55 'DM Sans', sans-serif;
+}
+
+.digital-closing {
+  display: flex;
+  min-height: 92dvh;
+  padding: 120px 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.digital-closing h2 {
+  max-width: 12ch;
+  font-size: clamp(58px, 7vw, 108px);
+}
+
+.digital-closing a {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 64px;
+  padding: 17px 0 14px;
+  border-bottom: 1px solid var(--digital-silver);
+  color: var(--digital-white);
+  font: 600 15px/1 'DM Sans', sans-serif;
+  letter-spacing: .04em;
+  text-decoration: none;
+}
+
+.digital-closing a span {
+  color: var(--digital-silver);
+  font-size: 21px;
+  transition: transform .25s ease;
+}
+
+.digital-closing a:hover span,
+.digital-closing a:focus-visible span {
+  transform: translate(4px, -4px);
 }
 
 
@@ -491,6 +766,11 @@ body:has(.digital-marketing-page) {
 @keyframes digital-drift-b {
   from { transform: translate3d(2%, 3%, 0) scale(1.05); }
   to { transform: translate3d(-4%, -3%, 0) scale(1); }
+}
+
+@keyframes digital-scroll-pulse {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100%); }
 }
 
 @keyframes brand-films-reveal {
@@ -605,6 +885,34 @@ body:has(.digital-marketing-page) {
     max-width: 100%;
     font-size: 12px;
   }
+  .digital-scroll-cue span { display: none; }
+  .digital-manifesto,
+  .digital-capabilities,
+  .digital-closing {
+    width: calc(100% - 40px);
+  }
+  .digital-manifesto h2,
+  .digital-closing h2 {
+    max-width: 11ch;
+    font-size: clamp(50px, 14vw, 72px);
+  }
+  .digital-content-rule { width: 100%; }
+  .digital-content-intro,
+  .digital-capabilities > header {
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 32px;
+  }
+  .digital-capability-list article {
+    grid-template-columns: 46px 1fr;
+    gap: 18px;
+    padding: 34px 0;
+  }
+  .digital-capability-list article p {
+    grid-column: 2;
+    font-size: 15px;
+  }
+  .digital-capability-list h3 { font-size: 34px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -621,6 +929,7 @@ body:has(.digital-marketing-page) {
   .digital-stage-fallback,
   .studio-room-switch,
   .studio-room-switch-arrow { transition: none; }
+  .digital-scroll-cue i::after { animation: none; }
 }
 
 /* Final arrow-only control sizing overrides the previous card layout. */
