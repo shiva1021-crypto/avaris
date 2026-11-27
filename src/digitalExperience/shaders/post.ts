@@ -62,7 +62,7 @@ export const compositeFragmentShader = `
 
     float edgeMask = 1.0;
 
-    vec2 chroma = centered * radius2 * 0.00075;
+    vec2 chroma = centered * radius2 * 0.00018;
     float red = texture2D(uScene, warpedUv + chroma).r;
     float green = texture2D(uScene, warpedUv).g;
     float blue = texture2D(uScene, warpedUv - chroma).b;

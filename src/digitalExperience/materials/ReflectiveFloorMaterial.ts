@@ -63,8 +63,10 @@ const floorFragmentShader = `
     reflection *= vec3(0.94);
 
     vec3 finalColor = base + reflection * uReflectionStrength * reflectionMask * (0.96 - surface * 1.4);
+    float wallMerge = smoothstep(-13.5, -4.0, vWorldPosition.z);
+    finalColor = mix(uBaseColor, finalColor, wallMerge);
     float edgeFade = 1.0 - smoothstep(22.0, 38.0, length(vWorldPosition.xz));
-    gl_FragColor = vec4(finalColor, edgeFade);
+    gl_FragColor = vec4(finalColor, edgeFade * wallMerge);
   }
 `;
 

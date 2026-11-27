@@ -131,7 +131,7 @@ export const digitalSceneConfig = {
     },
   },
   performance: {
-    desktopDpr: 1.6,
-    mobileDpr: 1.25,
+    desktopDpr: 2,
+    mobileDpr: 1.75,
   },
 };

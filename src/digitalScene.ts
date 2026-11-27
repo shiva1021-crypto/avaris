@@ -259,7 +259,7 @@ export async function mountDigitalScene(
     renderer.setClearColor(0x030407, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.78;
+    renderer.toneMappingExposure = 1.9;
     renderer.autoClear = true;
 
     scene = new THREE.Scene();

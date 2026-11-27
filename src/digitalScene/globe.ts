@@ -129,6 +129,74 @@ function createLandParticles(mask: ReturnType<typeof readMask>, radius: number, 
   return { geometry, count: accepted };
 }
 
+function createNetworkConnections(particleGeometry: THREE.BufferGeometry, radius: number) {
+  const source = particleGeometry.getAttribute('position') as THREE.BufferAttribute;
+  const random = seededRandom(0x4e455457);
+  const nodeCount = Math.min(64, Math.floor(source.count / 40));
+  const nodes: THREE.Vector3[] = [];
+  for (let index = 0; index < nodeCount; index += 1) {
+    const sourceIndex = Math.floor(random() * source.count);
+    nodes.push(new THREE.Vector3(
+      source.getX(sourceIndex),
+      source.getY(sourceIndex),
+      source.getZ(sourceIndex),
+    ).normalize().multiplyScalar(radius * 1.018));
+  }
+
+  const segments: number[] = [];
+  const progress: number[] = [];
+  const phases: number[] = [];
+  const pointA = new THREE.Vector3();
+  const pointB = new THREE.Vector3();
+  const control = new THREE.Vector3();
+  const connected = new Set<string>();
+  const connectionCount = Math.min(26, nodes.length);
+
+  for (let connection = 0; connection < connectionCount; connection += 1) {
+    const from = Math.floor(random() * nodes.length);
+    const candidates = nodes
+      .map((node, to) => ({ to, distance: from === to ? Infinity : nodes[from].distanceTo(node) }))
+      .filter(({ distance }) => distance > radius * 0.78 && distance < radius * 1.62)
+      .sort((a, b) => Math.abs(a.distance - radius * 1.18) - Math.abs(b.distance - radius * 1.18));
+    if (!candidates.length) continue;
+
+    const { to, distance } = candidates[Math.floor(random() * Math.min(5, candidates.length))];
+    const key = from < to ? `${from}:${to}` : `${to}:${from}`;
+    if (connected.has(key)) {
+      connection -= 1;
+      continue;
+    }
+    connected.add(key);
+
+    const start = nodes[from];
+    const end = nodes[to];
+    control.copy(start).add(end).normalize().multiplyScalar(
+      radius * (1.22 + (distance / radius) * 0.16),
+    );
+    const steps = 24;
+    const phase = random();
+    for (let step = 0; step < steps; step += 1) {
+      const t0 = step / steps;
+      const t1 = (step + 1) / steps;
+      pointA.copy(start).multiplyScalar((1 - t0) * (1 - t0))
+        .addScaledVector(control, 2 * (1 - t0) * t0)
+        .addScaledVector(end, t0 * t0);
+      pointB.copy(start).multiplyScalar((1 - t1) * (1 - t1))
+        .addScaledVector(control, 2 * (1 - t1) * t1)
+        .addScaledVector(end, t1 * t1);
+      segments.push(pointA.x, pointA.y, pointA.z, pointB.x, pointB.y, pointB.z);
+      progress.push(t0, t1);
+      phases.push(phase, phase);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(segments, 3));
+  geometry.setAttribute('aProgress', new THREE.Float32BufferAttribute(progress, 1));
+  geometry.setAttribute('aPhase', new THREE.Float32BufferAttribute(phases, 1));
+  return geometry;
+}
+
 export async function loadGlobe(
   signal: AbortSignal,
   options: { includeSurface?: boolean; includeRings?: boolean } = {},
@@ -222,9 +290,52 @@ export async function loadGlobe(
   const particles = new THREE.Points(particleGeometry, particleMaterial);
   particles.renderOrder = 3;
 
+  const networkGeometry = createNetworkConnections(particleGeometry, globeConfig.radius);
+  const networkMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uColor: { value: new THREE.Color(0xd6e7f0) },
+    },
+    vertexShader: `
+      attribute float aProgress;
+      attribute float aPhase;
+      varying float vProgress;
+      varying float vPhase;
+      void main() {
+        vProgress = aProgress;
+        vPhase = aPhase;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec3 uColor;
+      varying float vProgress;
+      varying float vPhase;
+      void main() {
+        float head = fract(uTime * 0.20 + vPhase);
+        float behind = head - vProgress;
+        if (behind < 0.0) behind += 1.0;
+        float travellingPulse = 1.0 - smoothstep(0.0, 0.24, behind);
+        float leadingSpark = 1.0 - smoothstep(0.0, 0.035, abs(vProgress - head));
+        float endFade = smoothstep(0.0, 0.06, vProgress) * smoothstep(1.0, 0.94, vProgress);
+        float alpha = (0.13 + travellingPulse * 0.58 + leadingSpark * 0.34) * endFade;
+        gl_FragColor = vec4(uColor, alpha);
+      }
+    `,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: true,
+    toneMapped: false,
+  });
+  const network = new THREE.LineSegments(networkGeometry, networkMaterial);
+  network.renderOrder = 4;
+
   const rotatingSurface = new THREE.Group();
   if (options.includeSurface !== false) rotatingSurface.add(surface);
   rotatingSurface.add(particles);
+  rotatingSurface.add(network);
   root.add(rotatingSurface);
 
   const ringColors = [0xe0708a, 0x9b2946, 0xb84a63];
@@ -281,6 +392,7 @@ export async function loadGlobe(
       if (!motionEnabled || delta <= 0) return;
       elapsed += delta;
       globeMaterial.uniforms.uTime.value = elapsed;
+      networkMaterial.uniforms.uTime.value = elapsed;
       rotatingSurface.rotation.y += globeConfig.rotationSpeed * delta;
       for (const ring of rings) {
         ring.time += delta;
@@ -297,8 +409,13 @@ export async function loadGlobe(
       disposed = true;
       maskTexture.dispose();
       particleSprite.dispose();
-      const geometries = new Set<THREE.BufferGeometry>([geometry, particleGeometry]);
-      const materials = new Set<THREE.Material>([shellMaterial, globeMaterial, particleMaterial]);
+      const geometries = new Set<THREE.BufferGeometry>([geometry, particleGeometry, networkGeometry]);
+      const materials = new Set<THREE.Material>([
+        shellMaterial,
+        globeMaterial,
+        particleMaterial,
+        networkMaterial,
+      ]);
       for (const ring of rings) {
         geometries.add((ring.pivot.children[0] as THREE.Mesh).geometry);
         materials.add(ring.material);
