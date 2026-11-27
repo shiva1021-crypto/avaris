@@ -12,7 +12,7 @@ export interface GlobeHandle {
   root: THREE.Group;
   landParticleCount: number;
   ringCount: number;
-  update(delta: number): void;
+  update(delta: number, spotlight?: THREE.SpotLight): void;
   setMotionEnabled(enabled: boolean): void;
   dispose(): void;
 }
@@ -145,6 +145,14 @@ export async function loadGlobe(
   root.position.set(...globeConfig.position);
   root.rotation.y = globeConfig.rotation;
   const spotlightConfig = digitalSceneConfig.lighting.spotlight;
+  const initialSpotPosition = new THREE.Vector3(
+    spotlightConfig.anchor[0],
+    spotlightConfig.anchor[1] - spotlightConfig.cordLength - 0.44,
+    spotlightConfig.anchor[2],
+  );
+  const spotlightTarget = new THREE.Vector3(...spotlightConfig.target);
+  const spotlightPosition = new THREE.Vector3();
+  const spotlightTargetPosition = new THREE.Vector3();
 
   const geometry = new THREE.IcosahedronGeometry(globeConfig.radius, 5);
 
@@ -161,16 +169,16 @@ export async function loadGlobe(
     name: 'HolographicEarth',
     uniforms: {
       uLandMask: { value: maskTexture },
-      uLandColor: { value: new THREE.Color(0xb9bec4) },
-      uOceanColor: { value: new THREE.Color(0x11151a) },
-      uGridColor: { value: new THREE.Color(0x81878d) },
+      uLandColor: { value: new THREE.Color(0xe0e4e7) },
+      uOceanColor: { value: new THREE.Color(0x252b32) },
+      uGridColor: { value: new THREE.Color(0xb0b5ba) },
       uFresnelColor: { value: new THREE.Color(0xd9dde1) },
       uRimColor: { value: new THREE.Color(0xaab0b6) },
       uLightDirection: { value: new THREE.Vector3(0, 1, 0) },
-      uSpotPosition: { value: new THREE.Vector3(...spotlightConfig.position) },
+      uSpotPosition: { value: initialSpotPosition.clone() },
       uSpotDirection: {
-        value: new THREE.Vector3(...spotlightConfig.target)
-          .sub(new THREE.Vector3(...spotlightConfig.position))
+        value: spotlightTarget.clone()
+          .sub(initialSpotPosition)
           .normalize(),
       },
       uSpotColor: { value: new THREE.Color(spotlightConfig.color) },
@@ -200,7 +208,7 @@ export async function loadGlobe(
   );
   const particleSprite = createParticleSprite();
   const particleMaterial = new THREE.PointsMaterial({
-    color: 0xc5c9cd,
+    color: 0xe4e7ea,
     map: particleSprite,
     size: 0.026,
     sizeAttenuation: true,
@@ -260,8 +268,17 @@ export async function loadGlobe(
     root,
     landParticleCount,
     ringCount: rings.length,
-    update(delta) {
-      if (disposed || !motionEnabled || delta <= 0) return;
+    update(delta, spotlight) {
+      if (disposed) return;
+      if (spotlight) {
+        spotlight.getWorldPosition(spotlightPosition);
+        spotlight.target.getWorldPosition(spotlightTargetPosition);
+        globeMaterial.uniforms.uSpotPosition.value.copy(spotlightPosition);
+        globeMaterial.uniforms.uSpotDirection.value
+          .subVectors(spotlightTargetPosition, spotlightPosition)
+          .normalize();
+      }
+      if (!motionEnabled || delta <= 0) return;
       elapsed += delta;
       globeMaterial.uniforms.uTime.value = elapsed;
       rotatingSurface.rotation.y += globeConfig.rotationSpeed * delta;

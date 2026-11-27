@@ -116,7 +116,7 @@ export async function mountDigitalScene(
       applyCamera();
     }
     room.update(delta, elapsed);
-    globe?.update(delta);
+    globe?.update(delta, room.globeSpotlight);
     pipeline.render(scene, camera, elapsed);
   }
 
@@ -155,11 +155,13 @@ export async function mountDigitalScene(
     const ny = (event.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
     pointerTargetX = nx * 0.19;
     pointerTargetY = -ny * 0.075;
+    room?.setPointerTarget(nx);
   }
 
   function onPointerLeave() {
     pointerTargetX = 0;
     pointerTargetY = 0;
+    room?.setPointerTarget(0);
   }
 
   function onVisibilityChange() {
@@ -210,6 +212,7 @@ export async function mountDigitalScene(
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
     if (globe) globe.root.visible = nextRoom === 'marketing';
+    if (room) room.pendant.visible = nextRoom === 'marketing';
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
     while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
@@ -256,7 +259,7 @@ export async function mountDigitalScene(
     renderer.setClearColor(0x030407, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.38;
+    renderer.toneMappingExposure = 1.78;
     renderer.autoClear = true;
 
     scene = new THREE.Scene();
@@ -270,6 +273,7 @@ export async function mountDigitalScene(
     );
 
     room = createDigitalMarketingRoom(mobile);
+    room.pendant.visible = initialRoom === 'marketing';
     scene.add(room.root);
     globe = await loadGlobe(signal, { includeSurface: true, includeRings: false });
     globe.root.visible = initialRoom === 'marketing';

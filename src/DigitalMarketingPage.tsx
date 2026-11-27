@@ -168,7 +168,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
       );
 
       gsap.fromTo('.digital-hero-transition',
-        { opacity: 0.32, yPercent: 8 },
+        { opacity: 0.08, yPercent: 8 },
         {
           opacity: 1,
           yPercent: -4,

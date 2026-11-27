@@ -7,7 +7,10 @@ export interface DigitalMarketingRoomHandle {
   floor: THREE.Mesh;
   floorMaterial: ReflectiveFloorMaterial;
   reflectionExclusions: THREE.Object3D[];
+  pendant: THREE.Group;
+  globeSpotlight: THREE.SpotLight;
   update(delta: number, elapsed: number): void;
+  setPointerTarget(x: number): void;
   setMotionEnabled(enabled: boolean): void;
   dispose(): void;
 }
@@ -57,7 +60,8 @@ const screenFragmentShader = `
     vec3 glass = vec3(0.024) + uAccent * softField;
     glass = mix(glass, media * (0.92 + mediaLuma * 0.18), uTextureReady * 0.97);
     glass += grain;
-    float alpha = mix(0.9, 1.0, edge) * uIntensity * uEdgeFade;
+    glass *= uIntensity;
+    float alpha = mix(0.9, 1.0, edge) * uEdgeFade;
     gl_FragColor = vec4(glass, alpha);
   }
 `;
@@ -93,6 +97,11 @@ function seededRandom(seed: number) {
 export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoomHandle {
   const root = new THREE.Group();
   root.name = 'DigitalMarketingEmptyStudio';
+  const pendant = new THREE.Group();
+  pendant.name = 'GlobePendantLamp';
+  const spotlightConfig = digitalSceneConfig.lighting.spotlight;
+  pendant.position.set(...spotlightConfig.anchor);
+  root.add(pendant);
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
   const textures = new Set<THREE.Texture>();
@@ -110,6 +119,9 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     phase: number;
   }> = [];
   const reflectionExclusions: THREE.Object3D[] = [];
+  let lampAngle = 0;
+  let lampAngularVelocity = 0;
+  let lampPointerTarget = 0;
   const screenUrls = [
     '/assets/digital-marketing/screens/screen-01-camera-side.webp',
     '/assets/digital-marketing/screens/screen-02-camera-three-quarter.webp',
@@ -136,7 +148,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   // multipass renderer after the mirrored-camera blur passes.
   const floorMaterial = new ReflectiveFloorMaterial();
   floorMaterial.uniforms.uReflectionStrength.value = 0.78;
-  floorMaterial.uniforms.uBaseColor.value.set(0x030406);
+  floorMaterial.uniforms.uBaseColor.value.set(0x0b0d10);
   materials.add(floorMaterial);
   const floorGeometry = new THREE.PlaneGeometry(80, 80);
   geometries.add(floorGeometry);
@@ -151,7 +163,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   // gallery while disappearing naturally into the fog.
   const wallGeometry = new THREE.CylinderGeometry(18, 18, 10, 96, 1, true);
   const wallMaterial = new THREE.MeshStandardMaterial({
-    color: 0x05070a,
+    color: 0x111419,
     roughness: 0.92,
     metalness: 0.03,
     side: THREE.BackSide,
@@ -184,7 +196,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
           uTextureReady: { value: 0 },
           uFocusBlur: { value: depthOffset < 0 ? 0.006 : 0.0008 },
           uEdgeFade: { value: 1 },
-          uIntensity: { value: 1.13 },
+          uIntensity: { value: 1.4 },
           uPhase: { value: progress * 2.3 + options.y * 0.17 },
           uTime: { value: 0 },
         },
@@ -257,33 +269,92 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     rowScale: mobile ? 0.72 : 1.02,
   });
 
-  // A shallow recessed presentation aperture replaces the previous raised,
-  // neon platform. It remains quiet until the hero objects arrive later.
-  const apertureGeometry = new THREE.CylinderGeometry(2.65, 2.65, 0.035, 96);
-  const apertureMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x020304,
-    metalness: 0.45,
-    roughness: 0.3,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.34,
-  });
-  const aperture = trackMesh(new THREE.Mesh(apertureGeometry, apertureMaterial));
-  aperture.position.set(0, -0.012, -2.45);
-  root.add(aperture);
+  // A low-profile titanium and smoked-glass levitation plinth gives the globe
+  // a believable physical anchor without reading as a black opening.
+  const platform = new THREE.Group();
+  platform.name = 'GlobeLevitationPlinth';
+  platform.position.set(0, 0, -2.45);
+  root.add(platform);
 
-  const apertureRimGeometry = new THREE.TorusGeometry(2.65, 0.014, 6, 192);
-  const apertureRimMaterial = new THREE.MeshBasicMaterial({
-    color: 0xb9bec4,
+  const platformBase = trackMesh(new THREE.Mesh(
+    new THREE.CylinderGeometry(2.84, 2.94, 0.12, 96),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x171b20,
+      metalness: 0.82,
+      roughness: 0.24,
+      clearcoat: 0.68,
+      clearcoatRoughness: 0.2,
+    }),
+  ));
+  platformBase.position.y = 0.045;
+  platform.add(platformBase);
+
+  const platformGlass = trackMesh(new THREE.Mesh(
+    new THREE.CylinderGeometry(2.66, 2.66, 0.055, 96),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x343b42,
+      metalness: 0.46,
+      roughness: 0.14,
+      clearcoat: 1,
+      clearcoatRoughness: 0.08,
+      transparent: true,
+      opacity: 0.9,
+    }),
+  ));
+  platformGlass.position.y = 0.125;
+  platform.add(platformGlass);
+
+  const platformRim = trackMesh(new THREE.Mesh(
+    new THREE.TorusGeometry(2.72, 0.035, 10, 192),
+    new THREE.MeshStandardMaterial({
+      color: 0xaeb6bd,
+      metalness: 1,
+      roughness: 0.18,
+    }),
+  ));
+  platformRim.rotation.x = Math.PI / 2;
+  platformRim.position.y = 0.153;
+  platform.add(platformRim);
+
+  const platformHaloMaterial = new THREE.MeshBasicMaterial({
+    color: 0xc7d0d6,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.28,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
     toneMapped: false,
   });
-  geometries.add(apertureRimGeometry);
-  materials.add(apertureRimMaterial);
-  const apertureRim = new THREE.Mesh(apertureRimGeometry, apertureRimMaterial);
-  apertureRim.rotation.x = Math.PI / 2;
-  apertureRim.position.set(0, 0.014, -2.45);
-  root.add(apertureRim);
+  const haloRadii = [2.34, 2.53];
+  haloRadii.forEach((radius, index) => {
+    const geometry = new THREE.TorusGeometry(radius, index === 0 ? 0.009 : 0.014, 6, 160);
+    geometries.add(geometry);
+    const halo = new THREE.Mesh(geometry, platformHaloMaterial);
+    halo.rotation.x = Math.PI / 2;
+    halo.position.y = 0.158;
+    platform.add(halo);
+  });
+  materials.add(platformHaloMaterial);
+
+  const floorPoolTexture = createRadialTexture('rgba(230,235,238,.28)', 'rgba(170,180,188,.055)');
+  textures.add(floorPoolTexture);
+  const floorPoolMaterial = new THREE.MeshBasicMaterial({
+    map: floorPoolTexture,
+    color: 0xd8dde1,
+    transparent: true,
+    opacity: 0.58,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  materials.add(floorPoolMaterial);
+  const floorPoolGeometry = new THREE.PlaneGeometry(11.5, 7.2);
+  geometries.add(floorPoolGeometry);
+  const floorPool = new THREE.Mesh(floorPoolGeometry, floorPoolMaterial);
+  floorPool.rotation.x = -Math.PI / 2;
+  floorPool.position.set(0, 0.008, -2.45);
+  floorPool.renderOrder = 1;
+  root.add(floorPool);
+  reflectionExclusions.push(floorPool);
 
   // A single neutral haze keeps the room focused without colored side pools.
   const centreGlowTexture = createRadialTexture('rgba(235,235,235,.62)', 'rgba(190,195,200,.12)');
@@ -293,14 +364,14 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     map: centreGlowTexture,
     color: 0xffffff,
     transparent: true,
-    opacity: mobile ? 0.28 : 0.36,
+    opacity: mobile ? 0.68 : 0.82,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   });
   materials.add(centreGlowMaterial);
   const centreGlow = new THREE.Sprite(centreGlowMaterial);
   centreGlow.position.set(0, 1.15, -4.8);
-  centreGlow.scale.set(15, 8, 1);
+  centreGlow.scale.set(23, 12, 1);
   centreGlow.renderOrder = 0;
   root.add(centreGlow);
   glowSprites.push(centreGlow);
@@ -381,11 +452,106 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   root.add(glowParticles);
   reflectionExclusions.push(glowParticles);
 
-  const hemisphere = new THREE.HemisphereLight(0xbdbfc2, 0x030303, 0.46);
-  const centreFill = new THREE.SpotLight(0xeeeeec, 16, 20, 0.78, 0.9, 1.35);
+  const hemisphere = new THREE.HemisphereLight(0xc8cbd0, 0x050506, 0.68);
+  const centreFill = new THREE.SpotLight(0xf0f2f3, 25, 30, 1.08, 1, 1.45);
   centreFill.position.set(0, 6.8, 2.5);
   centreFill.target.position.set(0, 0, -2.4);
-  const spotlightConfig = digitalSceneConfig.lighting.spotlight;
+
+  const cordMaterial = new THREE.MeshBasicMaterial({
+    color: 0x727a80,
+    toneMapped: false,
+  });
+  const shadeMaterial = new THREE.MeshBasicMaterial({
+    color: 0x343a40,
+    toneMapped: false,
+    side: THREE.DoubleSide,
+  });
+  const cord = trackMesh(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.016, 0.016, spotlightConfig.cordLength, 8),
+    cordMaterial,
+  ));
+  cord.position.y = -spotlightConfig.cordLength / 2;
+  pendant.add(cord);
+
+  const lampCap = trackMesh(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.16, 0.12, 24),
+    shadeMaterial,
+  ));
+  lampCap.position.y = -spotlightConfig.cordLength + 0.02;
+  pendant.add(lampCap);
+
+  const shadeHeight = 0.44;
+  const shade = trackMesh(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.15, 0.5, shadeHeight, 40, 1, true),
+    shadeMaterial,
+  ));
+  shade.position.y = -spotlightConfig.cordLength - shadeHeight / 2;
+  pendant.add(shade);
+
+  const shadeRim = trackMesh(new THREE.Mesh(
+    new THREE.TorusGeometry(0.49, 0.018, 8, 48),
+    cordMaterial,
+  ));
+  shadeRim.rotation.x = Math.PI / 2;
+  shadeRim.position.y = -spotlightConfig.cordLength - shadeHeight;
+  pendant.add(shadeRim);
+
+  const bulbY = -spotlightConfig.cordLength - shadeHeight;
+  const diffuser = trackMesh(new THREE.Mesh(
+    new THREE.CircleGeometry(0.35, 40),
+    new THREE.MeshBasicMaterial({ color: 0xdfe6eb, toneMapped: false }),
+  ));
+  diffuser.rotation.x = Math.PI / 2;
+  diffuser.position.y = bulbY;
+  pendant.add(diffuser);
+
+  const beamHazeTexture = createRadialTexture('rgba(245,247,248,.34)', 'rgba(218,223,227,.1)');
+  textures.add(beamHazeTexture);
+  const hazeLayers = [
+    { y: bulbY - 0.72, width: 1.65, height: 1.85, opacity: mobile ? 0.17 : 0.21 },
+    { y: bulbY - 1.45, width: 3.15, height: 2.45, opacity: mobile ? 0.105 : 0.13 },
+    { y: bulbY - 2.05, width: 4.8, height: 3.25, opacity: mobile ? 0.052 : 0.07 },
+  ];
+  hazeLayers.forEach(layer => {
+    const material = new THREE.SpriteMaterial({
+      map: beamHazeTexture,
+      color: spotlightConfig.color,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: layer.opacity,
+      toneMapped: false,
+    });
+    materials.add(material);
+    const haze = new THREE.Sprite(material);
+    haze.position.y = layer.y;
+    haze.scale.set(layer.width, layer.height, 1);
+    haze.renderOrder = 2;
+    pendant.add(haze);
+  });
+
+  const bulbGlowTexture = createRadialTexture('rgba(255,255,255,.82)', 'rgba(230,235,240,.2)');
+  textures.add(bulbGlowTexture);
+  const bulbGlowMaterial = new THREE.SpriteMaterial({
+    map: bulbGlowTexture,
+    color: spotlightConfig.color,
+    opacity: 0.4,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    toneMapped: false,
+  });
+  materials.add(bulbGlowMaterial);
+  const bulbGlow = new THREE.Sprite(bulbGlowMaterial);
+  bulbGlow.position.y = bulbY - 0.06;
+  bulbGlow.scale.set(0.8, 0.8, 1);
+  bulbGlow.renderOrder = 2;
+  pendant.add(bulbGlow);
+
+  const bulbLight = new THREE.PointLight(0xf1f3f4, 12, 10, 1.8);
+  bulbLight.position.set(0, bulbY - 0.08, 0);
+  pendant.add(bulbLight);
+
   const globeSpotlight = new THREE.SpotLight(
     spotlightConfig.color,
     spotlightConfig.intensity,
@@ -394,9 +560,11 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     spotlightConfig.penumbra,
     spotlightConfig.decay,
   );
-  globeSpotlight.position.set(...spotlightConfig.position);
+  globeSpotlight.position.set(0, bulbY, 0);
   globeSpotlight.target.position.set(...spotlightConfig.target);
-  root.add(hemisphere, centreFill, centreFill.target, globeSpotlight, globeSpotlight.target);
+  pendant.add(globeSpotlight);
+  root.add(hemisphere, centreFill, centreFill.target, globeSpotlight.target);
+  reflectionExclusions.push(pendant);
 
   let disposed = false;
   let motionEnabled = true;
@@ -405,6 +573,8 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     floor,
     floorMaterial,
     reflectionExclusions,
+    pendant,
+    globeSpotlight,
     update(delta, elapsed) {
       if (disposed) return;
       floorMaterial.update(elapsed);
@@ -428,7 +598,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         track.group.rotation.y = -angle;
       });
       glowSprites.forEach((sprite, index) => {
-        const base = mobile ? 0.38 : 0.46;
+        const base = mobile ? 0.68 : 0.82;
         sprite.material.opacity = base * (0.94 + Math.sin(elapsed * 0.24 + index * 1.7) * 0.06);
       });
       const positions = dustGeometry.getAttribute('position') as THREE.BufferAttribute;
@@ -455,9 +625,24 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       }
       particleColors.needsUpdate = true;
       (glowParticleGeometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;
+      const desiredLampAngle = lampPointerTarget * 0.2;
+      const lampAcceleration = (desiredLampAngle - lampAngle) * 7.2 - lampAngularVelocity * 2.7;
+      lampAngularVelocity += lampAcceleration * delta;
+      lampAngle += lampAngularVelocity * delta;
+      pendant.rotation.z = lampAngle;
+    },
+    setPointerTarget(x) {
+      if (!motionEnabled) return;
+      lampPointerTarget = THREE.MathUtils.clamp(x, -1, 1);
     },
     setMotionEnabled(enabled) {
       motionEnabled = enabled;
+      if (!enabled) {
+        lampPointerTarget = 0;
+        lampAngle = 0;
+        lampAngularVelocity = 0;
+        pendant.rotation.z = 0;
+      }
     },
     dispose() {
       if (disposed) return;
