@@ -11,12 +11,12 @@ export const digitalSceneConfig = {
   rooms: {
     marketing: {
       yaw: 0,
-      cameraY: 1.0,
-      targetY: 1.8,
+      cameraY: 1.22,
+      targetY: 1.58,
       distance: 7.08,
-      narrowPull: 1.08,
-      fov: 38,
-      narrowFov: 44,
+      narrowPull: -0.65,
+      fov: 42,
+      narrowFov: 52,
     },
     'brand-films': {
       yaw: Math.PI * 0.4,

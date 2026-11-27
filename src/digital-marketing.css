@@ -1,7 +1,22 @@
+.digital-marketing-page,
+body:has(.digital-marketing-page) #root {
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+body:has(.digital-marketing-page) {
+  margin: 0;
+  overflow: hidden;
+}
+
 .digital-marketing-page {
-  position: relative;
-  width: 100%;
-  height: 100svh;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
@@ -66,6 +81,34 @@
   inset: 0;
   z-index: 2;
   pointer-events: none;
+}
+
+.marketing-studio-reference {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #030406;
+  animation: marketing-studio-reveal .85s cubic-bezier(.2, .72, .2, 1) both;
+}
+
+.marketing-studio-reference img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  transform: scale(1.006);
+}
+
+.turn-right .marketing-studio-reference.is-turning-out {
+  animation: room-layer-turn-out-left .72s cubic-bezier(.55, 0, .8, .35) both;
+}
+
+.turn-left .marketing-studio-reference.is-turning-out {
+  animation: room-layer-turn-out-right .72s cubic-bezier(.55, 0, .8, .35) both;
 }
 
 .digital-scene-canvas {
@@ -343,6 +386,35 @@
   transition: border-color .28s ease, background-color .28s ease, transform .3s ease, box-shadow .3s ease;
 }
 
+/* Minimal room navigation: arrow marks only. */
+.studio-room-switch {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  color: rgba(236, 234, 232, .86);
+  text-align: center;
+}
+
+.studio-room-switch:hover,
+.studio-room-switch:focus-visible {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+}
+
+.studio-room-switch-arrow {
+  font: 300 30px/1 'Host Grotesk', 'DM Sans', sans-serif;
+}
+
+
 .studio-room-switch--right {
   right: clamp(20px, 4.5vw, 56px);
   text-align: right;
@@ -451,6 +523,11 @@
   to { opacity: 0; transform: translate3d(-18%, 0, 0) scale(1.04); filter: blur(8px); }
 }
 
+@keyframes marketing-studio-reveal {
+  from { opacity: 0; transform: scale(1.025); filter: blur(7px) brightness(.68); }
+  to { opacity: 1; transform: scale(1); filter: blur(0) brightness(1); }
+}
+
 @keyframes room-layer-turn-out-right {
   from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
   to { opacity: 0; transform: translate3d(18%, 0, 0) scale(1.04); filter: blur(8px); }
@@ -544,4 +621,19 @@
   .digital-stage-fallback,
   .studio-room-switch,
   .studio-room-switch-arrow { transition: none; }
+}
+
+/* Final arrow-only control sizing overrides the previous card layout. */
+.studio-room-switch,
+.studio-room-switch:hover,
+.studio-room-switch:focus-visible {
+  width: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
 }

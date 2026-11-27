@@ -1,19 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import gsap from 'gsap';
-import { preloadCachedBinary } from './digitalScene/assetCache';
-import { digitalSceneConfig, type StudioRoomId } from './digitalScene/config';
+import type { StudioRoomId } from './digitalScene/config';
 import type { DigitalSceneController } from './digitalScene';
 import { pages } from './pages';
 import './digital-marketing.css';
-
-const BRAND_FILMS_BACKGROUND = '/assets/digital-marketing/brand-films/brand-films-empty-studio.png';
-const BRAND_FILMS_HERO = '/assets/digital-marketing/brand-films/brand-films-lens-hero.png';
-
-// Warm the core 360 studio assets as soon as this chunk is evaluated.
-preloadCachedBinary(digitalSceneConfig.character.url);
-preloadCachedBinary(digitalSceneConfig.globe.mask);
-preloadCachedBinary(BRAND_FILMS_BACKGROUND);
-preloadCachedBinary(BRAND_FILMS_HERO);
 
 type SceneStatus = 'loading' | 'ready' | 'error';
 type TurnDirection = 'left' | 'right';
@@ -35,7 +25,7 @@ const ROOM_META: Record<StudioRoomId, {
   marketing: {
     path: '/services/',
     pageTitle: 'Business Marketing — MYBI Digital',
-    ariaReady: 'A figure seen from behind in a cinematic studio, with a large holographic Earth and burgundy orbital rings.',
+    ariaReady: 'An empty cinematic MYBI studio with a softly reflective floor, burgundy and slate architectural lighting, atmospheric dust, and an illuminated presentation stage.',
   },
   'brand-films': {
     path: '/brand-films/',
@@ -228,28 +218,9 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
       ? `${activeMeta.pageTitle} studio environment ready.`
       : 'The cinematic studio environment could not load. A static studio view is shown.';
 
-  return <main className={`digital-marketing-page digital-room--${room} ${turning ? `is-turning turn-${turnDirection}` : ''}`}>
+  return <main className={`digital-marketing-page digital-room--${room} digital-settled--${settledRoom} ${turning ? `is-turning turn-${turnDirection}` : ''}`}>
     <div className="digital-environment" aria-hidden="true" />
     <div className="digital-atmosphere" aria-hidden="true" />
-
-    {settledRoom === 'brand-films' && <div className={`brand-films-composite ${turning && room !== 'brand-films' ? 'is-turning-out' : ''}`} aria-hidden="true">
-      <img
-        className="brand-films-background"
-        src={BRAND_FILMS_BACKGROUND}
-        alt=""
-        fetchPriority="high"
-      />
-      <div className="brand-films-smoke"><span /><span /></div>
-      <div className="brand-films-hero-shadow" />
-      <div className="brand-films-hero-wrap">
-        <img
-          className="brand-films-hero"
-          src={BRAND_FILMS_HERO}
-          alt=""
-          fetchPriority="high"
-        />
-      </div>
-    </div>}
 
     <div
       ref={host}
@@ -303,11 +274,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
         aria-label={`Turn left in the 360-degree studio to ${ROOM_META[previousRoom].pageTitle.replace(' — MYBI Digital', '')}`}
         disabled={turning}
       >
-        <span className="studio-room-switch-meta">360° STUDIO · TURN LEFT</span>
-        <span className="studio-room-switch-title">
-          <span className="studio-room-switch-arrow" aria-hidden="true">←</span>
-          <span>{ROOM_META[previousRoom].pageTitle.replace(' — MYBI Digital', '')}</span>
-        </span>
+        <span className="studio-room-switch-arrow" aria-hidden="true">←</span>
       </button>
       <button
         type="button"
@@ -316,11 +283,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
         aria-label={`Turn right in the 360-degree studio to ${ROOM_META[nextRoom].pageTitle.replace(' — MYBI Digital', '')}`}
         disabled={turning}
       >
-        <span className="studio-room-switch-meta">360° STUDIO · TURN RIGHT</span>
-        <span className="studio-room-switch-title">
-          <span>{ROOM_META[nextRoom].pageTitle.replace(' — MYBI Digital', '')}</span>
-          <span className="studio-room-switch-arrow" aria-hidden="true">→</span>
-        </span>
+        <span className="studio-room-switch-arrow" aria-hidden="true">→</span>
       </button>
     </nav>
 
