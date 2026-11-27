@@ -3,6 +3,7 @@ export const globeVertexShader = `
   varying vec3 vNormalView;
   varying vec3 vViewDir;
   varying vec3 vWorldNormal;
+  varying vec3 vWorldPosition;
   varying vec3 vSpherePosition;
 
   void main() {
@@ -10,6 +11,7 @@ export const globeVertexShader = `
     vSpherePosition = normalize(position);
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldNormal = normalize(mat3(modelMatrix) * normal);
+    vWorldPosition = worldPosition.xyz;
     vec4 viewPosition = viewMatrix * worldPosition;
     vNormalView = normalize(normalMatrix * normal);
     vViewDir = normalize(-viewPosition.xyz);
@@ -25,6 +27,12 @@ export const globeFragmentShader = `
   uniform vec3 uFresnelColor;
   uniform vec3 uRimColor;
   uniform vec3 uLightDirection;
+  uniform vec3 uSpotPosition;
+  uniform vec3 uSpotDirection;
+  uniform vec3 uSpotColor;
+  uniform float uSpotOuterCos;
+  uniform float uSpotInnerCos;
+  uniform float uSpotIntensity;
   uniform vec3 uRimDirection;
   uniform float uOpacity;
   uniform float uTime;
@@ -33,6 +41,7 @@ export const globeFragmentShader = `
   varying vec3 vNormalView;
   varying vec3 vViewDir;
   varying vec3 vWorldNormal;
+  varying vec3 vWorldPosition;
   varying vec3 vSpherePosition;
 
   float hash(vec2 value) {
@@ -67,7 +76,21 @@ export const globeFragmentShader = `
     float west = texture2D(uLandMask, sphereUv - vec2(texel.x, 0.0)).r;
     float edge = smoothstep(0.08, 0.62, abs(north - south) + abs(east - west));
 
-    float light = clamp(dot(normalize(vWorldNormal), normalize(uLightDirection)), 0.0, 1.0);
+    vec3 spotRayDirection = vWorldPosition - uSpotPosition;
+    float spotDistance = length(spotRayDirection);
+    spotRayDirection /= max(spotDistance, 0.0001);
+    float spotCone = smoothstep(
+      uSpotOuterCos,
+      uSpotInnerCos,
+      dot(spotRayDirection, normalize(uSpotDirection))
+    );
+    float spotDiffuse = max(dot(normalize(vWorldNormal), -spotRayDirection), 0.0);
+    float spotlight = spotCone * spotDiffuse * uSpotIntensity / (1.0 + spotDistance * 0.12);
+    float light = clamp(
+      dot(normalize(vWorldNormal), normalize(uLightDirection)) + spotlight * 0.6,
+      0.0,
+      1.0
+    );
     float sideRim = pow(clamp(dot(normalize(vWorldNormal), normalize(uRimDirection)), 0.0, 1.0), 1.6);
 
     // Fine geographic dot matrix, drawn only over land. Each dot varies in
@@ -93,6 +116,7 @@ export const globeFragmentShader = `
     colour += uGridColor * grid * (0.1 + land * 0.05) * (0.6 + 0.5 * light);
     colour += uFresnelColor * rim * 0.9;
     colour += uRimColor * directionalRim * 0.7;
+    colour += uSpotColor * spotlight * (0.12 + land * 0.18 + dots * land * 0.2 + edge * 0.1);
 
     float alpha = uOpacity * (
       0.065 +

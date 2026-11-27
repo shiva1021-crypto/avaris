@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { digitalSceneConfig } from '../../digitalScene/config';
 import { ReflectiveFloorMaterial } from '../materials/ReflectiveFloorMaterial';
 
 export interface DigitalMarketingRoomHandle {
@@ -338,11 +339,64 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   root.add(dust);
   reflectionExclusions.push(dust);
 
+  const glowParticleCount = mobile ? 32 : 80;
+  const glowParticlePositions = new Float32Array(glowParticleCount * 3);
+  const glowParticleOrigins = new Float32Array(glowParticleCount * 3);
+  const glowParticlePhases = new Float32Array(glowParticleCount);
+  const glowParticleBrightness = new Float32Array(glowParticleCount);
+  const glowParticleColors = new Float32Array(glowParticleCount * 3);
+  for (let index = 0; index < glowParticleCount; index += 1) {
+    const height = random() * 2 - 1;
+    const angle = random() * Math.PI * 2;
+    const radius = 1.8 + random() * 2.2;
+    const horizontalRadius = Math.sqrt(1 - height * height) * radius;
+    glowParticlePositions[index * 3] = Math.cos(angle) * horizontalRadius;
+    glowParticlePositions[index * 3 + 1] = 1.62 + height * radius;
+    glowParticlePositions[index * 3 + 2] = -1.8 + Math.sin(angle) * horizontalRadius;
+    glowParticleOrigins.set(glowParticlePositions.subarray(index * 3, index * 3 + 3), index * 3);
+    glowParticlePhases[index] = random() * Math.PI * 2;
+    glowParticleBrightness[index] = 0.62 + random() * 0.38;
+    glowParticleColors.fill(glowParticleBrightness[index], index * 3, index * 3 + 3);
+  }
+  const glowParticleGeometry = new THREE.BufferGeometry();
+  glowParticleGeometry.setAttribute('position', new THREE.BufferAttribute(glowParticlePositions, 3));
+  glowParticleGeometry.setAttribute('color', new THREE.BufferAttribute(glowParticleColors, 3));
+  geometries.add(glowParticleGeometry);
+  const glowParticleMaterial = new THREE.PointsMaterial({
+    map: dustTexture,
+    color: 0xe9edf0,
+    size: mobile ? 0.052 : 0.066,
+    sizeAttenuation: true,
+    opacity: mobile ? 0.68 : 0.78,
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    toneMapped: false,
+  });
+  materials.add(glowParticleMaterial);
+  const glowParticles = new THREE.Points(glowParticleGeometry, glowParticleMaterial);
+  glowParticles.renderOrder = 7;
+  root.add(glowParticles);
+  reflectionExclusions.push(glowParticles);
+
   const hemisphere = new THREE.HemisphereLight(0xbdbfc2, 0x030303, 0.46);
   const centreFill = new THREE.SpotLight(0xeeeeec, 16, 20, 0.78, 0.9, 1.35);
   centreFill.position.set(0, 6.8, 2.5);
   centreFill.target.position.set(0, 0, -2.4);
-  root.add(hemisphere, centreFill, centreFill.target);
+  const spotlightConfig = digitalSceneConfig.lighting.spotlight;
+  const globeSpotlight = new THREE.SpotLight(
+    spotlightConfig.color,
+    spotlightConfig.intensity,
+    spotlightConfig.distance,
+    spotlightConfig.angle,
+    spotlightConfig.penumbra,
+    spotlightConfig.decay,
+  );
+  globeSpotlight.position.set(...spotlightConfig.position);
+  globeSpotlight.target.position.set(...spotlightConfig.target);
+  root.add(hemisphere, centreFill, centreFill.target, globeSpotlight, globeSpotlight.target);
 
   let disposed = false;
   let motionEnabled = true;
@@ -385,6 +439,22 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         array[index * 3 + 1] = dustOrigins[index * 3 + 1] + Math.cos(elapsed * 0.16 + phase) * 0.035;
       }
       positions.needsUpdate = true;
+
+      const particleColors = glowParticleGeometry.getAttribute('color') as THREE.BufferAttribute;
+      const colorArray = particleColors.array as Float32Array;
+      for (let index = 0; index < glowParticleCount; index += 1) {
+        const phase = glowParticlePhases[index];
+        const pulse = 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(elapsed * 1.15 + phase));
+        const brightness = glowParticleBrightness[index] * pulse;
+        colorArray[index * 3] = brightness;
+        colorArray[index * 3 + 1] = brightness;
+        colorArray[index * 3 + 2] = brightness;
+        glowParticlePositions[index * 3] = glowParticleOrigins[index * 3] + Math.sin(elapsed * 0.22 + phase) * 0.035;
+        glowParticlePositions[index * 3 + 1] = glowParticleOrigins[index * 3 + 1] + Math.cos(elapsed * 0.28 + phase) * 0.035;
+        glowParticlePositions[index * 3 + 2] = glowParticleOrigins[index * 3 + 2] + Math.sin(elapsed * 0.19 + phase) * 0.035;
+      }
+      particleColors.needsUpdate = true;
+      (glowParticleGeometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;
     },
     setMotionEnabled(enabled) {
       motionEnabled = enabled;

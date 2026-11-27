@@ -337,20 +337,13 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
 
     <header className="site-header">
       <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
-      <nav className="desktop-nav" aria-label="Desktop navigation">
-        {pages.slice(0, -1).map(page => (
-          <a
-            key={page.path}
-            href={page.path}
-            aria-current={currentPage === page ? 'page' : undefined}
-            onClick={event => handleNavClick(event, page.path)}
-          >
-            {page.title}
-          </a>
-        ))}
-      </nav>
-      <button className="contact-button site-menu-toggle" aria-haspopup="dialog" onClick={() => menu.current?.showModal()}>
-        <span>Menu</span>
+      <button
+        className="contact-button site-menu-toggle"
+        aria-label="Open site menu"
+        aria-controls="digital-site-menu"
+        aria-haspopup="dialog"
+        onClick={() => menu.current?.showModal()}
+      >
         <span className="menu-lines" aria-hidden="true" />
       </button>
     </header>
@@ -428,7 +421,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
       </section>
     </section>}
 
-    <dialog ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
+    <dialog id="digital-site-menu" ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
       <button className="close-dialog" aria-label="Close menu" onClick={() => menu.current?.close()}>×</button>
       <nav aria-label="Main navigation">
         <a href="/">Home</a>

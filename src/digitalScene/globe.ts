@@ -144,6 +144,7 @@ export async function loadGlobe(
   const root = new THREE.Group();
   root.position.set(...globeConfig.position);
   root.rotation.y = globeConfig.rotation;
+  const spotlightConfig = digitalSceneConfig.lighting.spotlight;
 
   const geometry = new THREE.IcosahedronGeometry(globeConfig.radius, 5);
 
@@ -165,7 +166,19 @@ export async function loadGlobe(
       uGridColor: { value: new THREE.Color(0x81878d) },
       uFresnelColor: { value: new THREE.Color(0xd9dde1) },
       uRimColor: { value: new THREE.Color(0xaab0b6) },
-      uLightDirection: { value: new THREE.Vector3(-0.35, 0.55, 0.75).normalize() },
+      uLightDirection: { value: new THREE.Vector3(0, 1, 0) },
+      uSpotPosition: { value: new THREE.Vector3(...spotlightConfig.position) },
+      uSpotDirection: {
+        value: new THREE.Vector3(...spotlightConfig.target)
+          .sub(new THREE.Vector3(...spotlightConfig.position))
+          .normalize(),
+      },
+      uSpotColor: { value: new THREE.Color(spotlightConfig.color) },
+      uSpotOuterCos: { value: Math.cos(spotlightConfig.angle) },
+      uSpotInnerCos: {
+        value: Math.cos(spotlightConfig.angle * (1 - spotlightConfig.penumbra)),
+      },
+      uSpotIntensity: { value: spotlightConfig.shaderIntensity },
       uRimDirection: { value: new THREE.Vector3(0.7, 0.1, 0.65).normalize() },
       uOpacity: { value: 1 },
       uTime: { value: 0 },

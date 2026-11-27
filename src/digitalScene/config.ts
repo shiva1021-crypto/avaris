@@ -117,6 +117,17 @@ export const digitalSceneConfig = {
     accent: 7,
     fill: 0.16,
     environment: 0.24,
+    spotlight: {
+      color: 0xe9edf0,
+      position: [0, 6.1, -1.8] as const,
+      target: [0, 1.62, -1.8] as const,
+      intensity: 18,
+      distance: 8,
+      angle: 0.38,
+      penumbra: 0.85,
+      decay: 2,
+      shaderIntensity: 1.35,
+    },
   },
   performance: {
     desktopDpr: 1.6,
