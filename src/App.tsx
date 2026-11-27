@@ -4,12 +4,19 @@ import StudioIntro, { shouldPlayIntro } from './StudioIntro';
 import HeroCamera from './HeroCamera';
 import StudioAtmosphere from './StudioAtmosphere';
 import { pages } from './pages';
+import type { StudioRoomId } from './digitalScene/config';
 
 const DigitalMarketingPage = lazy(() => import('./DigitalMarketingPage'));
 const normalizedPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\/?$/, '/');
-const isBusinessMarketing = normalizedPath === '/services/';
-const isBrandFilms = normalizedPath === '/brand-films/';
-const isStudioRoomPage = isBusinessMarketing || isBrandFilms;
+const STUDIO_ROUTES: Record<string, StudioRoomId> = {
+  '/services/': 'marketing',
+  '/brand-films/': 'brand-films',
+  '/weddings-events/': 'weddings-events',
+  '/work/': 'work',
+  '/about/': 'about',
+};
+const initialStudioRoom = STUDIO_ROUTES[normalizedPath];
+const isStudioRoomPage = Boolean(initialStudioRoom);
 
 const currentPage = pages.find(page => page.path === normalizedPath);
 const isServicesPage = Boolean(currentPage);
@@ -110,7 +117,7 @@ export default function App() {
     return <Suspense fallback={lensArriving
       ? <div className="lens-blackout lens-arrival" aria-hidden="true" />
       : <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
-    }><DigitalMarketingPage initialRoom={isBrandFilms ? 'brand-films' : 'marketing'} /></Suspense>;
+    }><DigitalMarketingPage initialRoom={initialStudioRoom} /></Suspense>;
   }
   return <StudioApp />;
 }

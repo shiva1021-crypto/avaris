@@ -1,11 +1,12 @@
 // Independently adjustable composition parameters for the 360-degree MYBI studio.
 // Values are in metres and radians unless stated otherwise.
 
-export type StudioRoomId = 'marketing' | 'brand-films';
+export type StudioRoomId = 'marketing' | 'brand-films' | 'weddings-events' | 'work' | 'about';
 
 export const digitalSceneConfig = {
-  // The 360-degree camera pivot sits at (0, y, 7.08). At yaw = 0 it faces -Z
-  // (Business Marketing); turning right by +90 deg (+PI/2) faces +X (Shop & Brand Films).
+  // Five destinations are spaced evenly around one shared 360-degree studio.
+  // At yaw = 0 the camera faces Business Marketing; each following room is
+  // one 72-degree right turn around the central hub.
   hub: [0, 0, 7.08] as const,
   rooms: {
     marketing: {
@@ -18,13 +19,40 @@ export const digitalSceneConfig = {
       narrowFov: 44,
     },
     'brand-films': {
-      yaw: Math.PI / 2,
+      yaw: Math.PI * 0.4,
       cameraY: 1.12,
       targetY: 1.44,
       distance: 7.08,
       narrowPull: -0.45,
       fov: 39,
       narrowFov: 48,
+    },
+    'weddings-events': {
+      yaw: Math.PI * 0.8,
+      cameraY: 1.08,
+      targetY: 1.42,
+      distance: 7.08,
+      narrowPull: 0.2,
+      fov: 39,
+      narrowFov: 46,
+    },
+    work: {
+      yaw: Math.PI * 1.2,
+      cameraY: 1.04,
+      targetY: 1.38,
+      distance: 7.08,
+      narrowPull: 0.15,
+      fov: 39,
+      narrowFov: 46,
+    },
+    about: {
+      yaw: Math.PI * 1.6,
+      cameraY: 1.1,
+      targetY: 1.48,
+      distance: 7.08,
+      narrowPull: 0.25,
+      fov: 39,
+      narrowFov: 46,
     },
   },
   camera: {

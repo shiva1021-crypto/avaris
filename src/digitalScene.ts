@@ -81,9 +81,15 @@ export async function mountDigitalScene(
   let lastTime = 0;
   let narrow = mobile;
 
+  const initialCamera = digitalSceneConfig.rooms[initialRoom];
   const cameraState = {
-    yaw: digitalSceneConfig.rooms[initialRoom].yaw,
-    progress: initialRoom === 'brand-films' ? 1 : 0,
+    yaw: initialCamera.yaw,
+    cameraY: initialCamera.cameraY,
+    targetY: initialCamera.targetY,
+    distance: initialCamera.distance,
+    narrowPull: initialCamera.narrowPull,
+    fov: initialCamera.fov,
+    narrowFov: initialCamera.narrowFov,
   };
   let pointerTargetX = 0;
   let pointerTargetY = 0;
@@ -93,23 +99,18 @@ export async function mountDigitalScene(
 
   function applyCamera() {
     if (disposed || !camera) return;
-    const { hub, rooms } = digitalSceneConfig;
-    const marketing = rooms.marketing;
-    const films = rooms['brand-films'];
-    const t = THREE.MathUtils.clamp(cameraState.progress, 0, 1);
+    const { hub } = digitalSceneConfig;
 
     const forwardX = Math.sin(cameraState.yaw);
     const forwardZ = -Math.cos(cameraState.yaw);
     const rightX = Math.cos(cameraState.yaw);
     const rightZ = Math.sin(cameraState.yaw);
 
-    const pull = narrow ? THREE.MathUtils.lerp(marketing.narrowPull, films.narrowPull, t) : 0;
-    const camY = THREE.MathUtils.lerp(marketing.cameraY, films.cameraY, t);
-    const targetY = THREE.MathUtils.lerp(marketing.targetY, films.targetY, t);
-    const dist = THREE.MathUtils.lerp(marketing.distance, films.distance, t);
-    const fov = narrow
-      ? THREE.MathUtils.lerp(marketing.narrowFov, films.narrowFov, t)
-      : THREE.MathUtils.lerp(marketing.fov, films.fov, t);
+    const pull = narrow ? cameraState.narrowPull : 0;
+    const camY = cameraState.cameraY;
+    const targetY = cameraState.targetY;
+    const dist = cameraState.distance;
+    const fov = narrow ? cameraState.narrowFov : cameraState.fov;
 
     const px = finePointer && !reducedMotion ? pointerX : 0;
     const py = finePointer && !reducedMotion ? pointerY : 0;
@@ -261,19 +262,25 @@ export async function mountDigitalScene(
   function setRoom(room: StudioRoomId, immediate = false) {
     if (disposed) return;
     const dest = digitalSceneConfig.rooms[room];
-    const destProgress = room === 'brand-films' ? 1 : 0;
+    let targetYaw = dest.yaw;
+    while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
+    while (targetYaw - cameraState.yaw < -Math.PI) targetYaw += Math.PI * 2;
     cameraTween?.kill();
     if (immediate || reducedMotion) {
-      cameraState.yaw = dest.yaw;
-      cameraState.progress = destProgress;
+      Object.assign(cameraState, dest, { yaw: targetYaw });
       applyCamera();
       renderFrame(0);
       return;
     }
     gsap.ticker.lagSmoothing(1200, 100);
     cameraTween = gsap.to(cameraState, {
-      yaw: dest.yaw,
-      progress: destProgress,
+      yaw: targetYaw,
+      cameraY: dest.cameraY,
+      targetY: dest.targetY,
+      distance: dest.distance,
+      narrowPull: dest.narrowPull,
+      fov: dest.fov,
+      narrowFov: dest.narrowFov,
       duration: 1.55,
       ease: 'power3.inOut',
       onUpdate: () => {
