@@ -233,8 +233,8 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         baseAngle: angle,
         radius: panelRadius,
         y: options.y,
-        min: -0.88,
-        max: 0.88,
+        min: angle < 0 ? -0.88 : 0.28,
+        max: angle < 0 ? -0.28 : 0.88,
         speed: options.y > 2 ? 0.052 : -0.041,
         phase: options.y > 2 ? 0.35 : 2.1,
       });

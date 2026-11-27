@@ -6,6 +6,7 @@ import {
   type DigitalMarketingRoomHandle,
 } from './digitalExperience/rooms/DigitalMarketingRoom';
 import { digitalSceneConfig, type StudioRoomId } from './digitalScene/config';
+import { loadGlobe, type GlobeHandle } from './digitalScene/globe';
 
 export interface DigitalSceneController {
   setRoom(room: StudioRoomId, immediate?: boolean): void;
@@ -37,6 +38,7 @@ export async function mountDigitalScene(
   let scene: THREE.Scene | undefined;
   let camera: THREE.PerspectiveCamera | undefined;
   let room: DigitalMarketingRoomHandle | undefined;
+  let globe: GlobeHandle | undefined;
   let pipeline: RenderPipeline | undefined;
   let resizeObserver: ResizeObserver | undefined;
   let cameraTween: gsap.core.Tween | undefined;
@@ -114,6 +116,7 @@ export async function mountDigitalScene(
       applyCamera();
     }
     room.update(delta, elapsed);
+    globe?.update(delta);
     pipeline.render(scene, camera, elapsed);
   }
 
@@ -192,6 +195,7 @@ export async function mountDigitalScene(
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerleave', onPointerLeave);
     pipeline?.dispose();
+    globe?.dispose();
     room?.dispose();
     scene?.clear();
     renderer?.dispose();
@@ -205,6 +209,7 @@ export async function mountDigitalScene(
 
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
+    if (globe) globe.root.visible = nextRoom === 'marketing';
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
     while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
@@ -266,6 +271,9 @@ export async function mountDigitalScene(
 
     room = createDigitalMarketingRoom(mobile);
     scene.add(room.root);
+    globe = await loadGlobe(signal, { includeSurface: true, includeRings: false });
+    globe.root.visible = initialRoom === 'marketing';
+    scene.add(globe.root);
     pipeline = new RenderPipeline(renderer, {
       mobile,
       floorY: digitalSceneConfig.floor.y,

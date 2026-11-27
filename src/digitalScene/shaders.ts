@@ -3,9 +3,11 @@ export const globeVertexShader = `
   varying vec3 vNormalView;
   varying vec3 vViewDir;
   varying vec3 vWorldNormal;
+  varying vec3 vSpherePosition;
 
   void main() {
     vUv = uv;
+    vSpherePosition = normalize(position);
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vWorldNormal = normalize(mat3(modelMatrix) * normal);
     vec4 viewPosition = viewMatrix * worldPosition;
@@ -31,6 +33,7 @@ export const globeFragmentShader = `
   varying vec3 vNormalView;
   varying vec3 vViewDir;
   varying vec3 vWorldNormal;
+  varying vec3 vSpherePosition;
 
   float hash(vec2 value) {
     return fract(sin(dot(value, vec2(12.9898, 78.233))) * 43758.5453);
@@ -43,16 +46,25 @@ export const globeFragmentShader = `
   }
 
   void main() {
+    // Derive an equirectangular coordinate from the actual sphere position.
+    // This avoids the stretched islands and broken seams produced by the
+    // generated IcosahedronGeometry UVs and matches the particle map exactly.
+    vec3 spherePosition = normalize(vSpherePosition);
+    float longitude = atan(spherePosition.z, -spherePosition.x);
+    vec2 sphereUv = vec2(
+      fract(longitude / (2.0 * 3.14159265359) + 0.5),
+      1.0 - acos(clamp(spherePosition.y, -1.0, 1.0)) / 3.14159265359
+    );
     vec2 texel = vec2(1.0 / 1024.0, 1.0 / 512.0);
-    float land = texture2D(uLandMask, vUv).r;
+    float land = texture2D(uLandMask, sphereUv).r;
     land = smoothstep(0.32, 0.68, land);
 
     // A cheap coastline edge so continents read as linework rather than a
     // solid white mask. The mask is 4x wider than it is tall, hence texel.
-    float north = texture2D(uLandMask, vUv + vec2(0.0, texel.y)).r;
-    float south = texture2D(uLandMask, vUv - vec2(0.0, texel.y)).r;
-    float east = texture2D(uLandMask, vUv + vec2(texel.x, 0.0)).r;
-    float west = texture2D(uLandMask, vUv - vec2(texel.x, 0.0)).r;
+    float north = texture2D(uLandMask, sphereUv + vec2(0.0, texel.y)).r;
+    float south = texture2D(uLandMask, sphereUv - vec2(0.0, texel.y)).r;
+    float east = texture2D(uLandMask, sphereUv + vec2(texel.x, 0.0)).r;
+    float west = texture2D(uLandMask, sphereUv - vec2(texel.x, 0.0)).r;
     float edge = smoothstep(0.08, 0.62, abs(north - south) + abs(east - west));
 
     float light = clamp(dot(normalize(vWorldNormal), normalize(uLightDirection)), 0.0, 1.0);
@@ -61,19 +73,19 @@ export const globeFragmentShader = `
     // Fine geographic dot matrix, drawn only over land. Each dot varies in
     // strength so continents read as clustered settlements rather than a
     // uniform halftone.
-    vec2 dotGrid = vUv * vec2(190.0, 95.0);
+    vec2 dotGrid = sphereUv * vec2(190.0, 95.0);
     vec2 dotCell = fract(dotGrid) - 0.5;
     float dotSeed = hash(floor(dotGrid));
     float dots = (1.0 - smoothstep(0.08, 0.21, length(dotCell))) * (0.35 + 0.65 * dotSeed);
 
-    float meridian = gridLine(vUv.x, 24.0, 0.012);
-    float parallel = gridLine(vUv.y, 12.0, 0.012);
+    float meridian = gridLine(sphereUv.x, 24.0, 0.012);
+    float parallel = gridLine(sphereUv.y, 12.0, 0.012);
     float grid = max(meridian * 0.55, parallel * 0.42);
 
     float fresnel = pow(1.0 - max(dot(normalize(vNormalView), normalize(vViewDir)), 0.0), 2.8);
     float rim = fresnel * (0.3 + 0.7 * pow(light, 1.4));
     float warmRim = fresnel * sideRim;
-    float scan = 0.5 + 0.5 * sin(vUv.y * 52.0 - uTime * 0.24);
+    float scan = 0.5 + 0.5 * sin(sphereUv.y * 52.0 - uTime * 0.24);
 
     vec3 ocean = uOceanColor * (0.55 + scan * 0.12);
     vec3 landTint = uLandColor * (0.42 + dots * 0.5 + edge * 0.26) * (0.55 + 0.65 * light);
@@ -83,10 +95,10 @@ export const globeFragmentShader = `
     colour += uRimColor * warmRim * 0.7;
 
     float alpha = uOpacity * (
-      0.05 +
-      land * 0.05 +
-      dots * land * 0.28 +
-      edge * 0.2 +
+      0.065 +
+      land * 0.075 +
+      dots * land * 0.34 +
+      edge * 0.24 +
       grid * 0.05 +
       rim * 0.4 +
       warmRim * 0.26

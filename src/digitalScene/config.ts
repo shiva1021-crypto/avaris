@@ -69,14 +69,14 @@ export const digitalSceneConfig = {
   globe: {
     // Roughly 40% of the viewport height, centred behind the figure's head and
     // shoulders, with its lower edge settling into the floor glow.
-    position: [0, 1.62, -3.2] as const,
+    position: [0, 1.62, -1.8] as const,
     radius: 1.36,
     mask: '/assets/digital-marketing/globe/earth-land-mask-1024x512.png',
     // IcosahedronGeometry places the equirectangular prime meridian near -X.
     // +0.42π turns Africa and Europe toward the camera without a mirrored map.
     rotation: Math.PI * 0.42,
     rotationSpeed: 0.018,
-    landParticles: 950,
+    landParticles: 3800,
   },
   rings: {
     // Kept close to the globe so the orbits read as a system rather than

@@ -129,7 +129,10 @@ function createLandParticles(mask: ReturnType<typeof readMask>, radius: number, 
   return { geometry, count: accepted };
 }
 
-export async function loadGlobe(signal: AbortSignal): Promise<GlobeHandle> {
+export async function loadGlobe(
+  signal: AbortSignal,
+  options: { includeSurface?: boolean; includeRings?: boolean } = {},
+): Promise<GlobeHandle> {
   const { globe: globeConfig, rings: ringConfig } = digitalSceneConfig;
   const { image, texture: maskTexture } = await loadLandMask(signal);
   if (signal.aborted) {
@@ -157,14 +160,14 @@ export async function loadGlobe(signal: AbortSignal): Promise<GlobeHandle> {
     name: 'HolographicEarth',
     uniforms: {
       uLandMask: { value: maskTexture },
-      uLandColor: { value: new THREE.Color(0xe0ccc5) },
-      uOceanColor: { value: new THREE.Color(0x0a0f16) },
-      uGridColor: { value: new THREE.Color(0x6a7d8a) },
-      uFresnelColor: { value: new THREE.Color(0xd6b9b4) },
-      uRimColor: { value: new THREE.Color(0xc45a72) },
+      uLandColor: { value: new THREE.Color(0xf7adc1) },
+      uOceanColor: { value: new THREE.Color(0x230910) },
+      uGridColor: { value: new THREE.Color(0xd65376) },
+      uFresnelColor: { value: new THREE.Color(0xffc2d1) },
+      uRimColor: { value: new THREE.Color(0xf06b8d) },
       uLightDirection: { value: new THREE.Vector3(-0.35, 0.55, 0.75).normalize() },
       uRimDirection: { value: new THREE.Vector3(0.7, 0.1, 0.65).normalize() },
-      uOpacity: { value: 0.92 },
+      uOpacity: { value: 1 },
       uTime: { value: 0 },
     },
     vertexShader: globeVertexShader,
@@ -172,6 +175,7 @@ export async function loadGlobe(signal: AbortSignal): Promise<GlobeHandle> {
     transparent: true,
     depthWrite: false,
     side: THREE.FrontSide,
+    toneMapped: false,
   });
   const surface = new THREE.Mesh(geometry, globeMaterial);
   surface.renderOrder = 2;
@@ -183,26 +187,28 @@ export async function loadGlobe(signal: AbortSignal): Promise<GlobeHandle> {
   );
   const particleSprite = createParticleSprite();
   const particleMaterial = new THREE.PointsMaterial({
-    color: 0xf0d6cd,
+    color: 0xff9bb4,
     map: particleSprite,
-    size: 0.013,
+    size: 0.026,
     sizeAttenuation: true,
     transparent: true,
-    opacity: 0.5,
+    opacity: 1,
     alphaTest: 0.02,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
+    toneMapped: false,
   });
   const particles = new THREE.Points(particleGeometry, particleMaterial);
   particles.renderOrder = 3;
 
   const rotatingSurface = new THREE.Group();
-  rotatingSurface.add(surface, particles);
+  if (options.includeSurface !== false) rotatingSurface.add(surface);
+  rotatingSurface.add(particles);
   root.add(rotatingSurface);
 
   const ringColors = [0xe0708a, 0x9b2946, 0xb84a63];
   const ringOpacities = [0.78, 0.44, 0.58];
-  const rings = ringConfig.radiusMultipliers.map((multiplier, index) => {
+  const rings = options.includeRings === false ? [] : ringConfig.radiusMultipliers.map((multiplier, index) => {
     const pivot = new THREE.Group();
     pivot.rotation.set(...ringConfig.inclinations[index]);
     const ringGeometry = new THREE.TorusGeometry(
