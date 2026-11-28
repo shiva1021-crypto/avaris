@@ -13,6 +13,7 @@ import {
   loadWeddingsEventsSet,
   type WeddingsEventsHandle,
 } from './digitalScene/weddingsEvents';
+import { createWorkCube, type WorkCubeHandle } from './digitalScene/workCube';
 
 export interface DigitalSceneController {
   setRoom(room: StudioRoomId, immediate?: boolean): void;
@@ -49,6 +50,7 @@ export async function mountDigitalScene(
   let brandFilmsTask: Promise<BrandFilmsHandle | undefined> | undefined;
   let weddingsEvents: WeddingsEventsHandle | undefined;
   let weddingsEventsTask: Promise<WeddingsEventsHandle | undefined> | undefined;
+  let workCube: WorkCubeHandle | undefined;
   let pipeline: RenderPipeline | undefined;
   let environmentTarget: THREE.WebGLRenderTarget | undefined;
   let resizeObserver: ResizeObserver | undefined;
@@ -129,6 +131,7 @@ export async function mountDigitalScene(
     globe?.update(delta, room.globeSpotlight);
     brandFilms?.update(delta);
     weddingsEvents?.update(delta);
+    workCube?.update(delta);
     pipeline.render(scene, camera, elapsed);
   }
 
@@ -188,6 +191,7 @@ export async function mountDigitalScene(
     globe?.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
     weddingsEvents?.setMotionEnabled(!reducedMotion);
+    workCube?.setMotionEnabled(!reducedMotion);
     if (reducedMotion) {
       cameraTween?.kill();
       pointerX = 0;
@@ -214,6 +218,7 @@ export async function mountDigitalScene(
     pipeline?.dispose();
     scene && (scene.environment = null);
     environmentTarget?.dispose();
+    workCube?.dispose();
     weddingsEvents?.dispose();
     brandFilms?.dispose();
     globe?.dispose();
@@ -364,6 +369,9 @@ export async function mountDigitalScene(
     room = createDigitalMarketingRoom(mobile);
     room.pendant.visible = true;
     scene.add(room.root);
+    workCube = createWorkCube(mobile);
+    scene.add(workCube.root);
+    room.reflectionExclusions.push(workCube.root);
     const globeTask = loadGlobe(signal, { includeSurface: true, includeRings: false });
     const initialBrandFilmsTask = ensureBrandFilms();
     const initialWeddingsEventsTask = ensureWeddingsEvents();
@@ -397,6 +405,7 @@ export async function mountDigitalScene(
     globe.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
     weddingsEvents?.setMotionEnabled(!reducedMotion);
+    workCube.setMotionEnabled(!reducedMotion);
     renderFrame(0);
     startLoop();
     return { setRoom };

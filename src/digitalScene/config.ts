@@ -113,9 +113,21 @@ export const digitalSceneConfig = {
     // Third room in the continuous 360-degree studio (144 degrees right).
     position: [4.162, 0, 12.807] as const,
     rotationY: Math.PI * 0.2,
-    modelUrl: '/assets/digital-marketing/weddings-events/MYBI_Wedding_Final.glb',
+    modelUrl: '/assets/digital-marketing/weddings-events/MYBI_Wedding_Burgundy.glb',
     modelHeight: 2.72,
     floatHeight: 1.52,
+  },
+  workCube: {
+    // Fourth room in the continuous 360-degree studio (216 degrees right).
+    position: [-4.162, 0, 12.807] as const,
+    rotationY: -Math.PI * 0.2,
+    rotationX: -Math.PI * 0.09,
+    rotationYLocal: Math.PI * 0.25,
+    rotationZ: 0,
+    size: 2.25,
+    edgeThickness: 0.062,
+    coreRadius: 0.054,
+    floatHeight: 2.02,
   },
   floor: {
     y: 0,
