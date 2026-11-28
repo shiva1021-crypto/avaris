@@ -143,8 +143,6 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     baseAngle: number;
     radius: number;
     y: number;
-    min: number;
-    max: number;
     speed: number;
     phase: number;
   }> = [];
@@ -231,7 +229,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       const depthOffset = index % 2 === 0 ? -0.72 : 0.58;
       const panelRadius = options.radius + depthOffset;
       const foregroundScale = depthOffset < 0 ? 1.24 : 0.92;
-      const width = THREE.MathUtils.lerp(1.2, 1.7, edgeWeight) * options.rowScale * foregroundScale;
+      const width = THREE.MathUtils.lerp(1.32, 1.9, edgeWeight) * options.rowScale * foregroundScale;
       const height = width * 0.55;
       const softFocus = index % 7 === 0;
       const material = new THREE.ShaderMaterial({
@@ -294,9 +292,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         baseAngle: angle,
         radius: panelRadius,
         y: options.y,
-        min: angle - 0.08,
-        max: angle + 0.08,
-        speed: options.y > 2 ? 0.052 : -0.041,
+        speed: options.y > 2 ? 0.038 : -0.031,
         phase: options.y > 2 ? 0.35 : 2.1,
       });
     }
@@ -307,15 +303,18 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
 
   addScreenRing({
     angles: Array.from({ length: 16 }, (_, index) => 0.78 + index * (Math.PI * 2 - 1.56) / 15),
-    radius: 9.25,
+    // Keep the moving gallery behind every room's hero object. The globe sits
+    // roughly 8.9m from the 360 hub, so a wider ring prevents panels from
+    // intersecting it while still letting them travel continuously.
+    radius: 11.65,
     y: 3.12,
-    rowScale: mobile ? 0.52 : 0.74,
+    rowScale: mobile ? 0.72 : 1.12,
   });
   addScreenRing({
     angles: Array.from({ length: 16 }, (_, index) => 0.78 + index * (Math.PI * 2 - 1.56) / 15),
-    radius: 8.55,
+    radius: 11.05,
     y: 1.68,
-    rowScale: mobile ? 0.42 : 0.58,
+    rowScale: mobile ? 0.59 : 0.9,
   });
   // Sparse atmospheric particles are deliberately smaller and dimmer than the
   // future globe particles. Their job is only to reveal depth in the room.
@@ -527,15 +526,12 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       screenMaterials.forEach(material => { material.uniforms.uTime.value = elapsed; });
       if (!motionEnabled || delta <= 0) return;
       screenTracks.forEach(track => {
-        const span = track.max - track.min;
-        const speedDrift = Math.sin(elapsed * 0.16 + track.phase) * 0.038;
-        const travel = elapsed * track.speed + speedDrift;
-        const angle = track.min + THREE.MathUtils.euclideanModulo(
-          track.baseAngle - track.min + travel,
-          span,
+        const speedDrift = Math.sin(elapsed * 0.13 + track.phase) * 0.018;
+        const angle = THREE.MathUtils.euclideanModulo(
+          track.baseAngle + elapsed * track.speed + speedDrift,
+          Math.PI * 2,
         );
-        const edgeDistance = Math.min(angle - track.min, track.max - angle);
-        track.material.uniforms.uEdgeFade.value = THREE.MathUtils.smoothstep(edgeDistance, 0.02, 0.14);
+        track.material.uniforms.uEdgeFade.value = 1;
         track.group.position.set(
           Math.sin(angle) * track.radius,
           track.y,

@@ -165,19 +165,6 @@ body:has(.digital-marketing-page) {
   height: 100%;
 }
 
-.digital-stage-fallback {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  opacity: 1;
-  transition: opacity .55s ease;
-  background:
-    radial-gradient(ellipse 52% 32% at 50% 68%, rgba(159, 168, 177, .12), transparent 70%),
-    linear-gradient(180deg, #060709 0%, #0b0d10 58%, #171a1d 58.2%, #090a0b 100%);
-}
-
-.digital-canvas-host--ready .digital-stage-fallback { opacity: 0; }
-
 .digital-scene-notice {
   position: absolute;
   left: 50%;
@@ -369,6 +356,41 @@ body:has(.digital-marketing-page) {
   font: 500 12px/1.5 'DM Sans', sans-serif;
   letter-spacing: .16em;
   text-transform: uppercase;
+}
+
+.studio-room-name {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: max(78px, calc(env(safe-area-inset-bottom) + 68px));
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  width: min(82vw, 760px);
+  transform: translateX(-50%);
+  pointer-events: none;
+  text-align: center;
+  animation: studio-room-name-in .7s .28s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+.studio-room-name span {
+  color: rgba(229, 228, 226, .9);
+  font: 400 clamp(16px, 1.55vw, 25px)/1.1 'DM Sans', sans-serif;
+  letter-spacing: clamp(.24em, .48vw, .43em);
+  text-transform: uppercase;
+  text-shadow: 0 3px 22px rgba(0, 0, 0, .9);
+}
+
+.studio-room-name i {
+  display: block;
+  width: 74px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(229, 228, 226, .74), transparent);
+}
+
+@keyframes studio-room-name-in {
+  from { opacity: 0; transform: translate3d(-50%, 12px, 0); }
+  to { opacity: 1; transform: translate3d(-50%, 0, 0); }
 }
 
 .empty-studio-room h1 {
@@ -948,7 +970,6 @@ body:has(.digital-marketing-page) {
   .studio-turn-vignette,
   .studio-turn-vignette span,
   .empty-studio-room { animation: none; }
-  .digital-stage-fallback,
   .studio-room-switch,
   .studio-room-switch-arrow { transition: none; }
   .digital-scroll-cue i::after { animation: none; }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { RenderPipeline } from './digitalExperience/core/RenderPipeline';
 import {
   createDigitalMarketingRoom,
@@ -43,6 +44,7 @@ export async function mountDigitalScene(
   let brandFilms: BrandFilmsHandle | undefined;
   let brandFilmsTask: Promise<BrandFilmsHandle | undefined> | undefined;
   let pipeline: RenderPipeline | undefined;
+  let environmentTarget: THREE.WebGLRenderTarget | undefined;
   let resizeObserver: ResizeObserver | undefined;
   let cameraTween: gsap.core.Tween | undefined;
   let frame = 0;
@@ -50,6 +52,7 @@ export async function mountDigitalScene(
   let lastTime = 0;
   let elapsed = 0;
   let narrow = mobile;
+  let activeRoom = initialRoom;
 
   const initialCamera = digitalSceneConfig.rooms[initialRoom];
   const cameraState = {
@@ -177,6 +180,7 @@ export async function mountDigitalScene(
   function onMotionChange() {
     reducedMotion = motionQuery.matches;
     room?.setMotionEnabled(!reducedMotion);
+    globe?.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
     if (reducedMotion) {
       cameraTween?.kill();
@@ -202,6 +206,8 @@ export async function mountDigitalScene(
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerleave', onPointerLeave);
     pipeline?.dispose();
+    scene && (scene.environment = null);
+    environmentTarget?.dispose();
     brandFilms?.dispose();
     globe?.dispose();
     room?.dispose();
@@ -217,6 +223,10 @@ export async function mountDigitalScene(
 
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
+    activeRoom = nextRoom;
+    if (globe) globe.root.visible = nextRoom === 'marketing';
+    if (room) room.pendant.visible = nextRoom === 'marketing';
+    if (brandFilms) brandFilms.root.visible = nextRoom === 'brand-films';
     if (!brandFilms && nextRoom === 'brand-films') void ensureBrandFilms();
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
@@ -263,7 +273,7 @@ export async function mountDigitalScene(
           return undefined;
         }
         brandFilms = handle;
-        brandFilms.root.visible = true;
+        brandFilms.root.visible = activeRoom === 'brand-films';
         brandFilms.setMotionEnabled(!reducedMotion);
         scene.add(brandFilms.root);
         renderFrame(0);
@@ -297,6 +307,16 @@ export async function mountDigitalScene(
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x030407);
     scene.fog = null;
+
+    // A hidden studio environment gives dark products controlled soft-box
+    // reflections without adding visible geometry to the 360-degree room.
+    const reflectionRoom = new RoomEnvironment();
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    environmentTarget = pmrem.fromScene(reflectionRoom, 0.04);
+    reflectionRoom.dispose();
+    pmrem.dispose();
+    scene.environment = environmentTarget.texture;
+    scene.environmentIntensity = 0.58;
     camera = new THREE.PerspectiveCamera(
       digitalSceneConfig.camera.fov,
       1,
@@ -305,12 +325,12 @@ export async function mountDigitalScene(
     );
 
     room = createDigitalMarketingRoom(mobile);
+    room.pendant.visible = initialRoom === 'marketing';
     scene.add(room.root);
     const globeTask = loadGlobe(signal, { includeSurface: true, includeRings: false });
-    const brandFilmsPreload = ensureBrandFilms();
-    const [loadedGlobe] = await Promise.all([globeTask, brandFilmsPreload]);
-    globe = loadedGlobe;
-    globe.root.visible = true;
+    const initialBrandFilmsTask = initialRoom === 'brand-films' ? ensureBrandFilms() : undefined;
+    globe = await globeTask;
+    globe.root.visible = initialRoom === 'marketing';
     scene.add(globe.root);
     pipeline = new RenderPipeline(renderer, {
       mobile,
@@ -318,7 +338,7 @@ export async function mountDigitalScene(
       reflectionMaterial: room.floorMaterial,
       reflectionExclusions: room.reflectionExclusions,
     });
-    if (initialRoom === 'brand-films') await ensureBrandFilms();
+    if (initialBrandFilmsTask) await initialBrandFilmsTask;
 
     signal.addEventListener('abort', onAbort, { once: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
@@ -333,9 +353,18 @@ export async function mountDigitalScene(
     resizeObserver = new ResizeObserver(fit);
     resizeObserver.observe(host);
     room.setMotionEnabled(!reducedMotion);
+    globe.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
     renderFrame(0);
     startLoop();
+    if (initialRoom !== 'brand-films') {
+      const preloadBrandFilms = () => { if (!disposed) void ensureBrandFilms(); };
+      const idleWindow = window as Window & {
+        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      };
+      if (idleWindow.requestIdleCallback) idleWindow.requestIdleCallback(preloadBrandFilms, { timeout: 3500 });
+      else globalThis.setTimeout(preloadBrandFilms, 1200);
+    }
     return { setRoom };
   } catch (error) {
     dispose();

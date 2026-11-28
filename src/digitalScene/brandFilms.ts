@@ -27,6 +27,24 @@ function createLightGlowTexture() {
   return texture;
 }
 
+function createBackdropTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('The brand films backdrop could not be created.');
+  const gradient = context.createRadialGradient(128, 128, 12, 128, 128, 128);
+  gradient.addColorStop(0, 'rgba(1,2,4,.92)');
+  gradient.addColorStop(0.48, 'rgba(2,3,5,.75)');
+  gradient.addColorStop(0.78, 'rgba(3,4,6,.28)');
+  gradient.addColorStop(1, 'rgba(3,4,6,0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 256, 256);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export async function loadBrandFilmsSet(
   signal: AbortSignal,
   mobile: boolean,
@@ -79,14 +97,41 @@ export async function loadBrandFilmsSet(
         if (value instanceof THREE.Texture) textures.add(value);
       }
       if (material instanceof THREE.MeshStandardMaterial) {
-        material.envMapIntensity = 0.72;
-        material.roughness = Math.max(material.roughness, 0.34);
+        const materialName = `${material.name} ${node.name}`.toLowerCase();
+        const isSoftSurface = /leather|cushion|pad|foam|fabric/.test(materialName);
+        const isMetalAccent = /metal|gold|bronze|copper|ring|trim|hinge/.test(materialName) || material.metalness > 0.45;
+        material.envMapIntensity = isMetalAccent ? 1.55 : 1.08;
+        material.roughness = isSoftSurface
+          ? THREE.MathUtils.clamp(material.roughness, 0.48, 0.7)
+          : THREE.MathUtils.clamp(material.roughness, 0.24, 0.52);
+        if (isMetalAccent) material.metalness = Math.max(material.metalness, 0.72);
+        material.color.multiplyScalar(isSoftSurface ? 1.08 : 1.16);
         material.needsUpdate = true;
       }
       return material;
     });
     node.material = Array.isArray(node.material) ? tuned : tuned[0];
   });
+
+  // A feathered dark halo separates the product from the moving media wall
+  // while remaining transparent at its edges.
+  const backdropTexture = createBackdropTexture();
+  textures.add(backdropTexture);
+  const backdropMaterial = new THREE.SpriteMaterial({
+    map: backdropTexture,
+    color: 0x050608,
+    transparent: true,
+    opacity: 0.92,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  materials.add(backdropMaterial);
+  const backdrop = new THREE.Sprite(backdropMaterial);
+  backdrop.name = 'HeadphoneSeparationHalo';
+  backdrop.position.set(0, config.floatHeight, -0.52);
+  backdrop.scale.set(mobile ? 3.6 : 4.15, mobile ? 3.9 : 4.45, 1);
+  backdrop.renderOrder = 0;
+  root.add(backdrop);
 
   // Use the same restrained hanging diffuser as the business marketing room.
   const lightY = 3.5;
@@ -155,15 +200,17 @@ export async function loadBrandFilmsSet(
   }
   root.add(spotlight, spotlight.target);
 
-  const warmRim = new THREE.PointLight(0xb95436, mobile ? 5 : 8, 7, 1.8);
+  const warmRim = new THREE.PointLight(0xc56b45, mobile ? 8 : 13, 7, 1.8);
   warmRim.position.set(-1.7, 2.25, 0.9);
-  const headphoneKey = new THREE.PointLight(0xd9e4ef, mobile ? 16 : 24, 5, 1.8);
+  const headphoneKey = new THREE.PointLight(0xe2edf7, mobile ? 21 : 34, 5.5, 1.8);
   headphoneKey.position.set(0, 2.4, 2.2);
-  const ambientFill = new THREE.HemisphereLight(0xd0d9e2, 0x15191e, mobile ? 2 : 4);
-  const coolFill = new THREE.DirectionalLight(0x9caab8, mobile ? 2 : 4);
+  const ambientFill = new THREE.HemisphereLight(0xd0d9e2, 0x15191e, mobile ? 2.6 : 5.2);
+  const coolFill = new THREE.DirectionalLight(0xa9bdcf, mobile ? 3.4 : 6.2);
   coolFill.position.set(2.2, 2.5, 2.8);
   coolFill.target.position.set(0, config.floatHeight, 0);
-  root.add(warmRim, headphoneKey, ambientFill, coolFill, coolFill.target);
+  const edgeRim = new THREE.PointLight(0xe9edf0, mobile ? 7 : 12, 6, 1.8);
+  edgeRim.position.set(1.7, 2.7, -1.15);
+  root.add(warmRim, headphoneKey, ambientFill, coolFill, coolFill.target, edgeRim);
 
   let disposed = false;
   let motionEnabled = true;

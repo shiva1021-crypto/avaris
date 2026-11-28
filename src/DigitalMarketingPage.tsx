@@ -334,7 +334,6 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing', naviga
           ? activeMeta.ariaReady
           : 'Cinematic 360-degree studio environment for MYBI Digital.'}
       >
-        <div className="digital-stage-fallback" aria-hidden="true" />
         <p className="digital-scene-notice" aria-hidden="true">Static studio view — 3D scene unavailable</p>
       </div>
       <div className="digital-hero-transition" aria-hidden="true" />
@@ -361,6 +360,11 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing', naviga
     </header>
 
     {!isEmptyRoom && <h1 className="digital-sr-only">{currentPage?.title}</h1>}
+
+      <div key={settledRoom} className="studio-room-name" aria-live="polite">
+        <span>{settledPage?.title}</span>
+        <i aria-hidden="true" />
+      </div>
 
       <nav className="studio-room-controls" aria-label="360 studio room navigation">
       <button
