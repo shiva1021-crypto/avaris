@@ -189,14 +189,20 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
 
   // A dark cylindrical acoustic wall supplies real parallax behind the screen
   // gallery while disappearing naturally into the fog.
-  const wallGeometry = new THREE.CylinderGeometry(18, 18, 10, 96, 16, true);
+  // Extend the cylindrical wall far above tall/mobile viewports. The previous
+  // ten-metre wall exposed its curved upper edge, which looked like a separate
+  // ceiling partition when the camera used a portrait aspect ratio.
+  const wallHeight = 30;
+  const wallCentreY = 14.35;
+  const wallGeometry = new THREE.CylinderGeometry(18, 18, wallHeight, 96, 32, true);
   const wallPositions = wallGeometry.getAttribute('position') as THREE.BufferAttribute;
   const wallColors = new Float32Array(wallPositions.count * 3);
   const wallBottom = new THREE.Color(0x0b0d10);
   const wallBody = new THREE.Color(0x111419);
   const wallVertexColor = new THREE.Color();
   for (let index = 0; index < wallPositions.count; index += 1) {
-    const blend = THREE.MathUtils.smoothstep(wallPositions.getY(index), -4.35, -3.1);
+    const worldY = wallPositions.getY(index) + wallCentreY;
+    const blend = THREE.MathUtils.smoothstep(worldY, 0, 1.25);
     wallVertexColor.copy(wallBottom).lerp(wallBody, blend);
     wallColors[index * 3] = wallVertexColor.r;
     wallColors[index * 3 + 1] = wallVertexColor.g;
@@ -211,7 +217,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     side: THREE.BackSide,
   });
   const wall = trackMesh(new THREE.Mesh(wallGeometry, wallMaterial));
-  wall.position.set(0, 4.35, 7.08);
+  wall.position.set(0, wallCentreY, 7.08);
   root.add(wall);
 
   // A continuous low atmospheric band hides the hard wall/floor horizon in

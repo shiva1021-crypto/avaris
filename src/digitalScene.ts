@@ -9,6 +9,10 @@ import {
 import { digitalSceneConfig, type StudioRoomId } from './digitalScene/config';
 import { loadGlobe, type GlobeHandle } from './digitalScene/globe';
 import { loadBrandFilmsSet, type BrandFilmsHandle } from './digitalScene/brandFilms';
+import {
+  loadWeddingsEventsSet,
+  type WeddingsEventsHandle,
+} from './digitalScene/weddingsEvents';
 
 export interface DigitalSceneController {
   setRoom(room: StudioRoomId, immediate?: boolean): void;
@@ -43,6 +47,8 @@ export async function mountDigitalScene(
   let globe: GlobeHandle | undefined;
   let brandFilms: BrandFilmsHandle | undefined;
   let brandFilmsTask: Promise<BrandFilmsHandle | undefined> | undefined;
+  let weddingsEvents: WeddingsEventsHandle | undefined;
+  let weddingsEventsTask: Promise<WeddingsEventsHandle | undefined> | undefined;
   let pipeline: RenderPipeline | undefined;
   let environmentTarget: THREE.WebGLRenderTarget | undefined;
   let resizeObserver: ResizeObserver | undefined;
@@ -122,6 +128,7 @@ export async function mountDigitalScene(
     room.update(delta, elapsed);
     globe?.update(delta, room.globeSpotlight);
     brandFilms?.update(delta);
+    weddingsEvents?.update(delta);
     pipeline.render(scene, camera, elapsed);
   }
 
@@ -180,6 +187,7 @@ export async function mountDigitalScene(
     room?.setMotionEnabled(!reducedMotion);
     globe?.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
+    weddingsEvents?.setMotionEnabled(!reducedMotion);
     if (reducedMotion) {
       cameraTween?.kill();
       pointerX = 0;
@@ -206,6 +214,7 @@ export async function mountDigitalScene(
     pipeline?.dispose();
     scene && (scene.environment = null);
     environmentTarget?.dispose();
+    weddingsEvents?.dispose();
     brandFilms?.dispose();
     globe?.dispose();
     room?.dispose();
@@ -222,6 +231,7 @@ export async function mountDigitalScene(
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
     if (!brandFilms && nextRoom === 'brand-films') void ensureBrandFilms();
+    if (!weddingsEvents && nextRoom === 'weddings-events') void ensureWeddingsEvents();
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
     while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
@@ -286,6 +296,35 @@ export async function mountDigitalScene(
     return brandFilmsTask;
   }
 
+  function ensureWeddingsEvents() {
+    if (weddingsEvents) return Promise.resolve(weddingsEvents);
+    if (weddingsEventsTask) return weddingsEventsTask;
+    weddingsEventsTask = loadWeddingsEventsSet(signal, mobile)
+      .then(handle => {
+        if (disposed || signal.aborted || !scene) {
+          handle.dispose();
+          return undefined;
+        }
+        weddingsEvents = handle;
+        weddingsEvents.root.visible = true;
+        weddingsEvents.setMotionEnabled(!reducedMotion);
+        scene.add(weddingsEvents.root);
+        if (room && !room.reflectionExclusions.includes(weddingsEvents.root)) {
+          room.reflectionExclusions.push(weddingsEvents.root);
+        }
+        pipeline?.addCleanForeground(weddingsEvents.root);
+        renderFrame(0);
+        return handle;
+      })
+      .catch(error => {
+        weddingsEventsTask = undefined;
+        if (error instanceof DOMException && error.name === 'AbortError') return undefined;
+        console.error('The Weddings and Events sculpture could not load.', error);
+        return undefined;
+      });
+    return weddingsEventsTask;
+  }
+
   try {
     renderer = new THREE.WebGLRenderer({
       canvas,
@@ -327,6 +366,7 @@ export async function mountDigitalScene(
     scene.add(room.root);
     const globeTask = loadGlobe(signal, { includeSurface: true, includeRings: false });
     const initialBrandFilmsTask = ensureBrandFilms();
+    const initialWeddingsEventsTask = ensureWeddingsEvents();
     globe = await globeTask;
     globe.root.visible = true;
     scene.add(globe.root);
@@ -337,7 +377,9 @@ export async function mountDigitalScene(
       reflectionExclusions: room.reflectionExclusions,
     });
     await initialBrandFilmsTask;
+    await initialWeddingsEventsTask;
     if (brandFilms) pipeline.addCleanForeground(brandFilms.root);
+    if (weddingsEvents) pipeline.addCleanForeground(weddingsEvents.root);
 
     signal.addEventListener('abort', onAbort, { once: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
@@ -354,6 +396,7 @@ export async function mountDigitalScene(
     room.setMotionEnabled(!reducedMotion);
     globe.setMotionEnabled(!reducedMotion);
     brandFilms?.setMotionEnabled(!reducedMotion);
+    weddingsEvents?.setMotionEnabled(!reducedMotion);
     renderFrame(0);
     startLoop();
     return { setRoom };

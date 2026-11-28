@@ -264,15 +264,17 @@ export class RenderPipeline {
       const background = scene.background;
       const autoClear = this.renderer.autoClear;
       const exposure = this.renderer.toneMappingExposure;
-      scene.children.forEach(child => {
-        child.visible = visibleForeground.includes(child);
-      });
       scene.background = null;
       this.renderer.autoClear = false;
       this.renderer.toneMappingExposure = 1;
       this.renderer.setRenderTarget(null);
       this.renderer.clearDepth();
-      this.renderer.render(scene, camera);
+      visibleForeground.forEach(foreground => {
+        scene.children.forEach(child => {
+          child.visible = child === foreground;
+        });
+        this.renderer.render(scene, camera);
+      });
       this.renderer.toneMappingExposure = exposure;
       this.renderer.autoClear = autoClear;
       scene.background = background;

@@ -109,6 +109,14 @@ export const digitalSceneConfig = {
       lowerRight: '/assets/digital-marketing/brand-films/screen-coastal-drive.webp',
     },
   },
+  weddingsEvents: {
+    // Third room in the continuous 360-degree studio (144 degrees right).
+    position: [4.162, 0, 12.807] as const,
+    rotationY: Math.PI * 0.2,
+    modelUrl: '/assets/digital-marketing/weddings-events/MYBI_Wedding_Final.glb',
+    modelHeight: 2.72,
+    floatHeight: 1.52,
+  },
   floor: {
     y: 0,
     size: 140,
@@ -122,7 +130,7 @@ export const digitalSceneConfig = {
     environment: 0.24,
     spotlight: {
       color: 0xe9edf0,
-      anchor: [0, 6.65, -1.8] as const,
+      anchor: [0, 7.2, -1.8] as const,
       target: [0, 1.62, -1.8] as const,
       cordLength: 2,
       intensity: 27,
