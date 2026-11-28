@@ -157,11 +157,13 @@ export async function loadBrandFilmsSet(
 
   const warmRim = new THREE.PointLight(0xb95436, mobile ? 5 : 8, 7, 1.8);
   warmRim.position.set(-1.7, 2.25, 0.9);
+  const headphoneKey = new THREE.PointLight(0xd9e4ef, mobile ? 16 : 24, 5, 1.8);
+  headphoneKey.position.set(0, 2.4, 2.2);
   const ambientFill = new THREE.HemisphereLight(0xd0d9e2, 0x15191e, mobile ? 2 : 4);
   const coolFill = new THREE.DirectionalLight(0x9caab8, mobile ? 2 : 4);
   coolFill.position.set(2.2, 2.5, 2.8);
   coolFill.target.position.set(0, config.floatHeight, 0);
-  root.add(warmRim, ambientFill, coolFill, coolFill.target);
+  root.add(warmRim, headphoneKey, ambientFill, coolFill, coolFill.target);
 
   let disposed = false;
   let motionEnabled = true;

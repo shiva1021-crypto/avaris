@@ -159,6 +159,7 @@ body:has(.digital-marketing-page) {
 .digital-scene-canvas {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -167,6 +168,7 @@ body:has(.digital-marketing-page) {
 .digital-stage-fallback {
   position: absolute;
   inset: 0;
+  z-index: 1;
   opacity: 1;
   transition: opacity .55s ease;
   background:
@@ -389,23 +391,31 @@ body:has(.digital-marketing-page) {
   content: '';
   position: absolute;
   left: 50%;
-  top: 56%;
-  width: min(38vw, 500px);
-  height: min(44vh, 440px);
+  top: 46%;
+  width: min(27vw, 330px);
+  aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(220, 223, 226, .07), transparent 58%);
-  filter: blur(28px);
+  border: 1px solid rgba(202, 211, 220, .16);
+  background:
+    radial-gradient(circle at 34% 30%, rgba(200, 210, 220, .12), transparent 16%),
+    radial-gradient(circle at 48% 46%, rgba(105, 118, 130, .16), rgba(5, 7, 10, .96) 68%);
+  box-shadow: 0 0 54px rgba(151, 164, 177, .1), inset -18px -8px 36px rgba(0, 0, 0, .8);
 }
 
 .digital-stage-fallback::after {
   content: '';
   position: absolute;
-  left: 18%;
-  right: 18%;
-  bottom: 16%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(83, 104, 120, .32), transparent);
+  inset: 0;
+  background:
+    linear-gradient(145deg, rgba(170, 181, 190, .24), rgba(30, 34, 39, .42)),
+    linear-gradient(145deg, rgba(156, 169, 180, .2), rgba(30, 34, 39, .4)),
+    linear-gradient(145deg, rgba(156, 169, 180, .17), rgba(30, 34, 39, .38)),
+    radial-gradient(ellipse at 50% 75%, rgba(150, 161, 171, .14), transparent 52%);
+  background-size: 15vw 8vw, 13vw 7vw, 12vw 6vw, 100% 100%;
+  background-position: 17% 34%, 82% 32%, 80% 60%, center;
+  background-repeat: no-repeat;
+  opacity: .58;
 }
 
 /* 360° Studio Room Navigation Control */

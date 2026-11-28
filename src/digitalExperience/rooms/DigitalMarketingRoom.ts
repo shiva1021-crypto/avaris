@@ -233,7 +233,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       const foregroundScale = depthOffset < 0 ? 1.24 : 0.92;
       const width = THREE.MathUtils.lerp(1.2, 1.7, edgeWeight) * options.rowScale * foregroundScale;
       const height = width * 0.55;
-      const softFocus = index % 5 === 0;
+      const softFocus = index % 7 === 0;
       const material = new THREE.ShaderMaterial({
         uniforms: {
           uAccent: { value: new THREE.Color(0x9ca3aa) },
@@ -241,7 +241,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
           uTextureReady: { value: 0 },
           uFocusBlur: { value: softFocus ? (depthOffset < 0 ? 0.0025 : 0.0015) : 0 },
           uEdgeFade: { value: 1 },
-          uIntensity: { value: 1.4 },
+          uIntensity: { value: 0.95 },
           uPhase: { value: progress * 2.3 + options.y * 0.17 },
           uTime: { value: 0 },
         },
@@ -286,7 +286,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         options.y + (index % 2 ? 0.08 : -0.05),
         -Math.cos(angle) * panelRadius,
       );
-      panelGroup.lookAt(0, options.y, 0);
+      panelGroup.lookAt(0, options.y, 7.08);
       ring.add(panelGroup);
       screenTracks.push({
         group: panelGroup,
@@ -294,8 +294,8 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         baseAngle: angle,
         radius: panelRadius,
         y: options.y,
-        min: angle - Math.PI,
-        max: angle + Math.PI,
+        min: angle - 0.08,
+        max: angle + 0.08,
         speed: options.y > 2 ? 0.052 : -0.041,
         phase: options.y > 2 ? 0.35 : 2.1,
       });
@@ -306,16 +306,16 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   }
 
   addScreenRing({
-    angles: Array.from({ length: 20 }, (_, index) => index * Math.PI / 10 + Math.PI / 20),
+    angles: Array.from({ length: 16 }, (_, index) => 0.78 + index * (Math.PI * 2 - 1.56) / 15),
     radius: 9.25,
     y: 3.12,
-    rowScale: mobile ? 0.58 : 0.84,
+    rowScale: mobile ? 0.52 : 0.74,
   });
   addScreenRing({
-    angles: Array.from({ length: 20 }, (_, index) => index * Math.PI / 10 + Math.PI / 20),
+    angles: Array.from({ length: 16 }, (_, index) => 0.78 + index * (Math.PI * 2 - 1.56) / 15),
     radius: 8.55,
     y: 1.68,
-    rowScale: mobile ? 0.48 : 0.66,
+    rowScale: mobile ? 0.42 : 0.58,
   });
   // Sparse atmospheric particles are deliberately smaller and dimmer than the
   // future globe particles. Their job is only to reveal depth in the room.
@@ -541,7 +541,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
           track.y,
           -Math.cos(angle) * track.radius,
         );
-        track.group.rotation.y = -angle;
+        track.group.lookAt(0, track.y, 7.08);
       });
       smokeWisps.forEach((wisp, index) => {
         const drift = elapsed * (0.035 + index * 0.0025) + wisp.phase;
