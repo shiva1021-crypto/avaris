@@ -121,13 +121,14 @@ export const digitalSceneConfig = {
     // Fourth room in the continuous 360-degree studio (216 degrees right).
     position: [-4.162, 0, 12.807] as const,
     rotationY: -Math.PI * 0.2,
-    rotationX: -Math.PI * 0.09,
+    // Match the reference: 45-degree corner view with the underside visible.
+    rotationX: Math.PI * 0.11,
     rotationYLocal: Math.PI * 0.25,
     rotationZ: 0,
-    size: 2.25,
-    edgeThickness: 0.062,
-    coreRadius: 0.054,
-    floatHeight: 2.02,
+    size: 1.75,
+    edgeThickness: 0.012,
+    coreRadius: 0.035,
+    floatHeight: 1.55,
   },
   floor: {
     y: 0,
