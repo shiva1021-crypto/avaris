@@ -5,9 +5,10 @@ import { loadCachedBinary } from './digitalScene/assetCache';
 import desktopRigUrl from '../models/avaris-camera-tripod.glb?url';
 import mobileRigUrl from '../models/avaris-camera-tripod-mobile.glb?url';
 
-export default function HeroCamera({ onReady, onError, transition, chapterAngle, minimalMotion }: {
+export default function HeroCamera({ onReady, onError, transition, chapterAngle, minimalMotion, navigate }: {
   minimalMotion: boolean;
   chapterAngle: number | null;
+  navigate: (href: string) => void;
   onReady: () => void; onError: () => void; transition: RefObject<((url: string) => void) | null>;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -58,10 +59,11 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
         paused: true,
         repeat: -1,
         repeatDelay: 1.4,
-        delay: 1.6,
         defaults: { ease: 'sine.inOut' },
         onUpdate: () => {
-          if (running.current || document.hidden || canvas.current?.closest('[inert]') || document.querySelector('dialog[open]')) return;
+          // Keep the camera moving behind the intro overlay so its motion is
+          // already in progress when the studio is revealed.
+          if (running.current || document.hidden || document.querySelector('dialog[open]')) return;
           angle.current = pose.degrees;
           turn.current(pose.degrees);
         },
@@ -131,7 +133,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
       if (minimalMotion) gsap.set(canvas.current, { willChange: 'transform' });
       timeline = gsap.timeline({ onComplete: () => {
         try { sessionStorage.setItem('avaris-lens-transition', '1'); } catch { /* Storage may be unavailable. */ }
-        location.assign(url);
+        navigate(url);
       } });
       timeline.to(state, { degrees: destination, duration: .95, ease: 'power3.inOut', onUpdate: draw })
         .to(flash.current, { opacity: .85, duration: .055 })
@@ -150,7 +152,7 @@ export default function HeroCamera({ onReady, onError, transition, chapterAngle,
       timeline?.kill();
       transition.current = null;
     };
-  }, [transition, minimalMotion]);
+  }, [transition, minimalMotion, navigate]);
 
   return <div className={`camera-frame ${active ? 'is-interactive' : ''}`}>
     {createPortal(<>

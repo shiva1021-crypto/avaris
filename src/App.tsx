@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import gsap from 'gsap';
 import StudioIntro, { shouldPlayIntro } from './StudioIntro';
 import HeroCamera from './HeroCamera';
@@ -7,7 +7,6 @@ import { pages } from './pages';
 import type { StudioRoomId } from './digitalScene/config';
 
 const DigitalMarketingPage = lazy(() => import('./DigitalMarketingPage'));
-const normalizedPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\/?$/, '/');
 const STUDIO_ROUTES: Record<string, StudioRoomId> = {
   '/services/': 'marketing',
   '/brand-films/': 'brand-films',
@@ -15,13 +14,22 @@ const STUDIO_ROUTES: Record<string, StudioRoomId> = {
   '/work/': 'work',
   '/about/': 'about',
 };
-const initialStudioRoom = STUDIO_ROUTES[normalizedPath];
-const isStudioRoomPage = Boolean(initialStudioRoom);
 
-const currentPage = pages.find(page => page.path === normalizedPath);
-const isServicesPage = Boolean(currentPage);
+function normalizePath(pathname: string) {
+  return pathname.replace(/\/index\.html$/, '/').replace(/\/?$/, '/');
+}
 
-function StudioApp() {
+type Navigate = (href: string) => void;
+
+function handleInternalLink(event: MouseEvent<HTMLAnchorElement>, href: string, navigate: Navigate) {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+  event.preventDefault();
+  navigate(href);
+}
+
+function StudioApp({ pathname, navigate }: { pathname: string; navigate: Navigate }) {
+  const currentPage = pages.find(page => page.path === pathname);
+  const isServicesPage = Boolean(currentPage);
   const lensTransition = useRef<((url: string) => void) | null>(null);
   const arrival = useRef<HTMLDivElement>(null);
   const [arriving] = useState(() => {
@@ -66,9 +74,9 @@ function StudioApp() {
   return <><main inert={playingIntro} ref={shell} id={isServicesPage ? 'services' : 'home'} className={isServicesPage ? 'services-page' : `homepage ${loaded ? 'is-ready' : ''} ${mobile ? 'is-static-mobile' : ''}`}>
     {isServicesPage ? <div className="services-ambience" aria-hidden="true"><div className="studio-background" /><StudioAtmosphere reducedMotion={reducedMotion || mobile} fullBackdrop /></div> : <>{!playingIntro && <div className="homepage-ambience" aria-hidden="true"><StudioAtmosphere reducedMotion={reducedMotion || mobile} fullBackdrop /></div>}<h1 className="headline"><span aria-hidden="true">MYBI DIGITAL</span><span className="headline-face">MYBI DIGITAL</span></h1></>}
     <header className="site-header">
-      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
+      <a className="brand" href="/" aria-label="MYBI Digital home" onClick={event => handleInternalLink(event, '/', navigate)}><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
       <nav className="desktop-nav" aria-label="Desktop navigation">
-        {pages.slice(0, -1).map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
+        {pages.slice(0, -1).map(page => <a key={page.path} href={page.path} onClick={event => handleInternalLink(event, page.path, navigate)} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
       </nav>
       <button className="contact-button site-menu-toggle" aria-haspopup="dialog" onClick={() => menu.current?.showModal()}><span>Menu</span><span className="menu-lines" aria-hidden="true" /></button>
     </header>
@@ -79,7 +87,7 @@ function StudioApp() {
       {currentPage.path !== '/contact/' && <a href="/contact/">Contact us ↗</a>}
     </section> : <>
     <div className="camera-stage">
-      <HeroCamera onReady={ready} onError={() => setFailed(true)} transition={lensTransition} chapterAngle={chapter < 0 ? null : selection.angle} minimalMotion={mobile} />
+      <HeroCamera onReady={ready} onError={() => setFailed(true)} transition={lensTransition} chapterAngle={chapter < 0 ? null : selection.angle} minimalMotion={mobile} navigate={navigate} />
     </div>
     <nav className="chapter-nav" aria-label="Featured pages">
       <button className="chapter-neighbor previous" type="button" onClick={() => changeChapter(-1)}>{pages[(selectedIndex - 1 + pages.length) % pages.length].title}</button>
@@ -103,23 +111,48 @@ function StudioApp() {
     <dialog ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
       <button className="close-dialog" aria-label="Close menu" onClick={() => menu.current?.close()}>×</button>
       <nav aria-label="Main navigation">
-        <a href="/" aria-current={currentPage ? undefined : 'page'}>Home</a>
-        {pages.map(page => <a key={page.path} href={page.path} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
+        <a href="/" onClick={event => handleInternalLink(event, '/', navigate)} aria-current={currentPage ? undefined : 'page'}>Home</a>
+        {pages.map(page => <a key={page.path} href={page.path} onClick={event => handleInternalLink(event, page.path, navigate)} aria-current={currentPage === page ? 'page' : undefined}>{page.title}</a>)}
       </nav>
     </dialog>
   </main>{playingIntro && <StudioIntro ready={loaded || failed} finish={finishIntro} reducedMotion={reducedMotion || mobile} />}</>;
 }
 
 export default function App() {
+  const [pathname, setPathname] = useState(() => normalizePath(window.location.pathname));
+  const navigate = useCallback<Navigate>(href => {
+    const url = new URL(href, window.location.href);
+    if (url.origin !== window.location.origin) {
+      window.location.assign(url.href);
+      return;
+    }
+    const nextPath = normalizePath(url.pathname);
+    if (nextPath === normalizePath(window.location.pathname) && url.search === window.location.search && url.hash === window.location.hash) return;
+    window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    setPathname(nextPath);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const nextPath = normalizePath(window.location.pathname);
+      setPathname(currentPath => STUDIO_ROUTES[currentPath] && STUDIO_ROUTES[nextPath] ? currentPath : nextPath);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const initialStudioRoom = STUDIO_ROUTES[pathname];
+  const isStudioRoomPage = Boolean(initialStudioRoom);
   if (isStudioRoomPage) {
     let lensArriving = false;
     try { lensArriving = sessionStorage.getItem('avaris-lens-transition') === '1'; } catch { /* Storage may be unavailable. */ }
     return <Suspense fallback={lensArriving
       ? <div className="lens-blackout lens-arrival" aria-hidden="true" />
       : <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
-    }><DigitalMarketingPage initialRoom={initialStudioRoom} /></Suspense>;
+    }><DigitalMarketingPage initialRoom={initialStudioRoom} navigate={navigate} /></Suspense>;
   }
-  return <StudioApp />;
+  return <StudioApp pathname={pathname} navigate={navigate} />;
 }
 
 

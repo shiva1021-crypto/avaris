@@ -57,7 +57,10 @@ function roomFromPath(pathname: string): StudioRoomId | null {
   return ROOM_ORDER.find(room => ROOM_META[room].path === normalized) ?? null;
 }
 
-export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { initialRoom?: StudioRoomId }) {
+export default function DigitalMarketingPage({ initialRoom = 'marketing', navigate }: {
+  initialRoom?: StudioRoomId;
+  navigate: (href: string) => void;
+}) {
   const page = useRef<HTMLElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLElement>(null);
@@ -245,22 +248,31 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
   }, []);
 
   useEffect(() => {
-    if (!arriving || !arrival.current) return;
+    // Keep the lens blackout in place until the destination scene has mounted
+    // and produced its first frame. This prevents a static fallback from being
+    // exposed before the live globe begins updating.
+    if (!arriving || !arrival.current || status === 'loading') return;
     try { sessionStorage.removeItem('avaris-lens-transition'); } catch { /* Storage may be unavailable. */ }
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fade = gsap.to(arrival.current, {
-      opacity: 0,
-      duration: reduced ? 0 : 0.62,
-      ease: 'power2.out',
-      onComplete: () => setArriving(false),
+    let fade: gsap.core.Tween | undefined;
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        if (!arrival.current) return;
+        fade = gsap.to(arrival.current, {
+          opacity: 0,
+          duration: reduced ? 0 : 0.62,
+          ease: 'power2.out',
+          onComplete: () => setArriving(false),
+        });
+      });
     });
-    const clearArrival = () => setArriving(false);
-    window.addEventListener('pageshow', clearArrival);
     return () => {
-      fade.kill();
-      window.removeEventListener('pageshow', clearArrival);
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+      fade?.kill();
     };
-  }, [arriving]);
+  }, [arriving, status]);
 
   useEffect(() => {
     const sceneHost = host.current;
@@ -295,10 +307,10 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, path: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     const targetRoom = roomFromPath(path);
-    if (!targetRoom) return;
     event.preventDefault();
     if (menu.current?.open) menu.current.close();
-    navigateToRoom(targetRoom);
+    if (targetRoom) navigateToRoom(targetRoom);
+    else navigate(path);
   };
 
   const statusText = status === 'loading'
@@ -336,7 +348,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
     </section>}
 
     <header className="site-header">
-      <a className="brand" href="/" aria-label="MYBI Digital home"><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
+      <a className="brand" href="/" aria-label="MYBI Digital home" onClick={event => handleNavClick(event, '/')}><img className="brand-mark" src="/mybi-titanium.png" alt="" /></a>
       <button
         className="contact-button site-menu-toggle"
         aria-label="Open site menu"
@@ -424,7 +436,7 @@ export default function DigitalMarketingPage({ initialRoom = 'marketing' }: { in
     <dialog id="digital-site-menu" ref={menu} className="chapter-dialog site-menu" aria-label="Site menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
       <button className="close-dialog" aria-label="Close menu" onClick={() => menu.current?.close()}>×</button>
       <nav aria-label="Main navigation">
-        <a href="/">Home</a>
+        <a href="/" onClick={event => handleNavClick(event, '/')}>Home</a>
         {pages.map(page => (
           <a
             key={page.path}
