@@ -13,9 +13,10 @@
 
 html:has(.services-page) { scroll-behavior: smooth; }
 .services-page { position: relative; min-height: 100svh; isolation: isolate; overflow-x: clip; }
-.services-ambience { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.services-ambience::after { content: ''; position: absolute; inset: 0; z-index: 1; background: #05080e80; }
-.services-ambience .studio-smoke { opacity: .55; }
+.services-ambience, .homepage-ambience { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.services-ambience::after, .homepage-ambience::after { content: ''; position: absolute; inset: 0; z-index: 1; background: #05080e80; }
+.services-ambience .studio-smoke, .homepage-ambience .studio-smoke { opacity: .55; }
+.homepage-ambience { background: #0a0a0a; }
 .services-page .site-header { top: 24px; }
 .services-content { position: relative; z-index: 1; padding: 0 7.2%; }
 .services-hero { padding-top: 134px; padding-bottom: 72px; }
