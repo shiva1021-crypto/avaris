@@ -135,6 +135,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   const materials = new Set<THREE.Material>();
   const textures = new Set<THREE.Texture>();
   const screenMaterials: THREE.ShaderMaterial[] = [];
+  const screenMaterialsByImage = new Map<string, THREE.ShaderMaterial[]>();
   const screenRings: THREE.Group[] = [];
   const screenTracks: Array<{
     group: THREE.Group;
@@ -157,6 +158,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     '/assets/digital-marketing/screens/screen-sunscreen-campaign.jpg',
     '/assets/digital-marketing/screens/screen-marketing-strategy.jpg',
     '/assets/digital-marketing/brand-films/screen-portrait-silk.webp',
+    '/assets/digital-marketing/brand-films/screen-fragrance-macro.webp',
     '/assets/digital-marketing/brand-films/screen-coastal-drive.webp',
   ];
   const fallbackTexture = new THREE.DataTexture(new Uint8Array([5, 7, 11, 255]), 1, 1);
@@ -175,7 +177,7 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   // Broad polished floor. The actual reflection texture is supplied by the
   // multipass renderer after the mirrored-camera blur passes.
   const floorMaterial = new ReflectiveFloorMaterial();
-  floorMaterial.uniforms.uReflectionStrength.value = 0.78;
+  floorMaterial.uniforms.uReflectionStrength.value = 1.5;
   floorMaterial.uniforms.uBaseColor.value.set(0x0b0d10);
   materials.add(floorMaterial);
   const floorGeometry = new THREE.PlaneGeometry(80, 80);
@@ -231,12 +233,13 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       const foregroundScale = depthOffset < 0 ? 1.24 : 0.92;
       const width = THREE.MathUtils.lerp(1.2, 1.7, edgeWeight) * options.rowScale * foregroundScale;
       const height = width * 0.55;
+      const softFocus = index % 5 === 0;
       const material = new THREE.ShaderMaterial({
         uniforms: {
           uAccent: { value: new THREE.Color(0x9ca3aa) },
           uTexture: { value: fallbackTexture },
           uTextureReady: { value: 0 },
-          uFocusBlur: { value: depthOffset < 0 ? 0.001 : 0.0002 },
+          uFocusBlur: { value: softFocus ? (depthOffset < 0 ? 0.0025 : 0.0015) : 0 },
           uEdgeFade: { value: 1 },
           uIntensity: { value: 1.4 },
           uPhase: { value: progress * 2.3 + options.y * 0.17 },
@@ -252,16 +255,24 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
       screenMaterials.push(material);
       const imageUrl = screenUrls[screenAssetIndex % screenUrls.length];
       screenAssetIndex += 1;
-      textureLoader.load(imageUrl, texture => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.minFilter = THREE.LinearMipmapLinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        texture.anisotropy = 8;
-        texture.generateMipmaps = true;
-        textures.add(texture);
-        material.uniforms.uTexture.value = texture;
-        material.uniforms.uTextureReady.value = 1;
-      });
+      const imageUsers = screenMaterialsByImage.get(imageUrl);
+      if (imageUsers) {
+        imageUsers.push(material);
+      } else {
+        screenMaterialsByImage.set(imageUrl, [material]);
+        textureLoader.load(imageUrl, texture => {
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.minFilter = THREE.LinearMipmapLinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.anisotropy = 8;
+          texture.generateMipmaps = true;
+          textures.add(texture);
+          screenMaterialsByImage.get(imageUrl)?.forEach(user => {
+            user.uniforms.uTexture.value = texture;
+            user.uniforms.uTextureReady.value = 1;
+          });
+        });
+      }
 
       const panelGroup = new THREE.Group();
       const panelGeometry = new THREE.PlaneGeometry(width, height);
@@ -283,8 +294,8 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
         baseAngle: angle,
         radius: panelRadius,
         y: options.y,
-        min: angle < 0 ? -0.88 : 0.28,
-        max: angle < 0 ? -0.28 : 0.88,
+        min: angle - Math.PI,
+        max: angle + Math.PI,
         speed: options.y > 2 ? 0.052 : -0.041,
         phase: options.y > 2 ? 0.35 : 2.1,
       });
@@ -295,20 +306,16 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   }
 
   addScreenRing({
-    angles: mobile
-      ? [-0.67, -0.38, 0.38, 0.67]
-      : [-0.72, -0.4, 0.4, 0.72],
+    angles: Array.from({ length: 20 }, (_, index) => index * Math.PI / 10 + Math.PI / 20),
     radius: 9.25,
     y: 3.12,
-    rowScale: mobile ? 0.88 : 1.38,
+    rowScale: mobile ? 0.58 : 0.84,
   });
   addScreenRing({
-    angles: mobile
-      ? [-0.58, -0.3, 0.3, 0.58]
-      : [-0.64, -0.34, 0.34, 0.64],
+    angles: Array.from({ length: 20 }, (_, index) => index * Math.PI / 10 + Math.PI / 20),
     radius: 8.55,
     y: 1.68,
-    rowScale: mobile ? 0.72 : 1.02,
+    rowScale: mobile ? 0.48 : 0.66,
   });
   // Sparse atmospheric particles are deliberately smaller and dimmer than the
   // future globe particles. Their job is only to reveal depth in the room.

@@ -149,7 +149,7 @@ export default function App() {
     try { lensArriving = sessionStorage.getItem('avaris-lens-transition') === '1'; } catch { /* Storage may be unavailable. */ }
     return <Suspense fallback={lensArriving
       ? <div className="lens-blackout lens-arrival" aria-hidden="true" />
-      : <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: '#0a0a0a', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
+      : <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', background: 'radial-gradient(ellipse 52% 32% at 50% 68%, rgba(159, 168, 177, .12), transparent 70%), linear-gradient(180deg, #060709 0%, #0b0d10 58%, #171a1d 58.2%, #090a0b 100%)', color: '#e5e4e2', font: "500 13px 'DM Sans', sans-serif", letterSpacing: '.08em' }}>Preparing MYBI Digital…</div>
     }><DigitalMarketingPage initialRoom={initialStudioRoom} navigate={navigate} /></Suspense>;
   }
   return <StudioApp pathname={pathname} navigate={navigate} />;

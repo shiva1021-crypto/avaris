@@ -89,7 +89,7 @@ export async function loadBrandFilmsSet(
   });
 
   // Use the same restrained hanging diffuser as the business marketing room.
-  const lightY = 4.43;
+  const lightY = 3.5;
   const lamp = new THREE.Group();
   lamp.position.y = lightY;
   const cordMaterial = new THREE.MeshBasicMaterial({ color: 0x727a80, toneMapped: false });
@@ -139,6 +139,7 @@ export async function loadBrandFilmsSet(
   const bulbLight = new THREE.PointLight(0xf1f3f4, 12, 10, 1.8);
   bulbLight.position.y = -0.28;
   lamp.add(cord, shade, shadeRim, diffuser, glow, bulbLight);
+  lamp.scale.setScalar(0.72);
   root.add(lamp);
 
   const spotlight = new THREE.SpotLight(0xe9edf0, mobile ? 22 : 27, 11, 0.6, 1, 1.7);
@@ -156,8 +157,8 @@ export async function loadBrandFilmsSet(
 
   const warmRim = new THREE.PointLight(0xb95436, mobile ? 5 : 8, 7, 1.8);
   warmRim.position.set(-1.7, 2.25, 0.9);
-  const ambientFill = new THREE.HemisphereLight(0xb8c4d0, 0x15191e, mobile ? 1.2 : 2);
-  const coolFill = new THREE.DirectionalLight(0x8795a3, mobile ? 1.2 : 2.4);
+  const ambientFill = new THREE.HemisphereLight(0xd0d9e2, 0x15191e, mobile ? 2 : 4);
+  const coolFill = new THREE.DirectionalLight(0x9caab8, mobile ? 2 : 4);
   coolFill.position.set(2.2, 2.5, 2.8);
   coolFill.target.position.set(0, config.floatHeight, 0);
   root.add(warmRim, ambientFill, coolFill, coolFill.target);

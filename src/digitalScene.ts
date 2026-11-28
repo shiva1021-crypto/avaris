@@ -42,7 +42,6 @@ export async function mountDigitalScene(
   let globe: GlobeHandle | undefined;
   let brandFilms: BrandFilmsHandle | undefined;
   let brandFilmsTask: Promise<BrandFilmsHandle | undefined> | undefined;
-  let activeRoom = initialRoom;
   let pipeline: RenderPipeline | undefined;
   let resizeObserver: ResizeObserver | undefined;
   let cameraTween: gsap.core.Tween | undefined;
@@ -218,11 +217,7 @@ export async function mountDigitalScene(
 
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
-    activeRoom = nextRoom;
-    if (globe) globe.root.visible = nextRoom === 'marketing';
-    if (room) room.pendant.visible = nextRoom === 'marketing';
-    if (brandFilms) brandFilms.root.visible = nextRoom === 'brand-films';
-    else if (nextRoom === 'brand-films') void ensureBrandFilms();
+    if (!brandFilms && nextRoom === 'brand-films') void ensureBrandFilms();
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
     while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
@@ -268,7 +263,7 @@ export async function mountDigitalScene(
           return undefined;
         }
         brandFilms = handle;
-        brandFilms.root.visible = activeRoom === 'brand-films';
+        brandFilms.root.visible = true;
         brandFilms.setMotionEnabled(!reducedMotion);
         scene.add(brandFilms.root);
         renderFrame(0);
@@ -310,10 +305,12 @@ export async function mountDigitalScene(
     );
 
     room = createDigitalMarketingRoom(mobile);
-    room.pendant.visible = initialRoom === 'marketing';
     scene.add(room.root);
-    globe = await loadGlobe(signal, { includeSurface: true, includeRings: false });
-    globe.root.visible = initialRoom === 'marketing';
+    const globeTask = loadGlobe(signal, { includeSurface: true, includeRings: false });
+    const brandFilmsPreload = ensureBrandFilms();
+    const [loadedGlobe] = await Promise.all([globeTask, brandFilmsPreload]);
+    globe = loadedGlobe;
+    globe.root.visible = true;
     scene.add(globe.root);
     pipeline = new RenderPipeline(renderer, {
       mobile,

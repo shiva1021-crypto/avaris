@@ -120,10 +120,10 @@ body:has(.digital-marketing-page) {
       180deg,
       transparent 0%,
       transparent 44%,
-      rgba(8, 8, 8, .08) 54%,
-      rgba(8, 8, 8, .58) 72%,
-      rgba(8, 8, 8, .94) 91%,
-      #080808 100%
+      rgba(8, 8, 8, .03) 54%,
+      rgba(8, 8, 8, .2) 72%,
+      rgba(8, 8, 8, .45) 91%,
+      rgba(8, 8, 8, .7) 100%
     );
   will-change: opacity, transform;
 }
@@ -169,6 +169,9 @@ body:has(.digital-marketing-page) {
   inset: 0;
   opacity: 1;
   transition: opacity .55s ease;
+  background:
+    radial-gradient(ellipse 52% 32% at 50% 68%, rgba(159, 168, 177, .12), transparent 70%),
+    linear-gradient(180deg, #060709 0%, #0b0d10 58%, #171a1d 58.2%, #090a0b 100%);
 }
 
 .digital-canvas-host--ready .digital-stage-fallback { opacity: 0; }

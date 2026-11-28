@@ -214,7 +214,7 @@ export class RenderPipeline {
       this.reflectionBlurB,
       this.reflectionWidth,
       this.reflectionHeight,
-      this.mobile ? 4.2 : 5.8,
+      this.mobile ? 1.8 : 2.2,
     );
     this.reflectionMaterial.setReflection(this.reflectionBlurB.texture);
 
