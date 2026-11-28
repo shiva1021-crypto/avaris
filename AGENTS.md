@@ -202,7 +202,7 @@ with `role="img"` and a descriptive label; the eight screens are decorative in t
 |---|---|---|
 | Mixamo character + idle | `Breathing Idle.fbx` (repo root, **untracked**, 54.8 MB) | Full skinned character + animation. See §4.3. |
 | Camera rig GLBs | `models/avaris-camera-tripod*.glb`, `models/avaris-cinema.glb`, `public/assets/*.glb` | Homepage/archive only; source of stand-in screen imagery. Do not reuse as scene geometry. |
-| Studio plates | `public/assets/studio-background.{png,webp}`, `studio-empty.{png,webp}` | Flat 1672×941 backgrounds; stand-in screen imagery and reference, not the new 3D floor. |
+| Studio plates | `public/assets/studio-background.{png,webp}` | Flat 1672×941 background; stand-in screen imagery and reference, not the new 3D floor. |
 | Logos | `public/mybi-logo.png`, `mybi-titanium.png`, `mybi-infinity.svg`, `favicon.svg` | Reuse header assets and stand-in screen imagery. |
 | Fonts | `public/assets/fonts/*.ttf` | Reuse; no webfont fetch. |
 | Decoders | `public/basis/*` | Available if KTX2 textures are adopted. |

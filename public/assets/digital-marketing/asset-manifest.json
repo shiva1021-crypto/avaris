@@ -85,7 +85,7 @@
   },
   "screens": {
     "directory": "public/assets/digital-marketing/screens/",
-    "count": 8,
+    "count": 7,
     "manifest": "public/assets/digital-marketing/screens/screen-manifest.json",
     "processing": "WebP quality 88, method 6; no burgundy tint, frame, glow or lighting baked into the textures.",
     "textures": [
@@ -108,13 +108,6 @@
         "dimensions": [1672, 941],
         "bytes": 27298,
         "source": "public/assets/studio-background.webp",
-        "license": "Existing MYBI Digital project asset; internal reuse for this site."
-      },
-      {
-        "name": "screen-04-studio-empty.webp",
-        "dimensions": [1672, 941],
-        "bytes": 22886,
-        "source": "public/assets/studio-empty.webp",
         "license": "Existing MYBI Digital project asset; internal reuse for this site."
       },
       {
@@ -175,7 +168,6 @@
     "public/assets/digital-marketing/screens/screen-01-camera-side.webp",
     "public/assets/digital-marketing/screens/screen-02-camera-three-quarter.webp",
     "public/assets/digital-marketing/screens/screen-03-studio-background.webp",
-    "public/assets/digital-marketing/screens/screen-04-studio-empty.webp",
     "public/assets/digital-marketing/screens/screen-05-camera-cutout-onyx.webp",
     "public/assets/digital-marketing/screens/screen-06-camera-cutout-slate.webp",
     "public/assets/digital-marketing/screens/screen-07-mybi-logo.webp",

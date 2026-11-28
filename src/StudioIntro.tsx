@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import StudioRope from './StudioRope';
+import StudioAtmosphere from './StudioAtmosphere';
 
 const seenKey = 'mybi-studio-light-v3';
 
@@ -11,7 +12,7 @@ export function shouldPlayIntro() {
   catch { return true; }
 }
 
-export default function StudioIntro({ ready, finish }: { ready: boolean; finish: () => void }) {
+export default function StudioIntro({ ready, finish, reducedMotion }: { ready: boolean; finish: () => void; reducedMotion: boolean }) {
   const [waitExpired, setWaitExpired] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const activated = useRef(false);
@@ -47,6 +48,7 @@ export default function StudioIntro({ ready, finish }: { ready: boolean; finish:
 
   return <div ref={root} className={`studio-intro ${pulled ? 'is-lit' : ''}`} role="dialog" aria-modal="true" aria-label="Pull the rope to turn on the light and enter">
     <div className="intro-room" aria-hidden="true">
+      <StudioAtmosphere reducedMotion={reducedMotion} fullBackdrop />
       <div className="intro-light-beam" />
       <div className="intro-light-pool" />
 

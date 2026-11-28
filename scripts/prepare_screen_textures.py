@@ -1,4 +1,4 @@
-"""Prepare replaceable WebP stand-in textures for the eight floating 3D screens.
+"""Prepare replaceable WebP stand-in textures for the seven floating 3D screens.
 
 Only existing project imagery is used. Source aspect ratios are preserved: photographic
 plates are resized uniformly; alpha artwork is fitted uniformly onto a plain canvas.
@@ -38,12 +38,6 @@ SOURCES = [
         "source": "public/assets/studio-background.webp",
         "method": "resize",
         "note": "Wide studio plate, original aspect ratio retained.",
-    },
-    {
-        "filename": "screen-04-studio-empty.webp",
-        "source": "public/assets/studio-empty.webp",
-        "method": "resize",
-        "note": "Clean studio plate, original aspect ratio retained.",
     },
     {
         "filename": "screen-05-camera-cutout-onyx.webp",

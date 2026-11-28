@@ -22,7 +22,7 @@ Run `npm install` and `npm run dev`. Build with `npm run build`; serve the build
 
 ### New image assets
 
-The built-in image generation tool produced `public/assets/camera-reference-cutout.png` and `public/assets/studio-empty.png`; corresponding WebPs are used by the page (about 270 KB combined). The generative camera extraction follows the reference closely, but is not a pixel-identical manual mask. The previous background containing frozen ribbons is retained as a design reference.
+The built-in image generation tool produced `public/assets/camera-reference-cutout.png`; its WebP is used by the page. Studio curtains and smoke are rendered in code by `src/StudioAtmosphere.tsx`, rather than using a background image. The generative camera extraction follows the reference closely, but is not a pixel-identical manual mask. The previous background containing frozen ribbons is retained as a design reference.
 
 Exact prompts, source references, outputs and tool mode are recorded in `scripts/asset-provenance.json`.
 

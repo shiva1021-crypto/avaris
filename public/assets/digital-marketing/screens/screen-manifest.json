@@ -1,5 +1,5 @@
 {
-  "purpose": "Temporary stand-in textures for the eight floating digital marketing screens.",
+  "purpose": "Temporary stand-in textures for the seven floating digital marketing screens.",
   "replacement_instruction": "Overwrite a same-named WebP with a landscape photograph; keep the filename so the scene needs no code change.",
   "processing": "WebP quality 88, method 6. No colour tint, frame, glow or lighting baked into the texture.",
   "textures": [
@@ -67,28 +67,6 @@
       "output_aspect_ratio": 1.7768,
       "aspect_ratio_preserved": true,
       "note": "Wide studio plate, original aspect ratio retained.",
-      "replaceable": true
-    },
-    {
-      "filename": "screen-04-studio-empty.webp",
-      "path": "public/assets/digital-marketing/screens/screen-04-studio-empty.webp",
-      "source": "public/assets/studio-empty.webp",
-      "source_dimensions": [
-        1672,
-        941
-      ],
-      "source_license": "Existing MYBI Digital project asset; internal reuse for this site.",
-      "dimensions": [
-        1672,
-        941
-      ],
-      "bytes": 22886,
-      "method": "resize",
-      "background": null,
-      "source_aspect_ratio": 1.7768,
-      "output_aspect_ratio": 1.7768,
-      "aspect_ratio_preserved": true,
-      "note": "Clean studio plate, original aspect ratio retained.",
       "replaceable": true
     },
     {
