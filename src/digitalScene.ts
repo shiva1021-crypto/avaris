@@ -7,6 +7,7 @@ import {
 } from './digitalExperience/rooms/DigitalMarketingRoom';
 import { digitalSceneConfig, type StudioRoomId } from './digitalScene/config';
 import { loadGlobe, type GlobeHandle } from './digitalScene/globe';
+import { loadBrandFilmsSet, type BrandFilmsHandle } from './digitalScene/brandFilms';
 
 export interface DigitalSceneController {
   setRoom(room: StudioRoomId, immediate?: boolean): void;
@@ -39,6 +40,9 @@ export async function mountDigitalScene(
   let camera: THREE.PerspectiveCamera | undefined;
   let room: DigitalMarketingRoomHandle | undefined;
   let globe: GlobeHandle | undefined;
+  let brandFilms: BrandFilmsHandle | undefined;
+  let brandFilmsTask: Promise<BrandFilmsHandle | undefined> | undefined;
+  let activeRoom = initialRoom;
   let pipeline: RenderPipeline | undefined;
   let resizeObserver: ResizeObserver | undefined;
   let cameraTween: gsap.core.Tween | undefined;
@@ -117,6 +121,7 @@ export async function mountDigitalScene(
     }
     room.update(delta, elapsed);
     globe?.update(delta, room.globeSpotlight);
+    brandFilms?.update(delta);
     pipeline.render(scene, camera, elapsed);
   }
 
@@ -173,6 +178,7 @@ export async function mountDigitalScene(
   function onMotionChange() {
     reducedMotion = motionQuery.matches;
     room?.setMotionEnabled(!reducedMotion);
+    brandFilms?.setMotionEnabled(!reducedMotion);
     if (reducedMotion) {
       cameraTween?.kill();
       pointerX = 0;
@@ -197,6 +203,7 @@ export async function mountDigitalScene(
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerleave', onPointerLeave);
     pipeline?.dispose();
+    brandFilms?.dispose();
     globe?.dispose();
     room?.dispose();
     scene?.clear();
@@ -211,8 +218,11 @@ export async function mountDigitalScene(
 
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
+    activeRoom = nextRoom;
     if (globe) globe.root.visible = nextRoom === 'marketing';
     if (room) room.pendant.visible = nextRoom === 'marketing';
+    if (brandFilms) brandFilms.root.visible = nextRoom === 'brand-films';
+    else if (nextRoom === 'brand-films') void ensureBrandFilms();
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
     while (targetYaw - cameraState.yaw > Math.PI) targetYaw -= Math.PI * 2;
@@ -248,6 +258,31 @@ export async function mountDigitalScene(
     });
   }
 
+  function ensureBrandFilms() {
+    if (brandFilms) return Promise.resolve(brandFilms);
+    if (brandFilmsTask) return brandFilmsTask;
+    brandFilmsTask = loadBrandFilmsSet(signal, mobile)
+      .then(handle => {
+        if (disposed || signal.aborted || !scene) {
+          handle.dispose();
+          return undefined;
+        }
+        brandFilms = handle;
+        brandFilms.root.visible = activeRoom === 'brand-films';
+        brandFilms.setMotionEnabled(!reducedMotion);
+        scene.add(brandFilms.root);
+        renderFrame(0);
+        return handle;
+      })
+      .catch(error => {
+        brandFilmsTask = undefined;
+        if (error instanceof DOMException && error.name === 'AbortError') return undefined;
+        console.error('The Brand Films headphone set could not load.', error);
+        return undefined;
+      });
+    return brandFilmsTask;
+  }
+
   try {
     renderer = new THREE.WebGLRenderer({
       canvas,
@@ -261,6 +296,8 @@ export async function mountDigitalScene(
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.9;
     renderer.autoClear = true;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x030407);
@@ -284,6 +321,7 @@ export async function mountDigitalScene(
       reflectionMaterial: room.floorMaterial,
       reflectionExclusions: room.reflectionExclusions,
     });
+    if (initialRoom === 'brand-films') await ensureBrandFilms();
 
     signal.addEventListener('abort', onAbort, { once: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
@@ -298,6 +336,7 @@ export async function mountDigitalScene(
     resizeObserver = new ResizeObserver(fit);
     resizeObserver.observe(host);
     room.setMotionEnabled(!reducedMotion);
+    brandFilms?.setMotionEnabled(!reducedMotion);
     renderFrame(0);
     startLoop();
     return { setRoom };

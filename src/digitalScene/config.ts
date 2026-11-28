@@ -96,9 +96,12 @@ export const digitalSceneConfig = {
     scale: 1,
   },
   brandFilms: {
-    // Placed 90 degrees to the right of Business Marketing around the 360 hub.
-    position: [7.08, 0, 7.08] as const,
-    rotationY: -Math.PI / 2,
+    // Centred in the second 72-degree room of the shared 360-degree studio.
+    position: [6.733, 0, 4.892] as const,
+    rotationY: -Math.PI * 0.1,
+    headphonesUrl: '/assets/digital-marketing/brand-films/MYBI_Headphones_Final.glb',
+    headphonesHeight: 2.45,
+    floatHeight: 1.62,
     studioLightUrl: '/assets/digital-marketing/equipment/simple_studio_light.glb',
     screens: {
       left: '/assets/digital-marketing/brand-films/screen-portrait-silk.webp',
