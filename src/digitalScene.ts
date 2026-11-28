@@ -52,8 +52,6 @@ export async function mountDigitalScene(
   let lastTime = 0;
   let elapsed = 0;
   let narrow = mobile;
-  let activeRoom = initialRoom;
-
   const initialCamera = digitalSceneConfig.rooms[initialRoom];
   const cameraState = {
     yaw: initialCamera.yaw,
@@ -223,10 +221,6 @@ export async function mountDigitalScene(
 
   function setRoom(nextRoom: StudioRoomId, immediate = false) {
     if (disposed) return;
-    activeRoom = nextRoom;
-    if (globe) globe.root.visible = nextRoom === 'marketing';
-    if (room) room.pendant.visible = nextRoom === 'marketing';
-    if (brandFilms) brandFilms.root.visible = nextRoom === 'brand-films';
     if (!brandFilms && nextRoom === 'brand-films') void ensureBrandFilms();
     const destination = digitalSceneConfig.rooms[nextRoom];
     let targetYaw = destination.yaw;
@@ -273,9 +267,13 @@ export async function mountDigitalScene(
           return undefined;
         }
         brandFilms = handle;
-        brandFilms.root.visible = activeRoom === 'brand-films';
+        brandFilms.root.visible = true;
         brandFilms.setMotionEnabled(!reducedMotion);
         scene.add(brandFilms.root);
+        if (room && !room.reflectionExclusions.includes(brandFilms.root)) {
+          room.reflectionExclusions.push(brandFilms.root);
+        }
+        pipeline?.addCleanForeground(brandFilms.root);
         renderFrame(0);
         return handle;
       })
@@ -325,12 +323,12 @@ export async function mountDigitalScene(
     );
 
     room = createDigitalMarketingRoom(mobile);
-    room.pendant.visible = initialRoom === 'marketing';
+    room.pendant.visible = true;
     scene.add(room.root);
     const globeTask = loadGlobe(signal, { includeSurface: true, includeRings: false });
-    const initialBrandFilmsTask = initialRoom === 'brand-films' ? ensureBrandFilms() : undefined;
+    const initialBrandFilmsTask = ensureBrandFilms();
     globe = await globeTask;
-    globe.root.visible = initialRoom === 'marketing';
+    globe.root.visible = true;
     scene.add(globe.root);
     pipeline = new RenderPipeline(renderer, {
       mobile,
@@ -338,7 +336,8 @@ export async function mountDigitalScene(
       reflectionMaterial: room.floorMaterial,
       reflectionExclusions: room.reflectionExclusions,
     });
-    if (initialBrandFilmsTask) await initialBrandFilmsTask;
+    await initialBrandFilmsTask;
+    if (brandFilms) pipeline.addCleanForeground(brandFilms.root);
 
     signal.addEventListener('abort', onAbort, { once: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
@@ -357,14 +356,6 @@ export async function mountDigitalScene(
     brandFilms?.setMotionEnabled(!reducedMotion);
     renderFrame(0);
     startLoop();
-    if (initialRoom !== 'brand-films') {
-      const preloadBrandFilms = () => { if (!disposed) void ensureBrandFilms(); };
-      const idleWindow = window as Window & {
-        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      };
-      if (idleWindow.requestIdleCallback) idleWindow.requestIdleCallback(preloadBrandFilms, { timeout: 3500 });
-      else globalThis.setTimeout(preloadBrandFilms, 1200);
-    }
     return { setRoom };
   } catch (error) {
     dispose();

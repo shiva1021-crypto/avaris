@@ -47,6 +47,7 @@ export class RenderPipeline {
   private readonly passCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private readonly passQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
   private readonly normalMaterial = new THREE.MeshNormalMaterial();
+  private readonly cleanForeground: THREE.Object3D[] = [];
   private readonly mirrorCamera = new THREE.PerspectiveCamera();
   private readonly reflectorPosition = new THREE.Vector3();
   private readonly cameraPosition = new THREE.Vector3();
@@ -117,6 +118,10 @@ export class RenderPipeline {
     this.normalTexture = this.normalTarget.texture;
     this.passQuad.frustumCulled = false;
     this.passScene.add(this.passQuad);
+  }
+
+  addCleanForeground(object: THREE.Object3D) {
+    if (!this.cleanForeground.includes(object)) this.cleanForeground.push(object);
   }
 
   resize(width: number, height: number, pixelRatio: number) {
@@ -201,6 +206,9 @@ export class RenderPipeline {
   }
 
   render(scene: THREE.Scene, camera: THREE.PerspectiveCamera, elapsed: number) {
+    const foregroundVisibility = this.cleanForeground.map(object => object.visible);
+    this.cleanForeground.forEach(object => { object.visible = false; });
+
     this.updateMirrorCamera(camera);
     const visibility = this.reflectionExclusions.map(object => object.visible);
     this.reflectionExclusions.forEach(object => { object.visible = false; });
@@ -245,6 +253,33 @@ export class RenderPipeline {
     this.compositeMaterial.uniforms.uBloom.value = this.bloomBlurB.texture;
     this.compositeMaterial.uniforms.uTime.value = elapsed;
     this.renderPass(this.compositeMaterial, null);
+
+    this.cleanForeground.forEach((object, index) => {
+      object.visible = foregroundVisibility[index];
+    });
+
+    const visibleForeground = this.cleanForeground.filter(object => object.visible);
+    if (visibleForeground.length > 0) {
+      const childVisibility = scene.children.map(child => child.visible);
+      const background = scene.background;
+      const autoClear = this.renderer.autoClear;
+      const exposure = this.renderer.toneMappingExposure;
+      scene.children.forEach(child => {
+        child.visible = visibleForeground.includes(child);
+      });
+      scene.background = null;
+      this.renderer.autoClear = false;
+      this.renderer.toneMappingExposure = 1;
+      this.renderer.setRenderTarget(null);
+      this.renderer.clearDepth();
+      this.renderer.render(scene, camera);
+      this.renderer.toneMappingExposure = exposure;
+      this.renderer.autoClear = autoClear;
+      scene.background = background;
+      scene.children.forEach((child, index) => {
+        child.visible = childVisibility[index];
+      });
+    }
   }
 
   dispose() {

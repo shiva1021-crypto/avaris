@@ -214,6 +214,39 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   wall.position.set(0, 4.35, 7.08);
   root.add(wall);
 
+  // A continuous low atmospheric band hides the hard wall/floor horizon in
+  // every direction. Because it is cylindrical, the blend remains identical
+  // when the camera turns to any of the five rooms.
+  const seamGeometry = new THREE.CylinderGeometry(17.82, 17.82, 2.2, 96, 1, true);
+  const seamMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    side: THREE.BackSide,
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      void main() {
+        float rise = smoothstep(0.0, 0.3, vUv.y);
+        float fall = 1.0 - smoothstep(0.42, 1.0, vUv.y);
+        float alpha = rise * fall * 0.72;
+        gl_FragColor = vec4(vec3(0.027, 0.032, 0.041), alpha);
+      }
+    `,
+  });
+  geometries.add(seamGeometry);
+  materials.add(seamMaterial);
+  const seamBlend = new THREE.Mesh(seamGeometry, seamMaterial);
+  seamBlend.name = 'StudioWallFloorAtmosphere';
+  seamBlend.position.set(0, 0.45, 7.08);
+  root.add(seamBlend);
+  reflectionExclusions.push(seamBlend);
+
   function addScreenRing(options: {
     angles: number[];
     radius: number;
@@ -336,44 +369,56 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
     phase: number;
     opacity: number;
   }> = [];
-  const smokeCount = mobile ? 7 : 12;
-  for (let index = 0; index < smokeCount; index += 1) {
-    const x = (random() * 2 - 1) * 7.4;
-    const y = 1.05 + random() * 2.5;
-    const z = -4.5 - random() * 5.5;
-    const opacity = (mobile ? 0.032 : 0.038) + random() * 0.026;
-    const material = new THREE.SpriteMaterial({
-      map: smokeTexture,
-      color: index % 3 === 0 ? 0xc3d0da : 0x899aa8,
-      transparent: true,
-      opacity,
-      depthWrite: false,
-      blending: THREE.NormalBlending,
-      toneMapped: false,
-    });
-    materials.add(material);
-    const sprite = new THREE.Sprite(material);
-    const scale = 3.4 + random() * 3.2;
-    sprite.scale.set(scale * 1.55, scale * 0.74, 1);
-    sprite.position.set(x, y, z);
-    sprite.renderOrder = 0;
-    smokeRoot.add(sprite);
-    smokeWisps.push({
-      sprite,
-      origin: sprite.position.clone(),
-      phase: random() * Math.PI * 2,
-      opacity,
-    });
-  }
+  const smokePerRoom = mobile ? 3 : 5;
+  let smokeIndex = 0;
+  Object.values(digitalSceneConfig.rooms).forEach(roomConfig => {
+    const forwardX = Math.sin(roomConfig.yaw);
+    const forwardZ = -Math.cos(roomConfig.yaw);
+    const rightX = Math.cos(roomConfig.yaw);
+    const rightZ = Math.sin(roomConfig.yaw);
+    for (let index = 0; index < smokePerRoom; index += 1) {
+      const depth = 11.58 + random() * 5.5;
+      const lateral = (random() * 2 - 1) * 7.4;
+      const x = digitalSceneConfig.hub[0] + forwardX * depth + rightX * lateral;
+      const y = 1.05 + random() * 2.5;
+      const z = digitalSceneConfig.hub[2] + forwardZ * depth + rightZ * lateral;
+      const opacity = (mobile ? 0.032 : 0.038) + random() * 0.026;
+      const material = new THREE.SpriteMaterial({
+        map: smokeTexture,
+        color: smokeIndex % 3 === 0 ? 0xc3d0da : 0x899aa8,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+        blending: THREE.NormalBlending,
+        toneMapped: false,
+      });
+      materials.add(material);
+      const sprite = new THREE.Sprite(material);
+      const scale = 3.4 + random() * 3.2;
+      sprite.scale.set(scale * 1.55, scale * 0.74, 1);
+      sprite.position.set(x, y, z);
+      sprite.renderOrder = 0;
+      smokeRoot.add(sprite);
+      smokeWisps.push({
+        sprite,
+        origin: sprite.position.clone(),
+        phase: random() * Math.PI * 2,
+        opacity,
+      });
+      smokeIndex += 1;
+    }
+  });
 
-  const dustCount = mobile ? 55 : 130;
+  const dustCount = mobile ? 90 : 200;
   const dustPositions = new Float32Array(dustCount * 3);
   const dustOrigins = new Float32Array(dustCount * 3);
   const dustPhases = new Float32Array(dustCount);
   for (let index = 0; index < dustCount; index += 1) {
-    dustPositions[index * 3] = (random() * 2 - 1) * 9.5;
+    const angle = random() * Math.PI * 2;
+    const radius = 3 + random() * 14;
+    dustPositions[index * 3] = digitalSceneConfig.hub[0] + Math.sin(angle) * radius;
     dustPositions[index * 3 + 1] = 0.3 + random() * 4.2;
-    dustPositions[index * 3 + 2] = 1.6 - random() * 12.5;
+    dustPositions[index * 3 + 2] = digitalSceneConfig.hub[2] - Math.cos(angle) * radius;
     dustOrigins.set(dustPositions.subarray(index * 3, index * 3 + 3), index * 3);
     dustPhases[index] = random() * Math.PI * 2;
   }
@@ -398,9 +443,22 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   const centreFill = new THREE.SpotLight(0xf0f2f3, 25, 30, 1.08, 1, 1.45);
   centreFill.position.set(0, 6.8, 2.5);
   centreFill.target.position.set(0, 0, -2.4);
-  const wallFill = new THREE.SpotLight(0xd3dce3, 34, 30, 0.72, 1, 1.55);
-  wallFill.position.set(0, 4.2, -0.2);
-  wallFill.target.position.set(0, 2.1, -11.2);
+  const wallFills = Object.values(digitalSceneConfig.rooms).map(roomConfig => {
+    const forwardX = Math.sin(roomConfig.yaw);
+    const forwardZ = -Math.cos(roomConfig.yaw);
+    const light = new THREE.SpotLight(0xd3dce3, 34, 30, 0.72, 1, 1.55);
+    light.position.set(
+      digitalSceneConfig.hub[0] + forwardX * 7.28,
+      4.2,
+      digitalSceneConfig.hub[2] + forwardZ * 7.28,
+    );
+    light.target.position.set(
+      digitalSceneConfig.hub[0] + forwardX * 18.28,
+      2.1,
+      digitalSceneConfig.hub[2] + forwardZ * 18.28,
+    );
+    return light;
+  });
 
   const cordMaterial = new THREE.MeshBasicMaterial({
     color: 0x727a80,
@@ -508,7 +566,34 @@ export function createDigitalMarketingRoom(mobile: boolean): DigitalMarketingRoo
   globeSpotlight.position.set(0, bulbY, 0);
   globeSpotlight.target.position.set(...spotlightConfig.target);
   pendant.add(globeSpotlight);
-  root.add(hemisphere, centreFill, centreFill.target, wallFill, wallFill.target, globeSpotlight.target);
+  // Repeat the exact Business Marketing pendant around the 360-degree room.
+  // All copies sit at the same radial distance, so their apparent size and
+  // hanging length stay identical as the camera turns between pages.
+  const marketingLampDistance = Math.hypot(
+    spotlightConfig.anchor[0] - digitalSceneConfig.hub[0],
+    spotlightConfig.anchor[2] - digitalSceneConfig.hub[2],
+  );
+  Object.entries(digitalSceneConfig.rooms).forEach(([roomId, roomConfig]) => {
+    if (roomId === 'marketing') return;
+    const roomPendant = pendant.clone(true);
+    roomPendant.name = `${roomId}-PendantLamp`;
+    roomPendant.position.set(
+      digitalSceneConfig.hub[0] + Math.sin(roomConfig.yaw) * marketingLampDistance,
+      spotlightConfig.anchor[1],
+      digitalSceneConfig.hub[2] - Math.cos(roomConfig.yaw) * marketingLampDistance,
+    );
+    roomPendant.rotation.set(0, roomConfig.yaw, 0);
+    roomPendant.traverse(child => {
+      // The copied fixtures remain visible, but do not create a separate
+      // floor spotlight or alter the clean foreground product.
+      if (child instanceof THREE.Light) child.visible = false;
+    });
+    root.add(roomPendant);
+    reflectionExclusions.push(roomPendant);
+  });
+
+  root.add(hemisphere, centreFill, centreFill.target, globeSpotlight.target);
+  wallFills.forEach(light => root.add(light, light.target));
   reflectionExclusions.push(pendant);
 
   let disposed = false;
